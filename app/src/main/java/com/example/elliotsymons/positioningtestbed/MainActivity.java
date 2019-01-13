@@ -5,6 +5,7 @@ import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.R;
@@ -43,7 +44,14 @@ public class MainActivity extends AppCompatActivity {
 
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         if (String.valueOf(wifiInfo.getSupplicantState()).equals("COMPLETED")) {
-            Toast.makeText(this, wifiInfo.getSSID()+"", Toast.LENGTH_SHORT).show();
+            TextView tv = (TextView) findViewById(R.id.tv_info);
+            String text = "";
+
+            text += "SSID: " + wifiInfo.getSSID() + "\n";
+            text += "RSSI: " + wifiInfo.getRssi() + "\n";
+
+
+            tv.setText(text);
         } else {
             Toast.makeText(this, "Please connect...", Toast.LENGTH_SHORT).show();
         }
