@@ -33,6 +33,8 @@ public class WiFiHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getSupportActionBar().setTitle("WiFi positioning");
+
         // ( Non-dangerous permissions are granted automatically and do not need checking.)
 
         //Set up wifi manager

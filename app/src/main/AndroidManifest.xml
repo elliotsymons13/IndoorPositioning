@@ -13,7 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FingerprintingMenuActivity"></activity>
+        <activity android:name=".PlacementFingerprintingActivity"
+            android:screenOrientation="portrait" ></activity>
+        <activity android:name=".FingerprintingMenuActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".WiFiHomeActivity"
             android:screenOrientation="portrait">
