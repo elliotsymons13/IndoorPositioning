@@ -1,7 +1,6 @@
 package com.example.elliotsymons.positioningtestbed;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,21 +34,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Checking for wifi permission
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            //If permission is NOT granted, request it:
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_WIFI_STATE},
-                    PERMISSIONS_RQ_WIFI_STATE);
-        } else {
-            Toast.makeText(this, "Permission wifi already got", Toast.LENGTH_SHORT).show();//else, the permission is already granted...
-        }
+        // ( Non-dangerous permissions are granted automatically and do not need checking.)
 
         //Set up wifi manager
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         enableWifi();
-        registerReceiver(wifiScanReciever,
+        registerReceiver(wifiScanReceiver,
                 new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
         //Check for location permission
@@ -67,17 +57,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case PERMISSIONS_RQ_WIFI_STATE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //permission was granted
-                    Toast.makeText(this, "Wifi permission granted", Toast.LENGTH_SHORT).show();
-                } else {
-                    //permission was not granted 
-                    Toast.makeText(this, "Wifi permission required for app to function", Toast.LENGTH_LONG).show();
-                }
-                break;
-            }
             case PERMISSIONS_RQ_FINE_LOCATION: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -92,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final BroadcastReceiver wifiScanReciever = new BroadcastReceiver() {
+    private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
