@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private static final int PERMISSIONS_RQ_WIFI_STATE = 1; //TODO what value?
     private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
 
     WifiManager wifiManager;
@@ -104,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         String text = "";
         for (ScanResult result : scanResults) {
             text += "SSID: " + result.SSID + "\n";
+            text += "MAC : " + result.BSSID + "\n";
             text += "RSSI: " + result.level + "\n";
         }
         tv.setText(text);
@@ -115,11 +115,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Get basic info about WiFi state and print some of it to the screen.
-     *
-     * Gets:
-     *  - SSID
-     *  -
+     * Force a WiFi scan, if allowed by the OS.
      */
     public void getWifiInfo(View view) {
         Toast.makeText(this, "Requesting WiFi scan...", Toast.LENGTH_SHORT).show();
