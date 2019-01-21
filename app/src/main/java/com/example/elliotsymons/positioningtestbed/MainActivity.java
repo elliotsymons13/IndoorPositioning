@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
         //Set up wifi manager
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         enableWifi();
-        registerReceiver(wifiScanReceiver,
-                new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
         //Check for location permission
         if (ContextCompat.checkSelfPermission(this,
@@ -49,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_RQ_FINE_LOCATION);
         } else {
-            Toast.makeText(this, "Permission location already got", Toast.LENGTH_SHORT).show();//else, the permission is already granted...
+            Toast.makeText(this, "Location permission already granted", Toast.LENGTH_SHORT).show();//else, the permission is already granted...
         }
     }
 
@@ -69,21 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-                boolean success = intent.getBooleanExtra(
-                        WifiManager.EXTRA_RESULTS_UPDATED, false);
-                if (success) {
-                    onScanSuccess();
-                } else {
-                    onScanFailure();
-                }
-            }
-        }
-    };
+    
 
     /**
      * Enable WiFi if not already enabled.
@@ -91,34 +75,10 @@ public class MainActivity extends AppCompatActivity {
     private void enableWifi() {
         if (!wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(true);
+            Toast.makeText(this, "Enabled WiFi", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void onScanSuccess() {
-        List<ScanResult> scanResults = wifiManager.getScanResults();
-        Toast.makeText(this, "Scan completed", Toast.LENGTH_SHORT).show();
 
-        //Process results:
-        TextView tv = findViewById(R.id.tv_info);
-        String text = "";
-        for (ScanResult result : scanResults) {
-            text += "SSID: " + result.SSID + "\n";
-            text += "MAC : " + result.BSSID + "\n";
-            text += "RSSI: " + result.level + "\n";
-        }
-        tv.setText(text);
 
-    }
-
-    private void onScanFailure() {
-        Toast.makeText(this, "Scan failed", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Force a WiFi scan, if allowed by the OS.
-     */
-    public void getWifiInfo(View view) {
-        Toast.makeText(this, "Requesting WiFi scan...", Toast.LENGTH_SHORT).show();
-        wifiManager.startScan();
-    }
 }
