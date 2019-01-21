@@ -19,9 +19,9 @@ import android.widget.Toast;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class WiFiHomeActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "WiFiHomeActivity";
 
     private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
 
@@ -77,6 +77,16 @@ public class MainActivity extends AppCompatActivity {
             wifiManager.setWifiEnabled(true);
             Toast.makeText(this, "Enabled WiFi", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Transition to fingerprinting menu activity.
+     * @param view
+     */
+    public void fingerprintingSelected(View view) {
+        Intent transitionToFingerprinting = new Intent(getBaseContext(),
+                FingerprintingMenuActivity.class);
+        startActivity(transitionToFingerprinting);
     }
 
 
