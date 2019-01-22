@@ -49,7 +49,7 @@ public class WiFiHomeActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_RQ_FINE_LOCATION);
         } else {
-            Toast.makeText(this, "Location permission already granted", Toast.LENGTH_SHORT).show();//else, the permission is already granted...
+            //Toast.makeText(this, "Location permission already granted", Toast.LENGTH_SHORT).show();//else, the permission is already granted...
         }
     }
 
