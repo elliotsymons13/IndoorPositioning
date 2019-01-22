@@ -1,10 +1,17 @@
 package com.example.elliotsymons.positioningtestbed;
 
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class PlacementFingerprintingActivity extends AppCompatActivity {
+
+    MapView myMapView;
+
 
 
     @Override
@@ -15,10 +22,10 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Fingerprint capture");
 
         //Add MapView (map) programmatically
-        MapView myMapView;
         myMapView = new MapView(this);
-        //myMapView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
         setContentView(myMapView);
+
+        //myMapView.updateBlueDot(30,30);
     }
 
 
