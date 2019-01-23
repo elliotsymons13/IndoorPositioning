@@ -2,9 +2,14 @@ package com.example.elliotsymons.positioningtestbed;
 
 import android.app.ActionBar;
 import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -21,28 +26,38 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_placement_fingerprinting);
         getSupportActionBar().setTitle("Fingerprint capture");
 
-        //Setup UI root
-        RelativeLayout.LayoutParams llp = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT); //WRAP_CONTENT
-        RelativeLayout llRoot = (RelativeLayout) findViewById(R.id.relativeLayout);
+        //Setup constraint layout
+        ConstraintLayout layout = (ConstraintLayout)findViewById(R.id.constraintLayout);
+        ConstraintSet set = new ConstraintSet();
 
+        //Add map to constraint layout
+        myMapView = new MyMapView(this);
+        //myMapView = new Button(this);
+        myMapView.setId(View.generateViewId());
+        myMapView.setLayoutParams(new ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        layout.addView(myMapView,0);
 
-
-
-        //Add buttons (programmatically)
+        //Add buttons to constraint layout
         ConstraintLayout buttons = (ConstraintLayout) View.inflate(
                 this, R.layout.capture_button_layout, null);
-        buttons.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)); //llp);
-        llRoot.addView(buttons);
+        buttons.setId(View.generateViewId());
+        buttons.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT));
+        layout.addView(buttons, 0);
 
-        //Add MapView (map) programmatically
-        myMapView = new MyMapView(this);
-        myMapView.setLayoutParams(llp);
-        llRoot.addView(myMapView);
+        //Add constraints
+        set.clone(layout);
+        set.connect(myMapView.getId(), ConstraintSet.TOP, layout.getId(), ConstraintSet.TOP);
+        set.connect(myMapView.getId(), ConstraintSet.LEFT, layout.getId(), ConstraintSet.LEFT);
+        set.connect(myMapView.getId(), ConstraintSet.RIGHT, layout.getId(), ConstraintSet.RIGHT);
 
+        set.connect(myMapView.getId(), ConstraintSet.BOTTOM, buttons.getId(), ConstraintSet.TOP, 8);
 
-        //LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT);
-        //this.addContentView(llRoot, layoutParams);
+        set.connect(buttons.getId(), ConstraintSet.LEFT, layout.getId(), ConstraintSet.LEFT);
+        set.connect(buttons.getId(), ConstraintSet.RIGHT, layout.getId(), ConstraintSet.RIGHT);
+        set.connect(buttons.getId(), ConstraintSet.BOTTOM, layout.getId(), ConstraintSet.BOTTOM);
+        set.applyTo(layout);
+
         //myMapView.updateBlueDot(30,30);
 
     }

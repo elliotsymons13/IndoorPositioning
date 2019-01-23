@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.View;
 
 public class MyMapView extends AppCompatImageView {
 
@@ -133,6 +134,8 @@ public class MyMapView extends AppCompatImageView {
     public void setPersistentDotColour() {
         //TODO?
     }
+
+
 
 }
 
