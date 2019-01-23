@@ -13,7 +13,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
 
-public class MapView extends AppCompatImageView {
+public class MyMapView extends AppCompatImageView {
 
     private Canvas mapCanvas;
 
@@ -33,11 +33,11 @@ public class MapView extends AppCompatImageView {
 
 
     //Default constructor, calls through
-    public MapView(Context context) {
+    public MyMapView(Context context) {
         this(context, null);
     }
 
-    public MapView(Context context, AttributeSet attributeSet) {
+    public MyMapView(Context context, AttributeSet attributeSet) {
         super(context);
 
         //Import map image resource
@@ -74,7 +74,7 @@ public class MapView extends AppCompatImageView {
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
 
-        this.invalidate();
+        // this.invalidate(); //TODO uncomment
     }
 
 
