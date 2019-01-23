@@ -88,6 +88,8 @@ public class MapView extends AppCompatImageView {
         //invalidate();
     }
 
+
+
     /**
      * Allows for the location of the 'blue dot' representing the user's location to be changed.
      *
