@@ -30,6 +30,13 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         ConstraintLayout layout = (ConstraintLayout)findViewById(R.id.constraintLayout);
         ConstraintSet set = new ConstraintSet();
 
+        //Add buttons to constraint layout
+        ConstraintLayout buttons = (ConstraintLayout) View.inflate(
+                this, R.layout.capture_button_layout, null);
+        buttons.setId(View.generateViewId());
+        buttons.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT));
+        layout.addView(buttons, 0);
+
         //Add map to constraint layout
         myMapView = new MyMapView(this);
         //myMapView = new Button(this);
@@ -37,13 +44,6 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         myMapView.setLayoutParams(new ConstraintLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         layout.addView(myMapView,0);
-
-        //Add buttons to constraint layout
-        ConstraintLayout buttons = (ConstraintLayout) View.inflate(
-                this, R.layout.capture_button_layout, null);
-        buttons.setId(View.generateViewId());
-        buttons.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT));
-        layout.addView(buttons, 0);
 
         //Add constraints
         set.clone(layout);
