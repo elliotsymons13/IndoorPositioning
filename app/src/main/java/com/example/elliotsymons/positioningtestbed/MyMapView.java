@@ -54,11 +54,11 @@ public class MyMapView extends AppCompatImageView {
         dispHeight = displaySize.y;
 
         //Calculate dimensions for image
-        final int MAP_WIDTH_ORIGNAL = 1241;
+        final int MAP_WIDTH_ORIGINAL = 1241;
         final int MAP_HEIGHT_ORIGINAL = 1080;
 
         MAP_WIDTH = dispWidth;
-        final double SF = (double) MAP_WIDTH / MAP_WIDTH_ORIGNAL;
+        final double SF = (double) MAP_WIDTH / MAP_WIDTH_ORIGINAL;
         MAP_HEIGHT = (int) (MAP_HEIGHT_ORIGINAL * SF);
 
         //Construct rectangle container for background sizing
@@ -70,16 +70,18 @@ public class MyMapView extends AppCompatImageView {
         BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
 
         
-        //Setup linked buttons
+        /*//Setup linked buttons
         Button up = (Button) findViewById(R.id.btn_up);
         up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getContext(), "UP", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
 
     }
+
+
 
     //Also called on startup (as view is inflated from zero size when created).
     @Override
