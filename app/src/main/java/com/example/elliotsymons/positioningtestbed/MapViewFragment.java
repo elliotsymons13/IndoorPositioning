@@ -10,36 +10,49 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class MapViewFragment extends Fragment {
-    View rootView;
+    private View rootView;
 
-    MyMapView myMapView;
+    private MyMapView myMapView;
 
-    private int currentX;
-    private int currentY;
+    private int startX, startY;
+
+
 
     public MapViewFragment() {
         // Required empty public constructor
     }
 
+    public int getCurrentX() {
+        return myMapView.getBlueDot_x();
+    }
+
+    public int getCurrentY() {
+        return myMapView.getBlueDot_y();
+    }
+
     public void setCurrentX(int x) {
-        currentX = x;
-        myMapView.updateBlueDot(currentX, currentY);
-        //TODO?
+        myMapView.setBlueDot_x(x);
     }
 
     public void setCurrentY(int y) {
-        currentY = y;
-        myMapView.updateBlueDot(currentX, currentY);
-        //TODO?
+        myMapView.setBlueDot_y(y);
     }
 
-    public void setCurrentPosition(int x, int y) {
-        setCurrentX(x);
-        setCurrentY(y);
+    public void resetBlueDot() {
+        myMapView.updateBlueDot(startX,startY);
     }
 
-    public int getCurrentX() { return currentX; }
-    public int getCurrentY() { return currentY; }
+    public void setBlueDotLocked() {
+        myMapView.setBlueDotLocked(true);
+    }
+
+    public void setBlueDotUnlocked() {
+        myMapView.setBlueDotLocked(false);
+    }
+
+    public boolean blueDotLocked() {
+        return myMapView.isBlueDotLocked();
+    }
 
 
     @Override
@@ -73,12 +86,14 @@ public class MapViewFragment extends Fragment {
         set.applyTo(rootLayout);
 
         //Move dot to starting location (center)
-        currentX = myMapView.getMapWidth()/2;
-        currentY = myMapView.getMapHeight()/2;
-        myMapView.updateBlueDot(currentX,currentY);
+        startX = myMapView.getMapWidth()/2;
+        startY = myMapView.getMapHeight()/2;
+        myMapView.updateBlueDot(startX,startY);
 
         return rootView;
 
     }
+
+
 
 }

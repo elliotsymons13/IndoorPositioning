@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.MotionEvent;
 
 public class MyMapView extends AppCompatImageView {
 
@@ -29,7 +30,8 @@ public class MyMapView extends AppCompatImageView {
 
     private int blueDot_x = 0;
     private int blueDot_y = 0;
-    private int blueDot_r = 20;
+    private int blueDot_r = 15;
+    private boolean blueDotLocked = false;
 
 
     //Default constructor, calls through
@@ -89,6 +91,24 @@ public class MyMapView extends AppCompatImageView {
         //invalidate();
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!blueDotLocked) {
+            int touchX = (int) event.getX();
+            int touchY = (int) event.getY();
+
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    updateBlueDot(touchX, touchY);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        return false;
+    }
+
+
 
 
     /**
@@ -143,6 +163,31 @@ public class MyMapView extends AppCompatImageView {
     public int getMapHeight() {
         return MAP_HEIGHT;
     }
+
+    public int getBlueDot_x() {
+        return blueDot_x;
+    }
+
+    public void setBlueDot_x(int blueDot_x) {
+        updateBlueDot(blueDot_x, this.blueDot_y);
+    }
+
+    public int getBlueDot_y() {
+        return blueDot_y;
+    }
+
+    public void setBlueDot_y(int blueDot_y) {
+        updateBlueDot(this.blueDot_x, blueDot_y);
+    }
+
+    public void setBlueDotLocked(boolean locked) {
+        blueDotLocked = locked;
+    }
+
+    public boolean isBlueDotLocked() {
+        return blueDotLocked;
+    }
+
 
 }
 
