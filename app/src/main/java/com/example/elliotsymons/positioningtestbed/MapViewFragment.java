@@ -1,11 +1,10 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,32 @@ public class MapViewFragment extends Fragment {
 
     MyMapView myMapView;
 
+    private int currentX;
+    private int currentY;
+
     public MapViewFragment() {
         // Required empty public constructor
     }
+
+    public void setCurrentX(int x) {
+        currentX = x;
+        myMapView.updateBlueDot(currentX, currentY);
+        //TODO?
+    }
+
+    public void setCurrentY(int y) {
+        currentY = y;
+        myMapView.updateBlueDot(currentX, currentY);
+        //TODO?
+    }
+
+    public void setCurrentPosition(int x, int y) {
+        setCurrentX(x);
+        setCurrentY(y);
+    }
+
+    public int getCurrentX() { return currentX; }
+    public int getCurrentY() { return currentY; }
 
 
     @Override
@@ -50,7 +72,10 @@ public class MapViewFragment extends Fragment {
 
         set.applyTo(rootLayout);
 
-        myMapView.updateBlueDot(30,30);
+        //Move dot to starting location (center)
+        currentX = myMapView.getMapWidth()/2;
+        currentY = myMapView.getMapHeight()/2;
+        myMapView.updateBlueDot(currentX,currentY);
 
         return rootView;
 

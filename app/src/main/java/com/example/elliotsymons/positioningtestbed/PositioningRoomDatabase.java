@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
-@Database(entities = {MapPoint.class}, version = 1) //FIXME not word, what?
+@Database(entities = {FingerprintPoint.class}, version = 1)
 public abstract class PositioningRoomDatabase extends RoomDatabase {
     private static volatile PositioningRoomDatabase INSTANCE;
 

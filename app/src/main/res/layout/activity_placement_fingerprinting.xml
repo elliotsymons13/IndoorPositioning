@@ -8,7 +8,7 @@
     tools:context=".PlacementFingerprintingActivity" >
 
     <fragment
-        android:id="@+id/fragment_mv"
+        android:id="@+id/fragment_mapView"
         android:name="com.example.elliotsymons.positioningtestbed.MapViewFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -25,6 +25,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_mv" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_mapView" />
 
 </android.support.constraint.ConstraintLayout>

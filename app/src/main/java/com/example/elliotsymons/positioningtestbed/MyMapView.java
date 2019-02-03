@@ -12,9 +12,6 @@ import android.graphics.Rect;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 
 public class MyMapView extends AppCompatImageView {
 
@@ -68,16 +65,6 @@ public class MyMapView extends AppCompatImageView {
         BLUE_DOT_PAINT = new Paint();
         BLUE_DOT_PAINT.setColor(Color.parseColor("#4285f4")); //'Google maps dot blue'
         BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
-
-        
-        /*//Setup linked buttons
-        Button up = (Button) findViewById(R.id.btn_up);
-        up.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getContext(), "UP", Toast.LENGTH_SHORT).show();
-            }
-        });*/
 
     }
 
@@ -146,6 +133,15 @@ public class MyMapView extends AppCompatImageView {
 
     public void setPersistentDotColour() {
         //TODO?
+    }
+
+
+    public int getMapWidth() {
+        return MAP_WIDTH;
+    }
+
+    public int getMapHeight() {
+        return MAP_HEIGHT;
     }
 
 }

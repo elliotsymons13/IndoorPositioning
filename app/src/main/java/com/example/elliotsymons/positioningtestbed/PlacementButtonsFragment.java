@@ -1,12 +1,12 @@
 package com.example.elliotsymons.positioningtestbed;
 
-import android.content.Context;
-import android.net.Uri;
+
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 public class PlacementButtonsFragment extends Fragment {
@@ -22,5 +22,7 @@ public class PlacementButtonsFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_placement_buttons, container, false);
     }
+
+
 
 }
