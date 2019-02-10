@@ -1,5 +1,6 @@
 package com.example.elliotsymons.positioningtestbed;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,6 +12,8 @@ public class FingerprintingMenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fingerprinting_menu);
+
+        getSupportActionBar().setTitle("WiFi fingerprinting menu");
     }
 
 
@@ -18,6 +21,8 @@ public class FingerprintingMenuActivity extends AppCompatActivity {
         Toast.makeText(this, "Grid method not yet implemented", Toast.LENGTH_SHORT).show();
     }
     public void placementMethodSelected(View view) {
-        Toast.makeText(this, "Placement method not yet implemented", Toast.LENGTH_SHORT).show();
+        Intent transitionToPlacementFingerprinting = new Intent(getBaseContext(),
+                PlacementFingerprintingActivity.class);
+        startActivity(transitionToPlacementFingerprinting);
     }
 }
