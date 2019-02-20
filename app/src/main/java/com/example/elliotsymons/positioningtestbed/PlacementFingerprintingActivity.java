@@ -8,6 +8,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
+
+import org.json.JSONException;
+
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class PlacementFingerprintingActivity extends AppCompatActivity {
     private final String TAG = "Pl.Fing.Activity";
@@ -23,6 +32,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
 
     private Button placeCaptureButton;
 
+    private FingerprintManager fm;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +46,11 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 .findFragmentById(R.id.fragment_placementButtons);
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
+
+        fm = new JSONFingerprintManager(getApplicationContext());
+        fm.load();
+
+
 
         //TODO ???
 
@@ -84,6 +100,13 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 //Inform user of intent
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
                 //Status bar?
+
+                //TODO
+                Set<Capture> captures = new HashSet<>();
+                captures.add(new Capture("mac15", -32));
+                captures.add(new Capture("mac65", -45));
+                fm.addFingerprint(25,26, captures);
+                fm.save();
 
                 //re-enable button etc. only when capture is finished.
                 //FIXME stage 2 needs to be triggered asynchronously by the capture completing (below code is redundant)
