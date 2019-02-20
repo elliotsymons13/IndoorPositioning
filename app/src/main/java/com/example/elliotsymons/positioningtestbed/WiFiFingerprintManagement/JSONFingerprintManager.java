@@ -107,14 +107,15 @@ public class JSONFingerprintManager implements FingerprintManager {
     public void addFingerprint(int X, int Y, Set<Capture> captures) {
         FingerprintPoint point = new FingerprintPoint(++maxID, X, Y, captures);
 
-        if (points.contains(point)) {
-            Log.i(TAG, "Did not add point at existing location. ");
-            return;
-        } else {
-            Log.i(TAG, "Point did not yet exist, added. ");
+        for (FingerprintPoint pointTemp : points) {
+            if (pointTemp.equals(point)) {
+                Log.i(TAG, "Did not add point at existing location. ");
+                return;
+            }
         }
-
+        Log.i(TAG, "Point did not yet exist, added. ");
         points.add(point);
+
         try {
             JSONArray newCaptures = new JSONArray();
             for (Capture cap : captures) {
