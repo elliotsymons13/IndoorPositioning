@@ -1,6 +1,8 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,8 +14,6 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Cap
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 
-import org.json.JSONException;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,7 +24,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
     private MapViewFragment map;
     private PlacementButtonsFragment buttons;
 
-    //0 represent placing dot, 1 represents capturing dot, 2 represents captured
+    //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
     private int stage = 0;
 
     public int mapWidth;
@@ -48,12 +48,30 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
         fm = new JSONFingerprintManager(getApplicationContext());
-        fm.load();
+        new FingerprintLoaderTask().execute();
+        Log.i(TAG, "onCreate: Loaded fingerprints from file");
+    }
 
+    private class FingerprintLoaderTask extends AsyncTask<Void, Void, Void> {
+        public static final String TAG = "FingerprintLoaderTask";
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            placeCaptureButton.setEnabled(false);
+        }
 
-        //TODO ???
+        @Override
+        protected Void doInBackground(Void... voids) {
+            fm.load();
+            return null;
+        }
 
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            placeCaptureButton.setEnabled(true);
+            super.onPostExecute(aVoid);
+        }
     }
 
     public void directionClick(View v) {
@@ -84,6 +102,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 //Lock blue dot
                 map.setBlueDotLocked();
                 //Disable other buttons
+                placeCaptureButton.setEnabled(true);
                 findViewById(R.id.btn_up).setEnabled(false);
                 findViewById(R.id.btn_right).setEnabled(false);
                 findViewById(R.id.btn_down).setEnabled(false);
@@ -130,8 +149,27 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
 
     public void finishCapturing(View view) {
         Toast.makeText(this, "Finished...", Toast.LENGTH_SHORT).show();
-        //TODO
+        //TODO intent to move back to main screen?
+        Intent intent = new Intent(this, WiFiHomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
+    @Override
+    protected void onDestroy() {
+        new FingerprintSaverTask().execute(fm);
+        Log.i(TAG, "onDestroy: Saving fingerprints to file");
+        super.onDestroy();
+    }
+
+    private static class FingerprintSaverTask extends AsyncTask<FingerprintManager, Void, Void> {
+        public static final String TAG = "FingerprintSaverTask";
+
+        @Override
+        protected Void doInBackground(FingerprintManager... fm) {
+            fm[0].save();
+            return null;
+        }
+    }
 
 }
