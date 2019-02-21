@@ -1,13 +1,13 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintingIntentService;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 
 import java.util.HashSet;
@@ -53,6 +54,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         fm = new JSONFingerprintManager(getApplicationContext());
         new FingerprintLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded fingerprints from file");
+
     }
 
     private class FingerprintLoaderTask extends AsyncTask<Void, Void, Void> {
@@ -75,6 +77,12 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
             placeCaptureButton.setEnabled(true);
             super.onPostExecute(aVoid);
         }
+    }
+
+    private void startService() {
+        Intent serviceIntent = new Intent(this, FingerprintingIntentService.class);
+        serviceIntent.putExtra("inputExtra", "Hello world");
+        ContextCompat.startForegroundService(this, serviceIntent);
     }
 
     public void directionClick(View v) {
@@ -123,6 +131,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
                 //Status bar?
 
+                //TODO
+                startService();
                 //TODO
                 Set<Capture> captures = new HashSet<>();
                 captures.add(new Capture("mac15", -32));
