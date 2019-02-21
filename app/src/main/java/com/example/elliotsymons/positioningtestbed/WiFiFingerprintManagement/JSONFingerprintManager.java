@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.*;
-import java.nio.file.*;
 import java.util.*;
 
 public class JSONFingerprintManager implements FingerprintManager {
@@ -21,13 +20,12 @@ public class JSONFingerprintManager implements FingerprintManager {
     private JSONObject fingerprintData;
     private JSONArray fingerprints;
 
-    private Set<FingerprintPoint> points;
+    FingerprintDataSingleton fd = FingerprintDataSingleton.getInstance();
 
     private int maxID;
 
 
     public JSONFingerprintManager(Context context) {
-        points = new HashSet<>();
         this.applicationContext = context;
     }
 
@@ -65,7 +63,7 @@ public class JSONFingerprintManager implements FingerprintManager {
                 jsonString = fins.useDelimiter("\\A").next(); // read whole file into string
             } else {
                 initialise();
-                fin = new File(folder.getAbsolutePath(), filename); //refersh file
+                fin = new File(folder.getAbsolutePath(), filename); //refresh file
                 fins = new Scanner(fin);
                 jsonString = fins.useDelimiter("\\A").next(); // read whole file into string
             }
@@ -95,7 +93,7 @@ public class JSONFingerprintManager implements FingerprintManager {
                     int rssi = capture.getInt("RSSI");
                     captures.add(new Capture(mac, rssi));
                 }
-                points.add(new FingerprintPoint(ID, X, Y, captures));
+                fd.getFingerprintPoints().add(new FingerprintPoint(ID, X, Y, captures));
             }
         } catch (JSONException j) {
             Log.e(TAG, "Error loading fingeprints from JSON");
@@ -107,14 +105,14 @@ public class JSONFingerprintManager implements FingerprintManager {
     public void addFingerprint(int X, int Y, Set<Capture> captures) {
         FingerprintPoint point = new FingerprintPoint(++maxID, X, Y, captures);
 
-        for (FingerprintPoint pointTemp : points) {
+        for (FingerprintPoint pointTemp : fd.getFingerprintPoints()) {
             if (pointTemp.equals(point)) {
                 Log.i(TAG, "Did not add point at existing location. ");
                 return;
             }
         }
         Log.i(TAG, "Point did not yet exist, added. ");
-        points.add(point);
+        fd.getFingerprintPoints().add(point);
 
         try {
             JSONArray newCaptures = new JSONArray();
@@ -139,7 +137,7 @@ public class JSONFingerprintManager implements FingerprintManager {
     }
 
     public FingerprintPoint getFingerprintByXY(int x, int y) {
-        for (FingerprintPoint point : points) {
+        for (FingerprintPoint point : fd.getFingerprintPoints()) {
             if (point.getX() == x && point.getY() == y) {
                 return point;
             }
