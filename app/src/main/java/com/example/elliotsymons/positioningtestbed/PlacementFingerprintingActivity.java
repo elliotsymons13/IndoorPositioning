@@ -1,13 +1,11 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -79,9 +77,9 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         }
     }
 
-    private void startService() {
+    private void startFingerprintService() {
         Intent serviceIntent = new Intent(this, FingerprintingIntentService.class);
-        serviceIntent.putExtra("inputExtra", "Hello world");
+        //serviceIntent.putExtra("inputExtra", "Hello world");
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 
@@ -129,19 +127,19 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 placeCaptureButton.setEnabled(false);
                 //Inform user of intent
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
-                //Status bar?
+                //TODO Status bar?
 
                 //TODO
-                startService();
+                startFingerprintService();
                 //TODO
-                Set<Capture> captures = new HashSet<>();
+                /*Set<Capture> captures = new HashSet<>();
                 captures.add(new Capture("mac15", -32));
                 captures.add(new Capture("mac65", -45));
                 fm.addFingerprint(25,26, captures);
-                fm.save();
+                fm.save();*/
 
                 //re-enable button etc. only when capture is finished.
-                //FIXME stage 2 needs to be triggered asynchronously by the capture completing (below code is redundant)
+                //FIXME stage 2 needs to be triggered asynchronously by the capture completing (below code is redundant/wrong place)
                 stage++;
                 break;
             case 2:

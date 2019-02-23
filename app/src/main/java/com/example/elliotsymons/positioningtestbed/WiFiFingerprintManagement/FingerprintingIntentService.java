@@ -11,6 +11,9 @@ import android.util.Log;
 
 import com.example.elliotsymons.positioningtestbed.R;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static com.example.elliotsymons.positioningtestbed.App.CHANNEL_ID;
 
 public class FingerprintingIntentService extends IntentService {
@@ -42,9 +45,25 @@ public class FingerprintingIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(TAG, "onHandleIntent called");
+        Log.d(TAG, "onHandleIntent: called");
 
-        SystemClock.sleep(3000);
+        //TODO
+
+        //TODO get scan result (see POC earlier on)
+        //TODO extract needed values
+        //TODO pass to fingerprint manager
+
+        Set<Capture> captures = new HashSet<>();
+        captures.add(new Capture("mac15", -32));
+        captures.add(new Capture("mac65", -45));
+//        fm.addFingerprint(25,26, captures);
+//        fm.save();
+
+        //TODO trigger location state update
+        //TODO trigger 'stage 2' in UI thread
+
+        //TODO ...
+
         Log.d(TAG, "onHandleIntent: Finished waiting");
     }
 
