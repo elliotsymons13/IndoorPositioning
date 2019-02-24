@@ -33,6 +33,7 @@ public class FingerprintingIntentService extends IntentService {
     private boolean resultReceived;
 
     WifiManager wifiManager;
+    FingerprintManager fm;
 
     public FingerprintingIntentService() {
         super(TAG);
@@ -63,6 +64,7 @@ public class FingerprintingIntentService extends IntentService {
         registerReceiver(wifiScanReceiver,
                 new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
+        fm = JSONFingerprintManager.getInstance(getApplicationContext());
     }
 
     public void postToastMessage(final String message) {
@@ -99,6 +101,7 @@ public class FingerprintingIntentService extends IntentService {
         Set<Capture> captures = new HashSet<>();
         captures.add(new Capture("mac15", -32));
         captures.add(new Capture("mac65", -45));
+        fm.addFingerprint(7,7,captures);
 //        fm.addFingerprint(25,26, captures);
 //        fm.save();
 

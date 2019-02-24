@@ -49,7 +49,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
-        fm = new JSONFingerprintManager(getApplicationContext());
+        fm = JSONFingerprintManager.getInstance(getApplicationContext());
         new FingerprintLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded fingerprints from file");
 

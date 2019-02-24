@@ -29,6 +29,8 @@ public class FingerprintPoint {
         this.Y = Y;
     }
 
+    public int getID() { return ID; }
+
     @Override
     public String toString() {
         String capStr = "\n";
