@@ -30,6 +30,8 @@ import static com.example.elliotsymons.positioningtestbed.App.CHANNEL_ID;
 public class FingerprintingIntentService extends IntentService {
     private static final String TAG = "Fingerpr.IntentServ";
 
+    private boolean resultReceived;
+
     WifiManager wifiManager;
 
     public FingerprintingIntentService() {
@@ -78,14 +80,18 @@ public class FingerprintingIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.d(TAG, "onHandleIntent: called");
-
-        SystemClock.sleep(2000);
+        resultReceived = false;
 
         //TODO
 
         //TODO get scan result (see POC earlier on)
         Log.i(TAG, "onHandleIntent: Requesting scan");
-        getWifiInfo();
+        wifiManager.startScan();
+        while (!resultReceived) {
+            SystemClock.sleep(100);
+        }
+
+
 
         //TODO extract needed values
         //TODO pass to fingerprint manager
@@ -132,32 +138,21 @@ public class FingerprintingIntentService extends IntentService {
         Log.i(TAG, "onScanSuccess: Scan result received");
         List<ScanResult> scanResults = wifiManager.getScanResults();
         postToastMessage("Scan completed");
+        resultReceived = true;
 
         //Process results:
-        //TextView tv = getApplicationContext().findViewById(R.id.tv_info);
         String text = "";
         for (ScanResult result : scanResults) {
             text += "SSID: " + result.SSID + "\n";
             text += "MAC : " + result.BSSID + "\n";
             text += "RSSI: " + result.level + "\n";
-            postToastMessage(text);
         }
-        //tv.setText(text);
-
+        postToastMessage(text);
     }
 
     private void onScanFailure() {
         postToastMessage("Scan failed");
     }
-
-    /**
-     * Force a WiFi scan, if allowed by the OS.
-     */
-    public void getWifiInfo() {
-        wifiManager.startScan();
-    }
-
-
 
     @Override
     public void onDestroy() {
