@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
@@ -20,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class PlacementFingerprintingActivity extends AppCompatActivity {
+public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
     private final String TAG = "Pl.Fing.Activity";
 
     private MapViewFragment map;
@@ -33,6 +34,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
     public int mapHeight;
 
     private Button placeCaptureButton;
+    private TextView infoTextView;
 
     private FingerprintManager fm;
 
@@ -48,11 +50,25 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 .findFragmentById(R.id.fragment_placementButtons);
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
+        //infoTextView = (TextView) buttons.getView().findViewById(R.id.tv_info);
 
         fm = JSONFingerprintManager.getInstance(getApplicationContext());
         new FingerprintLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded fingerprints from file");
 
+    }
+
+    @Override
+    public void passLocation(int x, int y) {
+        Log.i(TAG, "passLocation: Called");
+        PlacementButtonsFragment newButtons = new PlacementButtonsFragment();
+        Bundle args = new Bundle();
+        args.putInt("x", x);
+        args.putInt("y", y);
+        newButtons.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_placementButtons, newButtons).commit();
+        buttons = newButtons;
     }
 
     private class FingerprintLoaderTask extends AsyncTask<Void, Void, Void> {
@@ -77,9 +93,10 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         }
     }
 
-    private void startFingerprintService() {
+    private void startFingerprintService(int x, int y) {
         Intent serviceIntent = new Intent(this, FingerprintingIntentService.class);
-        //serviceIntent.putExtra("inputExtra", "Hello world");
+        serviceIntent.putExtra("x", x);
+        serviceIntent.putExtra("y", y);
         ContextCompat.startForegroundService(this, serviceIntent);
     }
 
@@ -130,7 +147,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
                 //TODO Status bar?
 
                 //TODO
-                startFingerprintService();
+                startFingerprintService(map.getCurrentX(), map.getCurrentY());
                 //TODO
                 /*Set<Capture> captures = new HashSet<>();
                 captures.add(new Capture("mac15", -32));

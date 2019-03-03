@@ -82,6 +82,18 @@ public class FingerprintingIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         Log.d(TAG, "onHandleIntent: called");
+        int x, y;
+        try {
+            x = intent.getIntExtra("x", -1);
+            y = intent.getIntExtra("y", -1);
+        } catch (NullPointerException nptre) {
+            Log.e(TAG, "onHandleIntent: NO COORDINATES PROVIDED BY INTENT FROM CALLER");
+            nptre.printStackTrace();
+            x = -1;
+            y = -1;
+        }
+
+
         resultReceived = false;
 
         //TODO
@@ -92,25 +104,26 @@ public class FingerprintingIntentService extends IntentService {
         while (!resultReceived) {
             SystemClock.sleep(100);
         }
-
+        List<ScanResult> scanResults = wifiManager.getScanResults();
 
 
         //TODO extract needed values
         //TODO pass to fingerprint manager
-
         Set<Capture> captures = new HashSet<>();
-        captures.add(new Capture("mac15", -32));
-        captures.add(new Capture("mac65", -45));
-        fm.addFingerprint(7,7,captures);
-//        fm.addFingerprint(25,26, captures);
-//        fm.save();
+        for (ScanResult result : scanResults) {
+            captures.add(new Capture(result.BSSID, Math.abs(result.level)));
+        }
+        fm.addFingerprint(x,y,captures);
+        fm.save(); //TODO no call here
 
-        //TODO trigger location state update
+        //TODO trigger location state update?
+
+
         //TODO trigger 'stage 2' in UI thread
 
         //TODO ...
 
-        Log.i(TAG, "onHandleIntent: Finished waiting");
+        Log.i(TAG, "onHandleIntent: finished");
     }
 
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
