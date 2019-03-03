@@ -28,7 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService" />
+        <service android:name=".WiFiFingerprintManagement.OLD" />
     </application>
 
 </manifest>
