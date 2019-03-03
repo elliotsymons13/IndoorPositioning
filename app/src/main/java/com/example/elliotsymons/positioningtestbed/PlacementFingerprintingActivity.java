@@ -44,9 +44,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     private PlacementButtonsFragment buttons;
 
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
-    private int stage = 0;
-    public void setStage(int stage) { this.stage = stage; }
-    public int getStage() { return stage; }
+    private String stage = "Place";
 
     public int mapWidth;
     public int mapHeight;
@@ -83,6 +81,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         Bundle args = new Bundle();
         args.putInt("x", x);
         args.putInt("y", y);
+        args.putString("stage", stage);
         newButtons.setArguments(args);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_placementButtons, newButtons).commit();
@@ -141,50 +140,42 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     public void placeOrCaptureClick(View view) { placeOrCaptureStep(); }
     public void placeOrCaptureStep() {
         switch (stage) {
-            case 0:
-                //User is placing the fingerprint location
-                Toast.makeText(this, "Stage 0", Toast.LENGTH_SHORT).show();
+            case "Place":
+                //User is to place the fingerprint location
+                Toast.makeText(this, "LOCKED", Toast.LENGTH_SHORT).show();
+                stage = "Locked";
+
                 //Lock blue dot
                 map.setBlueDotLocked();
                 //Disable other buttons
-                placeCaptureButton.setEnabled(true);
-                findViewById(R.id.btn_up).setEnabled(false);
-                findViewById(R.id.btn_right).setEnabled(false);
-                findViewById(R.id.btn_down).setEnabled(false);
-                findViewById(R.id.btn_left).setEnabled(false);
+                buttons.setStage(stage);
+                buttons.updateButtonStates(); //TODO call needed?
                 //Change button text
                 placeCaptureButton.setText(R.string.capture);
-                stage++;
+
                 break;
-            case 1:
+            case "Locked":
                 //User has pressed capture. Phone needs to record RSSI values.
-                Toast.makeText(this, "Stage 1", Toast.LENGTH_SHORT).show();
-                //Lock all buttons
-                placeCaptureButton.setEnabled(false);
-                //Inform user of intent
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
+                stage = "Capture";
+                buttons.setStage(stage);
+                buttons.updateButtonStates();
+
+
                 //TODO Status bar?
 
                 //TODO
                 startFingerprintService(map.getCurrentX(), map.getCurrentY());
-                //TODO
+                //TODO ...
 
-                //re-enable button etc. only when capture is finished.
-                //FIXME stage 2 needs to be triggered asynchronously by the capture completing (below code is redundant/wrong place)
-                stage++;
+
                 break;
-            case 2:
+            case "Capture":
                 //Capture is complete
-                Toast.makeText(this, "Stage 2", Toast.LENGTH_SHORT).show();
-                //Update user
-                findViewById(R.id.btn_up).setEnabled(true);
-                findViewById(R.id.btn_right).setEnabled(true);
-                findViewById(R.id.btn_down).setEnabled(true);
-                findViewById(R.id.btn_left).setEnabled(true);
-                placeCaptureButton.setText(R.string.place);
-                placeCaptureButton.setEnabled(true);
-                //Move on to next capture
-                stage = 0;
+                Toast.makeText(this, "COMPLETE, RESTARTING", Toast.LENGTH_SHORT).show();
+                stage = "Place";
+                buttons.setStage(stage);
+                buttons.updateButtonStates();
                 break;
         }
     }
@@ -306,6 +297,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
             //TODO trigger 'stage 2' in UI thread
             Intent intenta = new Intent();
             LocalBroadcastManager.getInstance(PlacementFingerprintingActivity.this).sendBroadcast(intenta);
+            //FIXME
 
             //TODO ...
 
