@@ -16,7 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".PlacementFingerprintingActivity"
-            android:screenOrientation="portrait" ></activity>
+            android:screenOrientation="portrait" >
+        </activity>
+        <!--<service android:name=".PlacementFingerprintingActivity$FingerprintingIntentService"/>-->
+        <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService"/>
         <activity android:name=".FingerprintingMenuActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -28,7 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".WiFiFingerprintManagement.OLD" />
     </application>
 
 </manifest>
