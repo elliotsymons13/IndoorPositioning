@@ -16,6 +16,7 @@ public class JSONFingerprintManager implements FingerprintManager {
 
     private final String fingerprintDirectoryPath = "/WiFiFingerprintData";
     private final String filename = "data.json";
+    private boolean loaded = false;
 
     //JSON file storage
     private JSONObject jsonRoot;
@@ -60,7 +61,15 @@ public class JSONFingerprintManager implements FingerprintManager {
         }
     }
 
-    public void load() {
+    @Override
+    public void loadIfNotAlready() {
+        if (!loaded) {
+            load();
+            loaded = true;
+        }
+    }
+
+    private void load() {
         String jsonString = "";
 
         //Import file
@@ -162,6 +171,11 @@ public class JSONFingerprintManager implements FingerprintManager {
 
     public boolean fingerprintXYexists(int X, int Y) {
         return (getFingerprintByXY(X, Y) != null);
+    }
+
+    @Override
+    public Set<FingerprintPoint> getAllFingerprints() {
+        return points;
     }
 
     public void save() {

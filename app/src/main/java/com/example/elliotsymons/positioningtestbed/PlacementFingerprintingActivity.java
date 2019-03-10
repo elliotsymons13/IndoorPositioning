@@ -1,21 +1,11 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
-import android.app.IntentService;
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -26,17 +16,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintingIntentService;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.example.elliotsymons.positioningtestbed.App.CHANNEL_ID;
 
 
 public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, StageProvider {
@@ -73,6 +56,9 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         new FingerprintLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded fingerprints from file");
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(msgReceiver,
+                new IntentFilter("fingerprinting-finished"));
+
     }
 
     @Override
@@ -105,7 +91,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
 
         @Override
         protected Void doInBackground(Void... voids) {
-            fm.load();
+            fm.loadIfNotAlready();
             return null;
         }
 
@@ -148,38 +134,37 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         switch (stage) {
             case "Place":
                 //User is to place the fingerprint location
-                Toast.makeText(this, "LOCKED", Toast.LENGTH_SHORT).show();
                 stage = "Locked";
 
                 //Lock blue dot
                 map.setBlueDotLocked();
-                //Disable other buttons
+
                 //Change button text
                 placeCaptureButton.setText(R.string.capture);
-
                 break;
             case "Locked":
                 //User has pressed capture. Phone needs to record RSSI values.
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
                 stage = "Capture";
-
-
-
-                //TODO Status bar?
-
-                //TODO
                 startFingerprintService(map.getCurrentX(), map.getCurrentY());
-                //TODO ...
-
-
                 break;
             case "Capture":
                 //Capture is complete
-                Toast.makeText(this, "COMPLETE, RESTARTING", Toast.LENGTH_SHORT).show();
                 stage = "Place";
+
+                //Unlock blue dot
+                map.setBlueDotUnlocked();
                 break;
         }
+        buttons.updateButtonStates(stage); //redraws UI with buttons updates to guide user
     }
+
+    private BroadcastReceiver msgReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            placeOrCaptureStep();
+        }
+    };
 
     public void finishCapturing(View view) {
         Toast.makeText(this, "Finished...", Toast.LENGTH_SHORT).show();
@@ -188,10 +173,15 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         startActivity(intent);
     }
 
+
+
+
     @Override
     protected void onDestroy() {
         new FingerprintSaverTask().execute(fm);
         Log.i(TAG, "onDestroy: Saving fingerprints to file");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(msgReceiver);
+        Log.i(TAG, "onDestroy: Unregistered receivers");
         super.onDestroy();
     }
 

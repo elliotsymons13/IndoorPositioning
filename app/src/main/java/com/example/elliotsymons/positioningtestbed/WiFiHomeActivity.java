@@ -91,6 +91,12 @@ public class WiFiHomeActivity extends AppCompatActivity {
         startActivity(transitionToFingerprinting);
     }
 
+    public void locatingSelected(View view) {
+        Intent transitionToLocating = new Intent(getBaseContext(),
+                WiFiLocatingActivity.class);
+        startActivity(transitionToLocating);
+    }
+
 
 
 }

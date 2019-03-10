@@ -57,19 +57,16 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
             case R.id.btn_down:
             case R.id.btn_left:
             case R.id.btn_right:
-                Log.e(TAG, "onClick: direction");
+                Log.d(TAG, "onClick: direction");
                 ((PlacementFingerprintingActivity) getActivity()).directionClick(v);
-                updateButtonStates(stageProvider.getStage());
                 break;
             case R.id.btn_finishFingerprinting:
-                Log.e(TAG, "onClick: finish");
+                Log.d(TAG, "onClick: finish");
                 ((PlacementFingerprintingActivity) getActivity()).finishCapturing(v);
-                updateButtonStates(stageProvider.getStage());
                 break;
             case R.id.btn_multiPurpose:
-                Log.e(TAG, "onClick: place/capture");
+                Log.d(TAG, "onClick: place/capture");
                 ((PlacementFingerprintingActivity) getActivity()).placeOrCaptureStep();
-                updateButtonStates(stageProvider.getStage());
                 break;
         }
     }
@@ -93,7 +90,7 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
 
     public void updateButtonStates(String stage) {
         Button placeCaptureButton = getView().findViewById(R.id.btn_multiPurpose);
-        Log.e(TAG, "updateButtonStates: Updating based on stage: " + stage);
+        Log.d(TAG, "updateButtonStates: Updating based on stage: " + stage);
         switch (stage) {
             case "Place":
                 getView().findViewById(R.id.btn_up).setEnabled(true);

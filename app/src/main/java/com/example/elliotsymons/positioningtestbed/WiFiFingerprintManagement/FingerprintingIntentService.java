@@ -14,9 +14,11 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 
 import java.util.HashSet;
@@ -88,13 +90,9 @@ public class FingerprintingIntentService extends IntentService {
             x = -1;
             y = -1;
         }
-
-
         resultReceived = false;
 
-        //TODO
-
-        //TODO get scan result (see POC earlier on)
+        // get scan result
         Log.i(TAG, "onHandleIntent: Requesting scan");
         wifiManager.startScan();
         while (!resultReceived) {
@@ -103,22 +101,20 @@ public class FingerprintingIntentService extends IntentService {
         List<ScanResult> scanResults = wifiManager.getScanResults();
 
 
-        //TODO extract needed values
-        //TODO pass to fingerprint manager
+        //extract needed values
+
         Set<Capture> captures = new HashSet<>();
         for (ScanResult result : scanResults) {
             captures.add(new Capture(result.BSSID, Math.abs(result.level)));
         }
-        fm.addFingerprint(x,y,captures);
-        fm.save(); //TODO no call here
+        //pass to fingerprint manager
+        fm.addFingerprint(x, y, captures);
+        //fm.save(); //TODO no call here
 
 
-        //TODO trigger 'stage 2' in UI thread
-//            Intent intenta = new Intent();
-//            LocalBroadcastManager.getInstance(PlacementFingerprintingActivity.this).sendBroadcast(intenta);
-        //FIXME
-
-        //TODO ...
+        //trigger next stage in UI thread
+        Intent finishedIntent = new Intent("fingerprinting-finished");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(finishedIntent);
 
         Log.i(TAG, "onHandleIntent: finished");
     }
@@ -150,7 +146,7 @@ public class FingerprintingIntentService extends IntentService {
     private void onScanSuccess() {
         Log.i(TAG, "onScanSuccess: Scan result received");
         List<ScanResult> scanResults = wifiManager.getScanResults();
-        postToastMessage("Scan completed");
+        postToastMessage("Scan completed (" + scanResults.size() + " captures)");
         resultReceived = true;
 
         //Process results:
@@ -160,11 +156,10 @@ public class FingerprintingIntentService extends IntentService {
             text += "MAC : " + result.BSSID + "\n";
             text += "RSSI: " + result.level + "\n";
         }
-        postToastMessage(text);
     }
 
     private void onScanFailure() {
-        postToastMessage("Scan failed");
+        postToastMessage("SCAN FAILED");
     }
 
     @Override

@@ -2,34 +2,17 @@ package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 import java.util.*;
 
-public class FingerprintPoint {
+public class FingerprintPoint extends Point {
     private int ID, X, Y;
     private Set<Capture> captures;
 
     public FingerprintPoint(int ID, int X, int Y, Set<Capture> captures) {
+        super(X, Y);
         this.ID = ID;
-        this.X = X;
-        this.Y = Y;
         this.captures = captures;
     }
 
-    public int getX() {
-        return X;
-    }
-    
-    public void setX(int X) {
-        this.X = X;
-    }
-
-    public int getY() {
-        return Y;
-    }
-
-    public void setY(int Y) {
-        this.Y = Y;
-    }
-
-    public int getID() { return ID; }
+    public Set<Capture> getCaptures() { return captures; }
 
     @Override
     public String toString() {
