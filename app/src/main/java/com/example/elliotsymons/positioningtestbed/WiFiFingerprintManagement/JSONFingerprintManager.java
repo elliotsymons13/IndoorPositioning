@@ -7,29 +7,42 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.*;
-import java.nio.file.*;
 import java.util.*;
 
 public class JSONFingerprintManager implements FingerprintManager {
     private static final String TAG = "JSONFingerprintManager";
+    private static JSONFingerprintManager instance; //singleton
     private Context applicationContext;
 
     private final String fingerprintDirectoryPath = "/WiFiFingerprintData";
     private final String filename = "data.json";
 
+    //JSON file storage
     private JSONObject jsonRoot;
     private JSONObject fingerprintData;
     private JSONArray fingerprints;
 
+    //Local 'live' storage
     private Set<FingerprintPoint> points;
-
     private int maxID;
 
 
-    public JSONFingerprintManager(Context context) {
-        points = new HashSet<>();
+
+    /*
+     * Singleton support -->
+     * */
+    private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
+        points = new HashSet<FingerprintPoint>();
     }
+    public static JSONFingerprintManager getInstance(Context context) {
+        if (instance == null)
+            instance = new JSONFingerprintManager(context);
+        return instance;
+    }
+    /*
+     * <--
+     * */
 
     private void initialise() {
         try {
@@ -65,7 +78,7 @@ public class JSONFingerprintManager implements FingerprintManager {
                 jsonString = fins.useDelimiter("\\A").next(); // read whole file into string
             } else {
                 initialise();
-                fin = new File(folder.getAbsolutePath(), filename); //refersh file
+                fin = new File(folder.getAbsolutePath(), filename); //refresh file
                 fins = new Scanner(fin);
                 jsonString = fins.useDelimiter("\\A").next(); // read whole file into string
             }

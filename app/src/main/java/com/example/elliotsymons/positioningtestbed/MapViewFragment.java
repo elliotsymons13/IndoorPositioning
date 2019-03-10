@@ -1,6 +1,7 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -16,7 +17,10 @@ public class MapViewFragment extends Fragment {
 
     private int startX, startY;
 
-
+    LocationPassListener locationPassListener;
+    public interface LocationPassListener {
+        public void passLocation(int x, int y);
+    }
 
     public MapViewFragment() {
         // Required empty public constructor
@@ -62,6 +66,17 @@ public class MapViewFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        //make sure the required interfaces are implemented by the parent activity
+        try {
+            locationPassListener = (LocationPassListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement LocationPassListener");
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -93,7 +108,4 @@ public class MapViewFragment extends Fragment {
         return rootView;
 
     }
-
-
-
 }

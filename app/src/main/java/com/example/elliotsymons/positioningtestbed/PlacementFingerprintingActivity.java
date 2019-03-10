@@ -1,36 +1,58 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
+import android.app.IntentService;
+import android.app.Notification;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
+import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintingIntentService;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static com.example.elliotsymons.positioningtestbed.App.CHANNEL_ID;
 
-public class PlacementFingerprintingActivity extends AppCompatActivity {
+
+public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, StageProvider {
     private final String TAG = "Pl.Fing.Activity";
 
     private MapViewFragment map;
     private PlacementButtonsFragment buttons;
 
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
-    private int stage = 0;
+    private String stage = "Place";
 
     public int mapWidth;
     public int mapHeight;
 
     private Button placeCaptureButton;
+    private TextView infoTextView;
 
     private FingerprintManager fm;
 
@@ -47,9 +69,29 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
-        fm = new JSONFingerprintManager(getApplicationContext());
+        fm = JSONFingerprintManager.getInstance(getApplicationContext());
         new FingerprintLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded fingerprints from file");
+
+    }
+
+    @Override
+    public void passLocation(int x, int y) {
+        Log.i(TAG, "passLocation: Called");
+        /*PlacementButtonsFragment newButtons = new PlacementButtonsFragment();
+        Bundle args = new Bundle();
+        args.putInt("x", x);
+        args.putInt("y", y);
+        args.putString("stage", stage);
+        newButtons.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_placementButtons, newButtons).commit();
+        buttons = newButtons;*/ //FIXME
+    }
+
+    @Override
+    public String getStage() {
+        return stage;
     }
 
     private class FingerprintLoaderTask extends AsyncTask<Void, Void, Void> {
@@ -74,6 +116,13 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         }
     }
 
+    private void startFingerprintService(int x, int y) {
+        Intent serviceIntent = new Intent(this, FingerprintingIntentService.class);
+        serviceIntent.putExtra("x", x);
+        serviceIntent.putExtra("y", y);
+        ContextCompat.startForegroundService(this, serviceIntent);
+    }
+
     public void directionClick(View v) {
         int increment = 1;
         switch (v.getId()) {
@@ -94,62 +143,46 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
         }
     }
 
-    public void placeOrCaptureClick(View view) {
+    public void placeOrCaptureStep() {
+        Log.d(TAG, "placeOrCaptureStep: Called");
         switch (stage) {
-            case 0:
-                //User is placing the fingerprint location
-                Toast.makeText(this, "Stage 0", Toast.LENGTH_SHORT).show();
+            case "Place":
+                //User is to place the fingerprint location
+                Toast.makeText(this, "LOCKED", Toast.LENGTH_SHORT).show();
+                stage = "Locked";
+
                 //Lock blue dot
                 map.setBlueDotLocked();
                 //Disable other buttons
-                placeCaptureButton.setEnabled(true);
-                findViewById(R.id.btn_up).setEnabled(false);
-                findViewById(R.id.btn_right).setEnabled(false);
-                findViewById(R.id.btn_down).setEnabled(false);
-                findViewById(R.id.btn_left).setEnabled(false);
                 //Change button text
                 placeCaptureButton.setText(R.string.capture);
-                stage++;
+
                 break;
-            case 1:
+            case "Locked":
                 //User has pressed capture. Phone needs to record RSSI values.
-                Toast.makeText(this, "Stage 1", Toast.LENGTH_SHORT).show();
-                //Lock all buttons
-                placeCaptureButton.setEnabled(false);
-                //Inform user of intent
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
-                //Status bar?
+                stage = "Capture";
+
+
+
+                //TODO Status bar?
 
                 //TODO
-                Set<Capture> captures = new HashSet<>();
-                captures.add(new Capture("mac15", -32));
-                captures.add(new Capture("mac65", -45));
-                fm.addFingerprint(25,26, captures);
-                fm.save();
+                startFingerprintService(map.getCurrentX(), map.getCurrentY());
+                //TODO ...
 
-                //re-enable button etc. only when capture is finished.
-                //FIXME stage 2 needs to be triggered asynchronously by the capture completing (below code is redundant)
-                stage++;
+
                 break;
-            case 2:
+            case "Capture":
                 //Capture is complete
-                Toast.makeText(this, "Stage 2", Toast.LENGTH_SHORT).show();
-                //Update user
-                findViewById(R.id.btn_up).setEnabled(true);
-                findViewById(R.id.btn_right).setEnabled(true);
-                findViewById(R.id.btn_down).setEnabled(true);
-                findViewById(R.id.btn_left).setEnabled(true);
-                placeCaptureButton.setText(R.string.place);
-                placeCaptureButton.setEnabled(true);
-                //Move on to next capture
-                stage = 0;
+                Toast.makeText(this, "COMPLETE, RESTARTING", Toast.LENGTH_SHORT).show();
+                stage = "Place";
                 break;
         }
     }
 
     public void finishCapturing(View view) {
         Toast.makeText(this, "Finished...", Toast.LENGTH_SHORT).show();
-        //TODO intent to move back to main screen?
         Intent intent = new Intent(this, WiFiHomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
@@ -171,5 +204,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity {
             return null;
         }
     }
+
+
 
 }

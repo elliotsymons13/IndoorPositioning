@@ -33,6 +33,8 @@ public class MyMapView extends AppCompatImageView {
     private int blueDot_r = 15;
     private boolean blueDotLocked = false;
 
+    MapViewFragment.LocationPassListener locationPassListener;
+
 
     //Default constructor, calls through
     public MyMapView(Context context) {
@@ -67,6 +69,13 @@ public class MyMapView extends AppCompatImageView {
         BLUE_DOT_PAINT = new Paint();
         BLUE_DOT_PAINT.setColor(Color.parseColor("#4285f4")); //'Google maps dot blue'
         BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
+
+        //make sure the required interfaces are implemented by the parent activity
+        try {
+            locationPassListener = (MapViewFragment.LocationPassListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement MapViewLocationListener");
+        }
 
     }
 
@@ -123,6 +132,8 @@ public class MyMapView extends AppCompatImageView {
         blueDot_x = x;
         blueDot_y = y;
         blueDot_r = r;
+
+        locationPassListener.passLocation(x, y);
 
         invalidate(); //redraw view
     }
