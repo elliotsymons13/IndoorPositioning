@@ -15,12 +15,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".RouterPlacementActivity"></activity>
         <activity
             android:name=".WiFiLocatingActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".PlacementFingerprintingActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
 
         <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService" />
 

@@ -4,11 +4,13 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Fin
 
 class PossiblePoint {
     double distance;
+    int matchingRouters;
     FingerprintPoint fingerprintPoint;
 
 
-    public PossiblePoint(double distance, FingerprintPoint p) {
+    public PossiblePoint(double distance, int matchingRouters, FingerprintPoint p) {
         this.distance = distance;
+        this.matchingRouters = matchingRouters;
         this.fingerprintPoint = p;
     }
 
@@ -19,5 +21,7 @@ class PossiblePoint {
     public FingerprintPoint getFingerprintPoint() {
         return fingerprintPoint;
     }
+
+    public int getMatchingRouters() {return matchingRouters;}
 
 }

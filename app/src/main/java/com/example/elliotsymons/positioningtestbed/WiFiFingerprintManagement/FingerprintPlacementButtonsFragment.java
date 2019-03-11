@@ -1,4 +1,4 @@
-package com.example.elliotsymons.positioningtestbed;
+package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 
 import android.os.Bundle;
@@ -10,17 +10,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
+import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
+import com.example.elliotsymons.positioningtestbed.R;
 
 
-public class PlacementButtonsFragment extends Fragment implements View.OnClickListener {
+public class FingerprintPlacementButtonsFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "PlacementButtonsFragmen";
 
     TextView tvInfo;
     private StageProvider stageProvider;
 
-    public PlacementButtonsFragment() {
+    public FingerprintPlacementButtonsFragment() {
         // Required empty public constructor
     }
 
@@ -29,7 +29,7 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_placement_buttons, container, false);
+        View view = inflater.inflate(R.layout.fragment_fingerprint_placement_buttons, container, false);
         tvInfo = (TextView) view.findViewById(R.id.tv_info);
         stageProvider = (StageProvider) getActivity();
         if (stageProvider == null)
@@ -45,9 +45,9 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
         btn_right.setOnClickListener(this);
         Button btn_down = (Button) view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
-        Button btn_finish = (Button) view.findViewById(R.id.btn_finishFingerprinting);
+        Button btn_finish = (Button) view.findViewById(R.id.btn_finishPlacing);
         btn_finish.setOnClickListener(this);
-        Button btn_delete = (Button) view.findViewById(R.id.btn_deleteFingerprints);
+        Button btn_delete = (Button) view.findViewById(R.id.btn_deleteDataset);
         btn_delete.setOnClickListener(this);
 
         return view;
@@ -63,7 +63,7 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
                 Log.d(TAG, "onClick: direction");
                 ((PlacementFingerprintingActivity) getActivity()).directionClick(v);
                 break;
-            case R.id.btn_finishFingerprinting:
+            case R.id.btn_finishPlacing:
                 Log.d(TAG, "onClick: finish");
                 ((PlacementFingerprintingActivity) getActivity()).finishCapturing(v);
                 break;
@@ -71,7 +71,7 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
                 Log.d(TAG, "onClick: place/capture");
                 ((PlacementFingerprintingActivity) getActivity()).placeOrCaptureStep();
                 break;
-            case R.id.btn_deleteFingerprints:
+            case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete fingerprints");
 
                 JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();

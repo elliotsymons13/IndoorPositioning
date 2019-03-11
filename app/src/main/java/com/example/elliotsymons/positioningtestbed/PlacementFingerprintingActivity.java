@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPlacementButtonsFragment;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintingIntentService;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
@@ -26,7 +27,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     private final String TAG = "Pl.Fing.Activity";
 
     private MapViewFragment map;
-    private PlacementButtonsFragment buttons;
+    private FingerprintPlacementButtonsFragment buttons;
 
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
     private String stage = "Place";
@@ -48,7 +49,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         getSupportActionBar().setTitle("Fingerprint capture");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
-        buttons = (PlacementButtonsFragment) getSupportFragmentManager()
+        buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         mapID = getIntent().getIntExtra("mapID", 0);
         map.setMapBackground(mapID);
@@ -67,7 +68,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     @Override
     public void passLocation(int x, int y) {
         Log.i(TAG, "passLocation: Called");
-        /*PlacementButtonsFragment newButtons = new PlacementButtonsFragment();
+        /*FingerprintPlacementButtonsFragment newButtons = new FingerprintPlacementButtonsFragment();
         Bundle args = new Bundle();
         args.putInt("x", x);
         args.putInt("y", y);

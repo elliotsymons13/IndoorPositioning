@@ -111,6 +111,13 @@ public class WiFiHomeActivity extends AppCompatActivity {
         }
     }
 
+    public void routerPlacementSelected(View view) {
+        Intent transitionToRouterPlacement = new Intent(getBaseContext(),
+                RouterPlacementActivity.class);
+        transitionToRouterPlacement.putExtra("mapID", mapID);
+        startActivity(transitionToRouterPlacement);
+    }
+
 
 
 }

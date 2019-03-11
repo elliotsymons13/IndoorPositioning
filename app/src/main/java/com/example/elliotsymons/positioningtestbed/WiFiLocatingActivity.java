@@ -75,7 +75,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
     }
 
     /**
-     * Task to asyncronously calculate the users location, by snapping to the nearest fingerprint point.
+     * Task to asynchronously calculate the users location, by snapping to the nearest fingerprint point.
      *
      * 1 - setup progress bar
      * 2 - get a wifi scan of the current environment and parse RSSI, MAC to set of captures
@@ -159,15 +159,15 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
 
             //Positioning algorithm
             Set<PossiblePoint> possiblePoints = new HashSet<>();
-            //TODO progress updates (based on number of points, percentage of points checked)
             int numberOfPoints = fingerprintPoints.size();
-            int correlationCount = 0;
+            int pointsInCommon = 0;
             int index = 0;
             for (FingerprintPoint p : fingerprintPoints) {
                 int distanceSquared = 0;
                 index++;
-                publishProgress((10 + index/numberOfPoints * 80));
-                boolean correlated = false;
+                publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
+                boolean atLeast1Match = false;
+                int correlationsForThisPoint = 0;
                 Set<Capture> fingerprintCaptures = p.getCaptures();
                 for (Capture fingerprintCapture : fingerprintCaptures) {
                     for (Capture queryCapture: queryPointCaptures) {
@@ -175,26 +175,33 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                             distanceSquared += Math.pow(
                                     (queryCapture.getRSSI() -
                                             fingerprintCapture.getRSSI()), 2);
-                            if (!correlated) {
-                                correlationCount++;
-                                correlated = true;
+                            correlationsForThisPoint++;
+                            if (!atLeast1Match) {
+                                pointsInCommon++;
+                                atLeast1Match = true;
                             }
                         }
                     }
                 }
-                possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), p));
+                possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
             }
             publishProgress(90);
 
             //calculate nearest point
             PossiblePoint currentMinimum = null;
             for (PossiblePoint pp : possiblePoints) {
-                if (currentMinimum == null || pp.getDistance() < currentMinimum.getDistance()) {
+                if (currentMinimum == null) {
+                    currentMinimum = pp;
+                    continue;
+                }
+                if (pp.getDistance() < currentMinimum.getDistance()) {
+                    if (pp.getMatchingRouters() != currentMinimum.getMatchingRouters())
+                        Log.d(TAG, "doInBackground: not same router count");
                     currentMinimum = pp;
                 }
             }
 
-            if (correlationCount < 1)  {
+            if (pointsInCommon < 1)  {
                 publishProgress(4);
                 return null;
             }
