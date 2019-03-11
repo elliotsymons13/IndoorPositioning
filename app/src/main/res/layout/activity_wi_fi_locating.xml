@@ -20,7 +20,7 @@
 
     <fragment
         android:id="@+id/fragment_locationControls"
-        android:name="com.example.elliotsymons.positioningtestbed.LocationButtonFragment"
+        android:name="com.example.elliotsymons.positioningtestbed.LocationControlsFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

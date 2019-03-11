@@ -1,23 +1,17 @@
 package com.example.elliotsymons.positioningtestbed;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.List;
 
 public class WiFiHomeActivity extends AppCompatActivity {
 
@@ -27,11 +21,12 @@ public class WiFiHomeActivity extends AppCompatActivity {
 
     WifiManager wifiManager;
 
+    private int mapID = R.drawable.floor_plan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_wifihome);
 
         getSupportActionBar().setTitle("WiFi positioning");
 
@@ -88,13 +83,32 @@ public class WiFiHomeActivity extends AppCompatActivity {
     public void fingerprintingSelected(View view) {
         Intent transitionToFingerprinting = new Intent(getBaseContext(),
                 FingerprintingMenuActivity.class);
+        transitionToFingerprinting.putExtra("mapID", mapID);
         startActivity(transitionToFingerprinting);
     }
 
     public void locatingSelected(View view) {
         Intent transitionToLocating = new Intent(getBaseContext(),
                 WiFiLocatingActivity.class);
+        transitionToLocating.putExtra("mapID", mapID);
         startActivity(transitionToLocating);
+    }
+
+    public void setMapBackground(View view) {
+        switch(view.getId()) {
+            case R.id.rb_dcs:
+                Log.d(TAG, "onClick: dcs selected");
+                mapID = R.drawable.floor_plan;
+                break;
+            case R.id.rb_home:
+                Log.d(TAG, "onClick: home selected");
+                mapID = R.drawable.house_floor_plan;
+                break;
+            case R.id.rb_msb:
+                Log.d(TAG, "setMapBackground: msb selected");
+                mapID = R.drawable.msb_floor_plan;
+                break;
+        }
     }
 
 

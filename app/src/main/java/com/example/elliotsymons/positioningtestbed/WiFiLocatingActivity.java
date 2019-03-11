@@ -4,14 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Paint;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -27,11 +25,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, LocationButtonFragment.LocationControllerFragmentInteractionListener {
+public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, LocationControlsFragment.LocationControllerFragmentInteractionListener {
     private static final String TAG = "WiFiLocatingActivity";
     MapViewFragment map;
-    LocationButtonFragment controls;
+    LocationControlsFragment controls;
+    int mapID;
     ProgressBar progressBar;
+
+    int mode = MODE_FINGERPRINTING;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         getSupportActionBar().setTitle("WiFi location");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
-        controls = (LocationButtonFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
+        mapID = getIntent().getIntExtra("mapID", 0);
+        map.setMapBackground(mapID);
+        controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
         progressBar = findViewById(R.id.progressBar_locateProgress);
         progressBar.setVisibility(View.INVISIBLE);
         map.setBlueDotLocked(); //the user is not able to place the dot in this activity, it should be located for them
@@ -55,13 +58,30 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
 
     @Override
     public void updateLocation(View view) {
-        new WiFiFingerprintLocatorTask().execute();
+        switch (mode) {
+            case MODE_FINGERPRINTING:
+                new WiFiFingerprintLocatorTask().execute();
+                break;
+            case MODE_TRILATERATION:
+                //TODO
+                Toast.makeText(this, "other mode", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
+    @Override
+    public void selectMode(int mode) {
+        this.mode = mode;
     }
 
     /**
      * Task to asyncronously calculate the users location, by snapping to the nearest fingerprint point.
      *
-     * 1 -
+     * 1 - setup progress bar
+     * 2 - get a wifi scan of the current environment and parse RSSI, MAC to set of captures
+     * 3 - compare this set with the set at every fingerprint point,
+     * recording the proximity in terms of Euclidean distance
+     * 4 - Select the closest fingerprint points (min(distance)) and snap map location to the fingerprint coordinates
      */
     private class WiFiFingerprintLocatorTask extends AsyncTask<Void, Integer, Point> {
         private static final String TAG = "WiFiFingerprintLocatorT";
@@ -79,6 +99,14 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
+            if (location == null) {
+                Toast.makeText(WiFiLocatingActivity.this, "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WiFiLocatingActivity.this, "Cannot locate", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.INVISIBLE);
+                progressBar.setProgress(0);
+                findViewById(R.id.btn_locate).setEnabled(true);
+                return;
+            }
             int x = location.getX();
             int y = location.getY();
 

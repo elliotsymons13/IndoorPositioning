@@ -33,6 +33,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
 
     public int mapWidth;
     public int mapHeight;
+    private int mapID;
 
     private Button placeCaptureButton;
     private TextView infoTextView;
@@ -49,6 +50,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
         buttons = (PlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
+        mapID = getIntent().getIntExtra("mapID", 0);
+        map.setMapBackground(mapID);
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 

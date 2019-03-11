@@ -13,6 +13,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -131,8 +132,11 @@ public class MyMapView extends AppCompatImageView {
         return false;
     }
 
-
-
+    public void setMapBackground(int mapResourceID) {
+        mapBackground = BitmapFactory.decodeResource(getResources(), mapResourceID);
+        invalidate();
+        //Toast.makeText(getContext(), "Fingerprints need updating", Toast.LENGTH_SHORT).show();
+    }
 
     /**
      * Allows for the location of the 'blue dot' representing the user's location to be changed.
