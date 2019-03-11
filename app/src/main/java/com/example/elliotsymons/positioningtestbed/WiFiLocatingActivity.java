@@ -64,7 +64,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                 break;
             case MODE_TRILATERATION:
                 //TODO
-                Toast.makeText(this, "other mode", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Not yet implemented", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

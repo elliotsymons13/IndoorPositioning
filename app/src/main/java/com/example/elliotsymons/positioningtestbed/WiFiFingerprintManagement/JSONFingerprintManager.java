@@ -15,7 +15,7 @@ public class JSONFingerprintManager implements FingerprintManager {
     private static JSONFingerprintManager instance; //singleton
     private Context applicationContext;
 
-    private final String fingerprintDirectoryPath = "/WiFiFingerprintData";
+    private final String fingerprintDirectoryPath = "/data";
     private final String filename = "fingerprints.json";
     private boolean loaded = false;
 
