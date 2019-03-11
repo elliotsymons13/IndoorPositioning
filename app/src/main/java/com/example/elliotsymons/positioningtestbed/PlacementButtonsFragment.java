@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
 
 
@@ -46,6 +47,8 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
         btn_down.setOnClickListener(this);
         Button btn_finish = (Button) view.findViewById(R.id.btn_finishFingerprinting);
         btn_finish.setOnClickListener(this);
+        Button btn_delete = (Button) view.findViewById(R.id.btn_deleteFingerprints);
+        btn_delete.setOnClickListener(this);
 
         return view;
     }
@@ -67,6 +70,11 @@ public class PlacementButtonsFragment extends Fragment implements View.OnClickLi
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
                 ((PlacementFingerprintingActivity) getActivity()).placeOrCaptureStep();
+                break;
+            case R.id.btn_deleteFingerprints:
+                Log.d(TAG, "onClick: delete fingerprints");
+
+                JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();
                 break;
         }
     }

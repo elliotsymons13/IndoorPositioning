@@ -2,6 +2,7 @@ package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,7 +16,7 @@ public class JSONFingerprintManager implements FingerprintManager {
     private Context applicationContext;
 
     private final String fingerprintDirectoryPath = "/WiFiFingerprintData";
-    private final String filename = "data.json";
+    private final String filename = "fingerprints.json";
     private boolean loaded = false;
 
     //JSON file storage
@@ -27,7 +28,18 @@ public class JSONFingerprintManager implements FingerprintManager {
     private Set<FingerprintPoint> points;
     private int maxID;
 
+    @Override
+    public void deleteAllFingerprints() {
+        //Delete file
+        File folder = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath);
+        File fin = new File(folder.getAbsolutePath(), filename);
+        fin.delete();
 
+        //Delete local live data
+        points = new HashSet<>();
+        load(); //overwrites local JSON data also
+        Toast.makeText(applicationContext, "Fingerprints deleted", Toast.LENGTH_SHORT).show();
+    }
 
     /*
      * Singleton support -->
@@ -120,7 +132,7 @@ public class JSONFingerprintManager implements FingerprintManager {
                 points.add(new FingerprintPoint(ID, X, Y, captures));
             }
         } catch (JSONException j) {
-            Log.e(TAG, "Error loading fingeprints from JSON");
+            Log.e(TAG, "Error loading fingerprints from JSON");
             j.printStackTrace();
         }
         maxID = ID; //record highest current ID

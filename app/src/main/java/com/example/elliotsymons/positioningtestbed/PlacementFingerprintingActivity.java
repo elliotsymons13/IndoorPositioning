@@ -152,12 +152,13 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
                 //Capture is complete
                 stage = "Place";
 
-                //Unlock blue dot
+                map.addPersistentDot(map.getCurrentX(), map.getCurrentY());
                 map.setBlueDotUnlocked();
                 break;
         }
         buttons.updateButtonStates(stage); //redraws UI with buttons updates to guide user
     }
+
 
     private BroadcastReceiver msgReceiver = new BroadcastReceiver() {
         @Override
@@ -167,7 +168,6 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     };
 
     public void finishCapturing(View view) {
-        Toast.makeText(this, "Finished...", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, WiFiHomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
@@ -30,6 +31,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
     private static final String TAG = "WiFiLocatingActivity";
     MapViewFragment map;
     LocationButtonFragment controls;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +41,10 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         controls = (LocationButtonFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
+        progressBar = findViewById(R.id.progressBar_locateProgress);
+        progressBar.setVisibility(View.INVISIBLE);
         map.setBlueDotLocked(); //the user is not able to place the dot in this activity, it should be located for them
-
+        map.hideBlueDot();
     }
 
     @Override
@@ -54,6 +58,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         new WiFiFingerprintLocatorTask().execute();
     }
 
+    /**
+     * Task to asyncronously calculate the users location, by snapping to the nearest fingerprint point.
+     *
+     * 1 -
+     */
     private class WiFiFingerprintLocatorTask extends AsyncTask<Void, Integer, Point> {
         private static final String TAG = "WiFiFingerprintLocatorT";
         FingerprintManager fm;
@@ -64,45 +73,27 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         protected void onPreExecute() {
             super.onPreExecute();
             findViewById(R.id.btn_locate).setEnabled(false);
-            //TODO progress bar in UI
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
-            //TODO handle finishing, run on UI thread
             int x = location.getX();
             int y = location.getY();
 
-            //TODO update map
-            Toast.makeText(WiFiLocatingActivity.this, "Updating map", Toast.LENGTH_SHORT).show();
+            // update map
             map.setCurrentX(x);
             map.setCurrentY(y);
+            map.showBlueDot();
+            progressBar.setVisibility(View.INVISIBLE);
             findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            //TODO update on the UI thread progress bar
-            switch (values[0]) {
-                case 1:
-                    Toast.makeText(WiFiLocatingActivity.this, "Scanning...",
-                            Toast.LENGTH_SHORT).show();
-                    break;
-                case 2:
-                    Toast.makeText(WiFiLocatingActivity.this, "Scanned",
-                            Toast.LENGTH_SHORT).show();
-                    break;
-                case 3:
-                    Toast.makeText(WiFiLocatingActivity.this, "Cross-comparison complete",
-                            Toast.LENGTH_SHORT).show();
-                    break;
-                case 4:
-                    Toast.makeText(WiFiLocatingActivity.this,
-                            "Could not correlate", Toast.LENGTH_SHORT).show();
-                    break;
-            }
+            progressBar.setProgress(values[0]);
         }
 
         @Override
@@ -112,7 +103,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             fm.loadIfNotAlready();
 
             //Get capture of current location
-            publishProgress(1);
+            publishProgress(5);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             enableWifi();
             registerReceiver(wifiScanReceiver,
@@ -123,7 +114,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                 SystemClock.sleep(100);
             }
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            publishProgress(2);
+            publishProgress(10);
             unregisterReceiver(wifiScanReceiver);
 
             Log.d(TAG, "doInBackground: Scan completed");
@@ -141,9 +132,13 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             //Positioning algorithm
             Set<PossiblePoint> possiblePoints = new HashSet<>();
             //TODO progress updates (based on number of points, percentage of points checked)
+            int numberOfPoints = fingerprintPoints.size();
             int correlationCount = 0;
+            int index = 0;
             for (FingerprintPoint p : fingerprintPoints) {
                 int distanceSquared = 0;
+                index++;
+                publishProgress((10 + index/numberOfPoints * 80));
                 boolean correlated = false;
                 Set<Capture> fingerprintCaptures = p.getCaptures();
                 for (Capture fingerprintCapture : fingerprintCaptures) {
@@ -161,7 +156,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                 }
                 possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), p));
             }
-            publishProgress(3);
+            publishProgress(90);
 
             //calculate nearest point
             PossiblePoint currentMinimum = null;
@@ -175,7 +170,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                 publishProgress(4);
                 return null;
             }
-
+            publishProgress(100);
             return new Point(currentMinimum.getFingerprintPoint().getX(),
                     currentMinimum.getFingerprintPoint().getY());
         }
