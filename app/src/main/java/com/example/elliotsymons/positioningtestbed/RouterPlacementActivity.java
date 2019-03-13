@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -18,12 +19,14 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Fin
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
 
 public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
     private static final String TAG = "RouterPlacementActivity";
 
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
+    Button placeCaptureButton;
     int mapID;
     Preferences prefs;
 
@@ -48,10 +51,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         //mapID = prefs.getMapID();
         //map.setMapBackground(mapID);
 
+        placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
+
+
         rm = JSONRouterManager.getInstance(getApplicationContext());
         new RouterLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded routers from file");
-        //TODO
+
     }
 
     private class RouterLoaderTask extends AsyncTask<Void, Void, Void> {
@@ -60,7 +66,8 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //TODO disable button
+            placeCaptureButton.setEnabled(false);
+
         }
 
         @Override
@@ -71,7 +78,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            //TODO enable button
+            placeCaptureButton.setEnabled(true);
             super.onPostExecute(aVoid);
         }
     }
@@ -98,8 +105,8 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     
     public void placeRouter(View v) {
         Log.d(TAG, "placeRouter: called");
-
-        //TODO dialog to allow entry of router MAC address by user
+        //Lock blue dot
+        map.setBlueDotLocked();
 
         //Popup for MAC entry
         AlertDialog.Builder macAlertDialog = new AlertDialog.Builder(this);
@@ -115,8 +122,9 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 //TODO save MAC entered locally
-
-
+                rm.addRouter(map.getCurrentX(), map.getCurrentY(),
+                        input.getText().toString());
+                map.addPersistentDot(map.getCurrentX(), map.getCurrentY());
                 Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
                         " @ " + map.getCurrentX() + ", " + map.getCurrentY());
                 Toast.makeText(RouterPlacementActivity.this, "Added "
@@ -134,6 +142,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         macAlertDialog.show();
 
 
+        map.setBlueDotUnlocked();
         
     }
 

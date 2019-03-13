@@ -142,11 +142,19 @@ public class JSONRouterManager implements RouterManager {
     }
 
     @Override
-    public void addRouter(RouterPoint router) {
+    public void addRouter(int X, int Y, String mac) {
+        RouterPoint router = new RouterPoint(++maxID, X, Y, mac);
 
         //TODO check for existing - actually don't want this,
         // as different networks in same router have different MACs, EG in DCS, but would have same X, Y
 
+        /*for (RouterPoint pointTemp : points) {
+            if (pointTemp.equals(point)) {
+                Log.i(TAG, "Did not add point at existing location. ");
+                return;
+            }
+        }
+        Log.i(TAG, "Point did not yet exist, added. ");*/
         points.add(router);
 
         try {

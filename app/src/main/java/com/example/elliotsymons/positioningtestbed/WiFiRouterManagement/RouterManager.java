@@ -9,7 +9,7 @@ public interface RouterManager {
     void loadIfNotAlready();
     void deleteAllRouters();
 
-    void addRouter(RouterPoint router);
+    void addRouter(int X, int Y, String mac);
 
     Set<RouterPoint> getAllRouters();
 

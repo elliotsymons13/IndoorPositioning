@@ -16,7 +16,7 @@
             android:id="@+id/rbGroup_mapSelector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checkedButton="@+id/rb_dcs"
+            android:checkedButton="@+id/rb_msb"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -62,7 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="fingerprintingSelected"
         android:text="Fingerprint" />

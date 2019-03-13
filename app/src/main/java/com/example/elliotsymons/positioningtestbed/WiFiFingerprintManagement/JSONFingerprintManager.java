@@ -50,8 +50,6 @@ public class JSONFingerprintManager implements FingerprintManager {
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
         points = new HashSet<FingerprintPoint>();
-        Preferences prefs = Preferences.getInstance(context);
-        prefs.g
     }
     public static JSONFingerprintManager getInstance(Context context) {
         if (instance == null)
