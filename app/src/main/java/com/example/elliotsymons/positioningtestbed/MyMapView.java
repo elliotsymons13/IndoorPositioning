@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.preference.Preference;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MyMapView extends AppCompatImageView {
+    private Preferences prefs;
 
     private Canvas mapCanvas;
 
@@ -50,9 +52,11 @@ public class MyMapView extends AppCompatImageView {
 
     public MyMapView(Context context, AttributeSet attributeSet) {
         super(context);
+        prefs = Preferences.getInstance(getContext());
 
         //Import map image resource
-        mapBackground = BitmapFactory.decodeResource(getResources(), R.drawable.floor_plan);
+        int mapID = prefs.getMapID();
+        mapBackground = BitmapFactory.decodeResource(getResources(), mapID);
 
         //Size display
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();

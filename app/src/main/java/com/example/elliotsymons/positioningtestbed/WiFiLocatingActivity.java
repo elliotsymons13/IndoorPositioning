@@ -41,8 +41,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         getSupportActionBar().setTitle("WiFi location");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
-        mapID = getIntent().getIntExtra("mapID", 0);
-        map.setMapBackground(mapID);
+        //mapID = getIntent().getIntExtra("mapID", 0);
+        //map.setMapBackground(mapID);
         controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
         progressBar = findViewById(R.id.progressBar_locateProgress);
         progressBar.setVisibility(View.INVISIBLE);
@@ -183,6 +183,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                         }
                     }
                 }
+                Log.d(TAG, "doInBackground: possible fingerprintPoint: distance = "
+                        + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                + " at point X,Y = " + p.getX() + "," + p.getY());
                 possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
             }
             publishProgress(90);

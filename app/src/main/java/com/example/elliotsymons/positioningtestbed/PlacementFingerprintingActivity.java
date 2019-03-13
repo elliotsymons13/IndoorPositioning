@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.preference.Preference;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,7 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Sta
 
 public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, StageProvider {
     private final String TAG = "Pl.Fing.Activity";
+    Preferences prefs;
 
     private MapViewFragment map;
     private FingerprintPlacementButtonsFragment buttons;
@@ -51,8 +53,10 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
-        mapID = getIntent().getIntExtra("mapID", 0);
-        map.setMapBackground(mapID);
+        prefs = Preferences.getInstance(getApplicationContext());
+        //mapID = prefs.getMapID();
+        //mapID = getIntent().getIntExtra("mapID", 0);
+        //map.setMapBackground(mapID);
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 

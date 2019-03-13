@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
+import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,6 +21,7 @@ public class WiFiHomeActivity extends AppCompatActivity {
     private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
 
     WifiManager wifiManager;
+    Preferences prefs;
 
     private int mapID = R.drawable.floor_plan;
 
@@ -35,6 +37,9 @@ public class WiFiHomeActivity extends AppCompatActivity {
         //Set up wifi manager
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         enableWifi();
+
+        //Set up preferences singleton
+        prefs = Preferences.getInstance(getApplicationContext());
 
         //Check for location permission
         if (ContextCompat.checkSelfPermission(this,
@@ -83,14 +88,14 @@ public class WiFiHomeActivity extends AppCompatActivity {
     public void fingerprintingSelected(View view) {
         Intent transitionToFingerprinting = new Intent(getBaseContext(),
                 FingerprintingMenuActivity.class);
-        transitionToFingerprinting.putExtra("mapID", mapID);
+        //transitionToFingerprinting.putExtra("mapID", mapID);
         startActivity(transitionToFingerprinting);
     }
 
     public void locatingSelected(View view) {
         Intent transitionToLocating = new Intent(getBaseContext(),
                 WiFiLocatingActivity.class);
-        transitionToLocating.putExtra("mapID", mapID);
+        //transitionToLocating.putExtra("mapID", mapID);
         startActivity(transitionToLocating);
     }
 
@@ -109,12 +114,13 @@ public class WiFiHomeActivity extends AppCompatActivity {
                 mapID = R.drawable.msb_floor_plan;
                 break;
         }
+        prefs.setMapID(mapID);
     }
 
     public void routerPlacementSelected(View view) {
         Intent transitionToRouterPlacement = new Intent(getBaseContext(),
                 RouterPlacementActivity.class);
-        transitionToRouterPlacement.putExtra("mapID", mapID);
+        //transitionToRouterPlacement.putExtra("mapID", mapID);
         startActivity(transitionToRouterPlacement);
     }
 

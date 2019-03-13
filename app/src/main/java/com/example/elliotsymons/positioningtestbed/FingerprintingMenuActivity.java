@@ -13,7 +13,7 @@ public class FingerprintingMenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fingerprinting_menu);
-        mapID = getIntent().getIntExtra("mapID", 0);
+        //mapID = getIntent().getIntExtra("mapID", 0);
 
         getSupportActionBar().setTitle("WiFi fingerprinting menu");
     }
@@ -25,7 +25,7 @@ public class FingerprintingMenuActivity extends AppCompatActivity {
     public void placementMethodSelected(View view) {
         Intent transitionToPlacementFingerprinting = new Intent(getBaseContext(),
                 PlacementFingerprintingActivity.class);
-        transitionToPlacementFingerprinting.putExtra("mapID", mapID);
+        //transitionToPlacementFingerprinting.putExtra("mapID", mapID);
         startActivity(transitionToPlacementFingerprinting);
     }
 }

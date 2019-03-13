@@ -1,12 +1,17 @@
 package com.example.elliotsymons.positioningtestbed;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPlacementButtonsFragment;
@@ -20,6 +25,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
     int mapID;
+    Preferences prefs;
 
     private RouterManager rm;
 
@@ -38,7 +44,9 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
         mapID = getIntent().getIntExtra("mapID", 0);
-        map.setMapBackground(mapID);
+        //prefs = Preferences.getInstance(getApplicationContext());
+        //mapID = prefs.getMapID();
+        //map.setMapBackground(mapID);
 
         rm = JSONRouterManager.getInstance(getApplicationContext());
         new RouterLoaderTask().execute();
@@ -91,7 +99,39 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     public void placeRouter(View v) {
         Log.d(TAG, "placeRouter: called");
 
-        //TODO
+        //TODO dialog to allow entry of router MAC address by user
+
+        //Popup for MAC entry
+        AlertDialog.Builder macAlertDialog = new AlertDialog.Builder(this);
+        macAlertDialog.setTitle("Enter MAC address");
+
+        //Set the content of the popup
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        macAlertDialog.setView(input);
+
+        //Set popup buttons
+        macAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //TODO save MAC entered locally
+
+
+                Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
+                        " @ " + map.getCurrentX() + ", " + map.getCurrentY());
+                Toast.makeText(RouterPlacementActivity.this, "Added "
+                        + input.getText().toString() +  " @ "
+                        + map.getCurrentX() + ", " + map.getCurrentY(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        macAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+                Log.d(TAG, "onClick: Add MAC cancelled by user");
+            }
+        });
+        macAlertDialog.show();
 
 
         
