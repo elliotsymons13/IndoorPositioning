@@ -24,8 +24,8 @@ public class JSONRouterManager implements RouterManager {
     private static JSONRouterManager instance; //singleton
     private Context applicationContext;
 
-    private final String routerDirectoryPath = "/data";
-    private final String filename = "routers.json";
+    private final String routerDirectoryPath = "/routers";
+    private String filename = "defaultRoutersFile.json";
     private boolean loaded = false;
 
     //JSON file storage
@@ -55,9 +55,9 @@ public class JSONRouterManager implements RouterManager {
 
 
     @Override
-    public void loadIfNotAlready() {
+    public void loadIfNotAlready(String filename) {
         if (!loaded) {
-            load();
+            loadFile(filename);
             loaded = true;
         }
     }
@@ -71,9 +71,11 @@ public class JSONRouterManager implements RouterManager {
             File fin = new File(folder.getAbsolutePath(), filename);
             if (!folder.exists()) {
                 folder.mkdir();
+                Log.i(TAG, "load: Created folder as did not exist");
             }
             if (!fin.exists()) {
                 fin.createNewFile();
+                Log.i(TAG, "load: Created file as did not exist");
             }
             Scanner fins = new Scanner(fin);
             if (fins.hasNext()) {
@@ -85,7 +87,7 @@ public class JSONRouterManager implements RouterManager {
                 jsonString = fins.useDelimiter("\\A").next(); // read whole file into string
             }
         } catch (IOException e) {
-            Log.e(TAG, "Unable to write to read from wifi routers file");
+            Log.e(TAG, "Unable to read from wifi routers file");
             e.printStackTrace();
         }
 
@@ -110,6 +112,13 @@ public class JSONRouterManager implements RouterManager {
             j.printStackTrace();
         }
         maxID = ID; //record highest current ID
+    }
+
+    @Override
+    public void loadFile(String filename) {
+        this.filename = filename;
+        Log.d(TAG, "loadFile: Going to load file with NAME = " + filename);
+        this.load();
     }
 
     private void initialise() {

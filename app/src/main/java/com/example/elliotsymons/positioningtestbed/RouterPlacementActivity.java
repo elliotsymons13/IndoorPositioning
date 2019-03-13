@@ -21,6 +21,8 @@ import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterMa
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
 
+import java.util.Set;
+
 public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
     private static final String TAG = "RouterPlacementActivity";
 
@@ -46,7 +48,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
-        mapID = getIntent().getIntExtra("mapID", 0);
+        //mapID = getIntent().getIntExtra("mapID", 0);
         //prefs = Preferences.getInstance(getApplicationContext());
         //mapID = prefs.getMapID();
         //map.setMapBackground(mapID);
@@ -58,9 +60,17 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         new RouterLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded routers from file");
 
+        drawExistingRouters();
     }
 
-    private class RouterLoaderTask extends AsyncTask<Void, Void, Void> {
+    public void drawExistingRouters() {
+        Set<RouterPoint> existingRouters = rm.getAllRouters();
+        for (RouterPoint point : existingRouters) {
+            map.addPersistentDot(point.getX(), point.getY());
+        }
+    }
+
+    private class RouterLoaderTask extends AsyncTask<String, Void, Void> {
         public static final String TAG = "RouterLoaderTask";
 
         @Override
@@ -71,13 +81,20 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            rm.loadIfNotAlready();
+        protected Void doInBackground(String... strings) {
+            if (strings.length == 1) {
+                rm.loadFile(strings[0]); // passing filename
+                Log.d(TAG, "doInBackground: Loading custom router file " + strings[0]);
+            } else {
+                Log.d(TAG, "doInBackground: Loading default file");
+                rm.loadFile("defaultRoutersFile.json");
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            drawExistingRouters();
             placeCaptureButton.setEnabled(true);
             super.onPostExecute(aVoid);
         }
@@ -121,7 +138,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         macAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //TODO save MAC entered locally
                 rm.addRouter(map.getCurrentX(), map.getCurrentY(),
                         input.getText().toString());
                 map.addPersistentDot(map.getCurrentX(), map.getCurrentY());
@@ -141,7 +157,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         });
         macAlertDialog.show();
 
-
         map.setBlueDotUnlocked();
         
     }
@@ -151,6 +166,37 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         Intent intent = new Intent(this, WiFiHomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    public void loadRouters() {
+        String filename = "";
+
+        //Popup for filename entry
+        AlertDialog.Builder filenameAlertDialog = new AlertDialog.Builder(this);
+        filenameAlertDialog.setTitle("Enter custom filename");
+
+        //Set the content of the popup
+        final EditText input = new EditText(getApplicationContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        filenameAlertDialog.setView(input);
+
+        //Set popup buttons
+        filenameAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String filename = input.getText().toString() + ".json";
+                new RouterLoaderTask().execute(filename);
+                Toast.makeText(getApplicationContext(), "Using file specified now", Toast.LENGTH_SHORT).show();
+            }
+        });
+        filenameAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+                Log.d(TAG, "onClick: Add custom filename cancelled by user");
+            }
+        });
+        filenameAlertDialog.show();
     }
 
 
