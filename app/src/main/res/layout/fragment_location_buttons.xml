@@ -13,13 +13,16 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_weight="1"
         android:progressTint="@color/colorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/btn_locate"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rbGroup_methodSelector" />
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_power"
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/btn_locate"
@@ -35,18 +38,16 @@
     <RadioGroup
         android:id="@+id/rbGroup_methodSelector"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:checkedButton="@+id/rb_fingerprinting"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar_locateProgress"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/tv_mode"
@@ -71,5 +72,38 @@
             android:text="Trilateration" />
 
     </RadioGroup>
+
+    <SeekBar
+        android:id="@+id/seekBar_power"
+        style="@style/Widget.AppCompat.SeekBar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:max="400"
+        android:progress="70"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar_pathLoss"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rbGroup_methodSelector" />
+
+    <SeekBar
+        android:id="@+id/seekBar_pathLoss"
+        style="@style/Widget.AppCompat.SeekBar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:max="10"
+        android:progress="6"
+        app:layout_constraintBottom_toTopOf="@+id/progressBar_locateProgress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_power" />
 
 </android.support.constraint.ConstraintLayout>

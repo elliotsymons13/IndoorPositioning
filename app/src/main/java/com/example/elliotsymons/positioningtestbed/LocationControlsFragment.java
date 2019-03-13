@@ -10,9 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.SeekBar;
 
 
-public class LocationControlsFragment extends Fragment implements View.OnClickListener {
+public class LocationControlsFragment extends Fragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "LocationControlsFragmen";
 
     private LocationControllerFragmentInteractionListener locationControllerListener;
@@ -35,6 +36,11 @@ public class LocationControlsFragment extends Fragment implements View.OnClickLi
         radioButton_trilateraton.setOnClickListener(this);
         Button btnLocate = view.findViewById(R.id.btn_locate);
         btnLocate.setOnClickListener(this);
+
+        SeekBar progress = (SeekBar) view.findViewById(R.id.seekBar_power);
+        progress.setOnSeekBarChangeListener(this);
+        SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
+        pathLoss.setOnSeekBarChangeListener(this);
 
         return view;
     }
@@ -64,6 +70,8 @@ public class LocationControlsFragment extends Fragment implements View.OnClickLi
         }
     }
 
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -75,6 +83,27 @@ public class LocationControlsFragment extends Fragment implements View.OnClickLi
         }
     }
 
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        switch(seekBar.getId()) {
+            case R.id.seekBar_pathLoss:
+                ((WiFiLocatingActivity) getActivity()).setPathLossExponent(i);
+                break;
+            case R.id.seekBar_power:
+                ((WiFiLocatingActivity) getActivity()).setTxPwr(i);
+                break;
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        //do nothing
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        //do nothing
+    }
 
     public interface LocationControllerFragmentInteractionListener {
         int MODE_FINGERPRINTING = 1;

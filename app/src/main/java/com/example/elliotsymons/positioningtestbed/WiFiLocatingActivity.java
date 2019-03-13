@@ -48,6 +48,22 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
     int mapID;
     ProgressBar progressBar;
 
+    private double TxPwr; //Default is 70mW for 'normal' routers, up to 400mW for others - 200 for uni? //TODO set/calibrate
+    private double pathLossExponent;
+
+    public void setTxPwr(double txPwr) {
+        TxPwr = txPwr;
+        Log.d(TAG, "setTxPwr: set to " + txPwr);
+    }
+
+    public void setPathLossExponent(double pathLossExponent) {
+        this.pathLossExponent = pathLossExponent;
+        Log.d(TAG, "setPathLossExponent: set to " + pathLossExponent);
+    }
+
+
+
+
     int mode = MODE_FINGERPRINTING;
 
     @Override
@@ -180,8 +196,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
 
 
             //Calculate the distances to these N routers, using the path-loss model
-            double TxPwr = 70.0; //Default is 70mW for 'normal' routers, up to 400mW for others - 200 for uni? //TODO set/calibrate
-            double pathLossExponent = 6;
+            //(parameters are set globally, and configurable via the seek bars)
+            Log.d(TAG, "doInBackground: Tx = " + TxPwr + ", PathLossExponent = " + pathLossExponent);
             for (TrilaterationPoint point : NtrilaterationPoints) {
                 point.setDistance(
                         Math.pow(10,  ((TxPwr - point.getRSSI()) / (10 * pathLossExponent))  )
