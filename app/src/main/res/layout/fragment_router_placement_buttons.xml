@@ -72,24 +72,41 @@
 
     <Button
         android:id="@+id/btn_finishPlacing"
-        android:layout_width="195dp"
+        android:layout_width="0dp"
         android:layout_height="67dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="onClick"
         android:text="Save and finish"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_deleteDataset" />
 
     <Button
         android:id="@+id/btn_deleteDataset"
-        android:layout_width="195dp"
+        android:layout_width="0dp"
         android:layout_height="67dp"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:onClick="onClick"
         android:text="Delete dataset"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_finishPlacing"
+        app:layout_constraintStart_toEndOf="@+id/btn_loadFile" />
+
+    <Button
+        android:id="@+id/btn_loadFile"
+        android:layout_width="0dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:onClick="onClick"
+        android:text="Load file"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_deleteDataset"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView

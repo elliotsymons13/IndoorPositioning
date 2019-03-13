@@ -18,8 +18,8 @@ public class JSONFingerprintManager implements FingerprintManager {
     private static JSONFingerprintManager instance; //singleton
     private Context applicationContext;
 
-    private final String fingerprintDirectoryPath = "/data";
-    private final String filename = "fingerprints.json";
+    private final String fingerprintDirectoryPath = "/fingerprints";
+    private final String filename = "defaultFingerprintsFile.json";
     private boolean loaded = false;
 
     //JSON file storage
@@ -50,8 +50,6 @@ public class JSONFingerprintManager implements FingerprintManager {
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
         points = new HashSet<FingerprintPoint>();
-        Preferences prefs = Preferences.getInstance(context);
-        prefs.g
     }
     public static JSONFingerprintManager getInstance(Context context) {
         if (instance == null)

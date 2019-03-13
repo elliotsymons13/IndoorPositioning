@@ -23,7 +23,7 @@ public class WiFiHomeActivity extends AppCompatActivity {
     WifiManager wifiManager;
     Preferences prefs;
 
-    private int mapID = R.drawable.floor_plan;
+    private int mapID = R.drawable.msb_floor_plan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +40,7 @@ public class WiFiHomeActivity extends AppCompatActivity {
 
         //Set up preferences singleton
         prefs = Preferences.getInstance(getApplicationContext());
+        prefs.setMapID(mapID);
 
         //Check for location permission
         if (ContextCompat.checkSelfPermission(this,
@@ -87,7 +88,7 @@ public class WiFiHomeActivity extends AppCompatActivity {
      */
     public void fingerprintingSelected(View view) {
         Intent transitionToFingerprinting = new Intent(getBaseContext(),
-                FingerprintingMenuActivity.class);
+                PlacementFingerprintingActivity.class);
         //transitionToFingerprinting.putExtra("mapID", mapID);
         startActivity(transitionToFingerprinting);
     }
