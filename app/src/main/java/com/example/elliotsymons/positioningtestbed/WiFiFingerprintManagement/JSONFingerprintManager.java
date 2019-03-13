@@ -1,7 +1,11 @@
 package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 import android.content.Context;
+import android.preference.Preference;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.example.elliotsymons.positioningtestbed.Preferences;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,8 +18,9 @@ public class JSONFingerprintManager implements FingerprintManager {
     private static JSONFingerprintManager instance; //singleton
     private Context applicationContext;
 
-    private final String fingerprintDirectoryPath = "/WiFiFingerprintData";
-    private final String filename = "data.json";
+    private final String fingerprintDirectoryPath = "/data";
+    private final String filename = "fingerprints.json";
+    private boolean loaded = false;
 
     //JSON file storage
     private JSONObject jsonRoot;
@@ -26,7 +31,18 @@ public class JSONFingerprintManager implements FingerprintManager {
     private Set<FingerprintPoint> points;
     private int maxID;
 
+    @Override
+    public void deleteAllFingerprints() {
+        //Delete file
+        File folder = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath);
+        File fin = new File(folder.getAbsolutePath(), filename);
+        fin.delete();
 
+        //Delete local live data
+        points = new HashSet<>();
+        load(); //overwrites local JSON data also
+        Toast.makeText(applicationContext, "Fingerprints deleted", Toast.LENGTH_SHORT).show();
+    }
 
     /*
      * Singleton support -->
@@ -34,6 +50,8 @@ public class JSONFingerprintManager implements FingerprintManager {
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
         points = new HashSet<FingerprintPoint>();
+        Preferences prefs = Preferences.getInstance(context);
+        prefs.g
     }
     public static JSONFingerprintManager getInstance(Context context) {
         if (instance == null)
@@ -60,7 +78,15 @@ public class JSONFingerprintManager implements FingerprintManager {
         }
     }
 
-    public void load() {
+    @Override
+    public void loadIfNotAlready() {
+        if (!loaded) {
+            load();
+            loaded = true;
+        }
+    }
+
+    private void load() {
         String jsonString = "";
 
         //Import file
@@ -111,7 +137,7 @@ public class JSONFingerprintManager implements FingerprintManager {
                 points.add(new FingerprintPoint(ID, X, Y, captures));
             }
         } catch (JSONException j) {
-            Log.e(TAG, "Error loading fingeprints from JSON");
+            Log.e(TAG, "Error loading fingerprints from JSON");
             j.printStackTrace();
         }
         maxID = ID; //record highest current ID
@@ -162,6 +188,11 @@ public class JSONFingerprintManager implements FingerprintManager {
 
     public boolean fingerprintXYexists(int X, int Y) {
         return (getFingerprintByXY(X, Y) != null);
+    }
+
+    @Override
+    public Set<FingerprintPoint> getAllFingerprints() {
+        return points;
     }
 
     public void save() {

@@ -58,6 +58,13 @@ public class MapViewFragment extends Fragment {
         return myMapView.isBlueDotLocked();
     }
 
+    public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
+
+    public void setMapBackground(int mapResourceID) { myMapView.setMapBackground(mapResourceID);}
+
+    public void showBlueDot() { myMapView.showBlueDot();}
+    public void hideBlueDot() { myMapView.hideBlueDot();}
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

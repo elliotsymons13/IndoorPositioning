@@ -9,12 +9,18 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.preference.Preference;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.widget.Toast;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class MyMapView extends AppCompatImageView {
+    private Preferences prefs;
 
     private Canvas mapCanvas;
 
@@ -32,6 +38,9 @@ public class MyMapView extends AppCompatImageView {
     private int blueDot_y = 0;
     private int blueDot_r = 15;
     private boolean blueDotLocked = false;
+    private boolean dotVisible = true;
+
+    private Set<Point> persistentDots;
 
     MapViewFragment.LocationPassListener locationPassListener;
 
@@ -43,9 +52,11 @@ public class MyMapView extends AppCompatImageView {
 
     public MyMapView(Context context, AttributeSet attributeSet) {
         super(context);
+        prefs = Preferences.getInstance(getContext());
 
         //Import map image resource
-        mapBackground = BitmapFactory.decodeResource(getResources(), R.drawable.floor_plan);
+        int mapID = prefs.getMapID();
+        mapBackground = BitmapFactory.decodeResource(getResources(), mapID);
 
         //Size display
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
@@ -69,6 +80,11 @@ public class MyMapView extends AppCompatImageView {
         BLUE_DOT_PAINT = new Paint();
         BLUE_DOT_PAINT.setColor(Color.parseColor("#4285f4")); //'Google maps dot blue'
         BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
+        PERSISTENT_DOT_PAINT = new Paint();
+        PERSISTENT_DOT_PAINT.setColor(Color.parseColor("#808080"));
+        PERSISTENT_DOT_PAINT.setStyle(Paint.Style.FILL);
+
+        persistentDots = new HashSet<Point>();
 
         //make sure the required interfaces are implemented by the parent activity
         try {
@@ -85,7 +101,6 @@ public class MyMapView extends AppCompatImageView {
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
-
         // this.invalidate(); //TODO uncomment
     }
 
@@ -95,7 +110,11 @@ public class MyMapView extends AppCompatImageView {
         super.onDraw(canvas);
         mapCanvas = canvas;
         canvas.drawBitmap(mapBackground, null, displayRect, null);
-        canvas.drawCircle(blueDot_x, blueDot_y, blueDot_r, BLUE_DOT_PAINT);
+        for (Point p : persistentDots) {
+            canvas.drawCircle(p.x, p.y, DEFAULT_PERSISTENT_DOT_RADIUS, PERSISTENT_DOT_PAINT);
+        }
+        if (dotVisible)
+            canvas.drawCircle(blueDot_x, blueDot_y, blueDot_r, BLUE_DOT_PAINT);
 
         //invalidate();
     }
@@ -117,8 +136,11 @@ public class MyMapView extends AppCompatImageView {
         return false;
     }
 
-
-
+    public void setMapBackground(int mapResourceID) {
+        mapBackground = BitmapFactory.decodeResource(getResources(), mapResourceID);
+        invalidate();
+        //Toast.makeText(getContext(), "Fingerprints need updating", Toast.LENGTH_SHORT).show();
+    }
 
     /**
      * Allows for the location of the 'blue dot' representing the user's location to be changed.
@@ -128,7 +150,6 @@ public class MyMapView extends AppCompatImageView {
      * @param r radius of dot to draw.
      */
     public void updateBlueDot(int x, int y, int r) {
-        //TODO
         blueDot_x = x;
         blueDot_y = y;
         blueDot_r = r;
@@ -142,9 +163,6 @@ public class MyMapView extends AppCompatImageView {
         updateBlueDot(x, y, blueDot_r);
     }
 
-    public void setBlueDotColour(Paint colour) {
-        //TODO?
-    }
 
     /**
      * Adds a graphical dot to the map representing a fingerprinted point.
@@ -152,18 +170,10 @@ public class MyMapView extends AppCompatImageView {
      *
      * @param x pixel coordinate of center of dot horizontally
      * @param y pixel coordinate of center of dot vertically
-     * @param r radius of dot to draw.
      */
-    public void addPersistentDot(int x, int y, int r) {
-        //TODO
-    }
-
-    public void addPerisistentDot(int x, int y) {
-        addPersistentDot(x, y, DEFAULT_PERSISTENT_DOT_RADIUS);
-    }
-
-    public void setPersistentDotColour() {
-        //TODO?
+    public void addPersistentDot(int x, int y) {
+        persistentDots.add(new Point(x, y));
+        invalidate();
     }
 
 
@@ -197,6 +207,16 @@ public class MyMapView extends AppCompatImageView {
 
     public boolean isBlueDotLocked() {
         return blueDotLocked;
+    }
+
+    public void hideBlueDot() {
+        dotVisible = false;
+        invalidate();
+    }
+
+    public void showBlueDot() {
+        dotVisible = true;
+        invalidate();
     }
 
 
