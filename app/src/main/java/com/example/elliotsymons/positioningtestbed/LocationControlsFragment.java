@@ -11,12 +11,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 
 public class LocationControlsFragment extends Fragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "LocationControlsFragmen";
 
     private LocationControllerFragmentInteractionListener locationControllerListener;
+
+    TextView pathLossTV, powerTV;
 
 
     public LocationControlsFragment() {
@@ -41,6 +46,9 @@ public class LocationControlsFragment extends Fragment implements View.OnClickLi
         progress.setOnSeekBarChangeListener(this);
         SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
         pathLoss.setOnSeekBarChangeListener(this);
+
+        pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
+        powerTV = (TextView) view.findViewById(R.id.tv_power);
 
         return view;
     }
@@ -88,9 +96,11 @@ public class LocationControlsFragment extends Fragment implements View.OnClickLi
         switch(seekBar.getId()) {
             case R.id.seekBar_pathLoss:
                 ((WiFiLocatingActivity) getActivity()).setPathLossExponent(i);
+                pathLossTV.setText("PthLss\n"+ i + "/10");
                 break;
             case R.id.seekBar_power:
                 ((WiFiLocatingActivity) getActivity()).setTxPwr(i);
+                powerTV.setText("Pwr\n" + i + "/400");
                 break;
         }
     }

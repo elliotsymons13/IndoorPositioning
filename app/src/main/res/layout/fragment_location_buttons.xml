@@ -5,7 +5,7 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LocationControlsFragment" >
+    tools:context=".LocationControlsFragment">
 
     <ProgressBar
         android:id="@+id/progressBar_locateProgress"
@@ -85,8 +85,7 @@
         android:max="400"
         android:progress="70"
         app:layout_constraintBottom_toTopOf="@+id/seekBar_pathLoss"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toStartOf="@+id/tv_power"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rbGroup_methodSelector" />
 
@@ -102,8 +101,36 @@
         android:max="10"
         android:progress="6"
         app:layout_constraintBottom_toTopOf="@+id/progressBar_locateProgress"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/tv_pathLoss"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_power" />
+
+    <TextView
+        android:id="@+id/tv_power"
+        android:layout_width="60dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Pwr"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar_pathLoss"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/seekBar_power"
+        app:layout_constraintTop_toBottomOf="@+id/rbGroup_methodSelector" />
+
+    <TextView
+        android:id="@+id/tv_pathLoss"
+        android:layout_width="60dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="PthLss"
+        app:layout_constraintBottom_toBottomOf="@+id/seekBar_pathLoss"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/seekBar_pathLoss"
         app:layout_constraintTop_toBottomOf="@+id/seekBar_power" />
 
 </android.support.constraint.ConstraintLayout>

@@ -48,8 +48,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
     int mapID;
     ProgressBar progressBar;
 
-    private double TxPwr; //Default is 70mW for 'normal' routers, up to 400mW for others - 200 for uni? //TODO set/calibrate
-    private double pathLossExponent;
+    private double TxPwr = 70; //Default is 70mW for 'normal' routers, up to 400mW for others - 200 for uni? //TODO set/calibrate
+    private double pathLossExponent = 6;
 
     public void setTxPwr(double txPwr) {
         TxPwr = txPwr;
