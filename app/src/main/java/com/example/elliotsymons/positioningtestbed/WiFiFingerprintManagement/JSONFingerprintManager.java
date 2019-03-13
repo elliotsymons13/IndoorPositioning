@@ -1,8 +1,11 @@
 package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 import android.content.Context;
+import android.preference.Preference;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.elliotsymons.positioningtestbed.Preferences;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +50,8 @@ public class JSONFingerprintManager implements FingerprintManager {
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
         points = new HashSet<FingerprintPoint>();
+        Preferences prefs = Preferences.getInstance(context);
+        prefs.g
     }
     public static JSONFingerprintManager getInstance(Context context) {
         if (instance == null)

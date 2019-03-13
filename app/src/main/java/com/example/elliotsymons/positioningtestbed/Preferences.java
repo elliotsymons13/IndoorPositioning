@@ -13,6 +13,12 @@ public class Preferences {
 
     //Variables
     private int mapID = 0;
+    private String dcsFPfilename = "dcsFingerprints.json";
+    private String msbFPfilename = "msbFingerprints.json";
+    private String homeFPfilename = "homeFingerprints.json";
+    private String dcsRoutersFilename = "dcsRouters.json";
+    private String msbRoutersFilename = "msbRouters.json";
+    private String homeRoutersFilename = "homeRoutersFilename.json";
 
     public int getMapID() {
         return mapID;
