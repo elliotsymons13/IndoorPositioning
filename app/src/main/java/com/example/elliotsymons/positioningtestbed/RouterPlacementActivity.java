@@ -30,6 +30,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     private RouterPlacementButtonsFragment buttons;
     Button placeCaptureButton;
     int mapID;
+    String filename;
     Preferences prefs;
 
     private RouterManager rm;
@@ -49,9 +50,10 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
         //mapID = getIntent().getIntExtra("mapID", 0);
-        //prefs = Preferences.getInstance(getApplicationContext());
+        prefs = Preferences.getInstance(getApplicationContext());
         //mapID = prefs.getMapID();
         //map.setMapBackground(mapID);
+        filename = prefs.getRoutersFilename();
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
@@ -185,6 +187,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String filename = input.getText().toString() + ".json";
+                prefs.setRoutersFilename(filename);
                 new RouterLoaderTask().execute(filename);
                 Toast.makeText(getApplicationContext(), "Using file specified now", Toast.LENGTH_SHORT).show();
             }
@@ -199,6 +202,12 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         filenameAlertDialog.show();
     }
 
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        prefs.savePrefs(getApplicationContext()); //FIXME call elsewhere also?
+    }
 
     @Override
     protected void onDestroy() {

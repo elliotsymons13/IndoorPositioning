@@ -4,6 +4,10 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Poi
 
 public class RouterPoint extends Point {
     private int ID;
+    private int X;
+    private int Y;
+    private String mac;
+
 
     public int getID() {
         return ID;
@@ -41,9 +45,6 @@ public class RouterPoint extends Point {
         this.mac = mac;
     }
 
-    private int X;
-    private int Y;
-    private String mac;
 
     public RouterPoint(int ID, int X, int Y, String mac) {
         this.ID = ID;

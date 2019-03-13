@@ -34,4 +34,9 @@ dependencies {
     // Lifecycle components
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
+
+    //Requirements for localisation algorithm
+    implementation 'com.lemmingapex.trilateration:trilateration:1.0.2'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+    //compile 'org.apache.commons:commons-math3:3.6.1'
 }

@@ -13,18 +13,28 @@ public class Preferences {
 
     //Variables
     private int mapID = 0;
-    private String dcsFPfilename = "dcsFingerprints.json";
-    private String msbFPfilename = "msbFingerprints.json";
-    private String homeFPfilename = "homeFingerprints.json";
-    private String dcsRoutersFilename = "dcsRouters.json";
-    private String msbRoutersFilename = "msbRouters.json";
-    private String homeRoutersFilename = "homeRoutersFilename.json";
+    private String routersFilename = "defaultRoutersFile.json";
+
+//    private String dcsFPfilename = "dcsFingerprints.json";
+//    private String msbFPfilename = "msbFingerprints.json";
+//    private String homeFPfilename = "homeFingerprints.json";
+//    private String dcsRoutersFilename = "dcsRouters.json";
+//    private String msbRoutersFilename = "msbRouters.json";
+//    private String homeRoutersFilename = "homeRoutersFilename.json";
 
     public int getMapID() {
         return mapID;
     }
     public void setMapID(int id) {
         mapID = id;
+    }
+
+    public String getRoutersFilename() {
+        return routersFilename;
+    }
+
+    public void setRoutersFilename(String routersFilename) {
+        this.routersFilename = routersFilename;
     }
 
     /*
@@ -57,6 +67,7 @@ public class Preferences {
                     PreferenceManager.getDefaultSharedPreferences(ctx);
             //TODO
             mapID = sp.getInt("mapID", mapID);
+            routersFilename = sp.getString("routersFilename", routersFilename);
         } catch (Exception e) {
             Log.e(TAG, "exception reading preferences: " + e, e);
             e.printStackTrace();
@@ -71,9 +82,10 @@ public class Preferences {
                     PreferenceManager.getDefaultSharedPreferences(ctx).edit();
             //TODO
             sp.putInt("mapID", mapID);
+            sp.putString("routersFilename", routersFilename);
             sp.commit();
         } catch (Exception e) {
-            Log.e(TAG, "exception reading preferences: " + e, e);
+            Log.e(TAG, "exception writing preferences: " + e, e);
             e.printStackTrace();
             Toast.makeText(ctx, "ERROR: Could not save preferences", Toast.LENGTH_SHORT).show();
         }
