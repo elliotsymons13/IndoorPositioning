@@ -48,7 +48,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
     int mapID;
     ProgressBar progressBar;
 
-    private double TxPwr = 70; //Default is 70mW for 'normal' routers, up to 400mW for others - 200 for uni? //TODO set/calibrate
+    private double TxPwr = 100; //Default is 70mW for 'normal' routers, up to 400mW for others - <100 for uni? //TODO set/calibrate
     private double pathLossExponent = 6;
 
     public void setTxPwr(double txPwr) {
@@ -122,8 +122,22 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         }
 
         @Override
-        protected void onPostExecute(Point point) {
-            super.onPostExecute(point);
+        protected void onPostExecute(Point location) {
+            super.onPostExecute(location);
+            if (location == null) {
+                Toast.makeText(WiFiLocatingActivity.this, "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WiFiLocatingActivity.this, "Cannot locate", Toast.LENGTH_SHORT).show();
+                findViewById(R.id.btn_locate).setEnabled(true);
+                return;
+            }
+            int x = location.getX();
+            int y = location.getY();
+
+            // update map
+            map.setCurrentX(x);
+            map.setCurrentY(y);
+            map.showBlueDot();
+            findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
@@ -240,7 +254,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
 
             publishProgress(100);
             Log.d(TAG, "doInBackground: Finished");
-            return null;
+            return new Point((int) position_x, (int) position_y);
         }
 
         private void enableWifi() {
@@ -368,21 +382,23 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             Set<FingerprintPoint> fingerprintPoints = fm.getAllFingerprints();
 
 
-            //Positioning algorithm
+            // ---POSITIONING ALGORITHM---
+
             Set<PossiblePoint> possiblePoints = new HashSet<>();
             int numberOfPoints = fingerprintPoints.size();
             int pointsInCommon = 0;
             int index = 0;
-            for (FingerprintPoint p : fingerprintPoints) {
+            for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
                 int distanceSquared = 0;
                 index++;
                 publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
                 boolean atLeast1Match = false;
                 int correlationsForThisPoint = 0;
                 Set<Capture> fingerprintCaptures = p.getCaptures();
-                for (Capture fingerprintCapture : fingerprintCaptures) {
+                for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
                     for (Capture queryCapture: queryPointCaptures) {
-                        if (fingerprintCapture.getMAC().equals(queryCapture.getMAC())) {
+                        if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
+                            /// include in distance consideration:
                             distanceSquared += Math.pow(
                                     (queryCapture.getRSSI() -
                                             fingerprintCapture.getRSSI()), 2);
@@ -416,7 +432,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             }
 
             if (pointsInCommon < 1)  {
-                publishProgress(4);
+                publishProgress(40);
                 return null;
             }
             publishProgress(100);
