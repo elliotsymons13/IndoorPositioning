@@ -24,10 +24,6 @@
             android:screenOrientation="portrait" />
 
         <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService" />
-
-        <activity
-            android:name=".FingerprintingMenuActivity"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".WiFiHomeActivity"
             android:screenOrientation="portrait">

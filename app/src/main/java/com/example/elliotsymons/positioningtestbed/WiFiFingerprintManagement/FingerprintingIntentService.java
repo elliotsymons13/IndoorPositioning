@@ -96,7 +96,7 @@ public class FingerprintingIntentService extends IntentService {
         Log.i(TAG, "onHandleIntent: Requesting scan");
         wifiManager.startScan();
         while (!resultReceived) {
-            SystemClock.sleep(100);
+            SystemClock.sleep(25);
         }
         List<ScanResult> scanResults = wifiManager.getScanResults();
 
