@@ -125,14 +125,14 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
             if (location == null) {
-                Toast.makeText(WiFiLocatingActivity.this, "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WiFiLocatingActivity.this, "Insufficient points in range", Toast.LENGTH_SHORT).show();
                 Toast.makeText(WiFiLocatingActivity.this, "Cannot locate", Toast.LENGTH_SHORT).show();
                 findViewById(R.id.btn_locate).setEnabled(true);
                 return;
             }
             int x = location.getX();
             int y = location.getY();
-
+            Log.d(TAG, "onPostExecute: Updating map: x,y = " + x + ", " + y);
             // update map
             map.setCurrentX(x);
             map.setCurrentY(y);
@@ -150,7 +150,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             Point location = new Point();
             rm = JSONRouterManager.getInstance(getApplicationContext());
             String routersFilename = prefs.getRoutersFilename();
-            rm.loadIfNotAlready(routersFilename);
+            rm.loadFile(routersFilename);
 
             //Get captures at current location
             publishProgress(5);
@@ -205,6 +205,10 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                 N = length;
             }
             Log.d(TAG, "doInBackground: N = " + N);
+            if (N < 3) {
+                Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points");
+                return null;
+            }
             List<TrilaterationPoint> NtrilaterationPoints = trilaterationPoints.subList(0, N);
 
 
@@ -231,8 +235,18 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             //DUMMY FIXME
             //CREDIT: https://github.com/lemmingapex/Trilateration
             // -->> (adapted)
-            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
-            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
+            double[][] positions = new double[N][2];
+            double[] distances = new double[N];
+            int i = 0;
+            for (TrilaterationPoint p : NtrilaterationPoints) {
+                positions[i][0] = p.getRouterPoint().getX();
+                positions[i][1] = p.getRouterPoint().getY();
+                distances[i] = p.getDistance();
+
+                i++;
+            }
+//            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
+//            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
 
             NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(new TrilaterationFunction(positions, distances), new LevenbergMarquardtOptimizer());
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
