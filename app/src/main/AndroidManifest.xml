@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RouterPlacementActivity"></activity>
+        <activity android:name=".PermissionGrantActivity"></activity>
+        <activity android:name=".RouterPlacementActivity" />
         <activity
             android:name=".WiFiLocatingActivity"
             android:screenOrientation="portrait" />
@@ -24,6 +25,7 @@
             android:screenOrientation="portrait" />
 
         <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService" />
+
         <activity
             android:name=".WiFiHomeActivity"
             android:screenOrientation="portrait">
