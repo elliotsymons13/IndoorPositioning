@@ -80,7 +80,23 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
                 break;
             case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete routers");
-                JSONRouterManager.getInstance(getContext()).deleteAllRouters();
+                AlertDialog.Builder confirmDeleteDialog = new AlertDialog.Builder(getActivity());
+                confirmDeleteDialog.setTitle("Really delete all routers?");
+                confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        JSONRouterManager.getInstance(getContext()).deleteAllRouters();
+                        Log.d(TAG, "onClick: Routers deleted by user");
+                    }
+                });
+                confirmDeleteDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                        Log.d(TAG, "onClick: delete routers cancelled by user");
+                    }
+                });
+                confirmDeleteDialog.show();
                 break;
             case R.id.btn_loadFile:
                 Log.d(TAG, "onClick: load routers");
