@@ -5,6 +5,6 @@
     <color name="colorAccent">#C69C72</color>
     <color name="colorPersistentDot">#808080</color>
     <color name="colorGenericDot">#425ff4</color>
-    <color name="colorRSSIDot">#f441ac</color>
-    <color name="colorTilatDot">#42f4e2</color>
+    <color name="colorRSSIDot">#F441AC</color>
+    <color name="colorTilatDot">#42F4E2</color>
 </resources>

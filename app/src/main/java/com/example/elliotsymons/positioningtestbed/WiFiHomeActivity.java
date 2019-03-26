@@ -45,6 +45,9 @@ public class WiFiHomeActivity extends AppCompatActivity {
         prefs.setMapID(mapID);
 
         // ( Non-dangerous permissions are granted automatically and do not need checking.)
+
+
+        //For android versions higher than 6.0 (API 23).  Versions earlier than this not supported. :
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "onCreate: Location permission not granted. Requesting grant. ");

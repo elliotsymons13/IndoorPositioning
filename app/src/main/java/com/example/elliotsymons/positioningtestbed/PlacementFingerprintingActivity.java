@@ -24,6 +24,8 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSO
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
 
 public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, StageProvider {
@@ -53,6 +55,9 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         getSupportActionBar().setTitle("Fingerprint capture");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
+        MyMapView myMapView = map.getMyMapView();
+        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
+        myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         prefs = Preferences.getInstance(getApplicationContext());

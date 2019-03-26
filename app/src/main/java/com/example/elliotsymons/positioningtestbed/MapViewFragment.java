@@ -2,6 +2,7 @@ package com.example.elliotsymons.positioningtestbed;
 
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -19,7 +20,7 @@ public class MapViewFragment extends Fragment {
 
     private MyMapView myMapView;
 
-    private int startX, startY;
+    public static int startX, startY;
 
     LocationPassListener locationPassListener;
     public interface LocationPassListener {
@@ -64,6 +65,10 @@ public class MapViewFragment extends Fragment {
 
     public void unlockNavDot(int dotID) {
         myMapView.unlockNavDot(dotID);
+    }
+
+    public void addNavDot(int ID, int x, int y, int colourResource) {
+        myMapView.addNavDot(ID, x, y, colourResource);
     }
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
@@ -115,8 +120,6 @@ public class MapViewFragment extends Fragment {
         //Move dot to starting location (center)
         startX = myMapView.getMapWidth()/2;
         startY = myMapView.getMapHeight()/2;
-        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
-        myMapView.setNavDotRadius(GENERIC_DOT, 15);
 
         return rootView;
 

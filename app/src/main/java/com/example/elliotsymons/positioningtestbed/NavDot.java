@@ -15,11 +15,14 @@ public class NavDot {
 
     private Paint paint;
 
-    public NavDot(int ID, Paint paint) {
+    public NavDot(int ID, int x, int y, Paint paint) {
         this.ID = ID;
         this.paint = paint;
-        r = 0; x = 10; y = 10; //default values
+        this.x = x;
+        this.y = y;
+        r = 15;
     }
+
     public int getID() {
         return ID;
     }
@@ -27,6 +30,7 @@ public class NavDot {
     public void setID(int ID) {
         this.ID = ID;
     }
+
     public int getX() {
         return x;
     }

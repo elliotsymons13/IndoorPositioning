@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.preference.Preference;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ import java.util.Set;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
 public class MyMapView extends AppCompatImageView {
+    private static final String TAG = "MyMapView";
     private Preferences prefs;
 
     private Canvas mapCanvas;
@@ -33,14 +35,7 @@ public class MyMapView extends AppCompatImageView {
 
     //Dots on map
     private final int DEFAULT_PERSISTENT_DOT_RADIUS = 10;
-    private Paint BLUE_DOT_PAINT;
     private Paint PERSISTENT_DOT_PAINT;
-
-    private int blueDot_x = 0;
-    private int blueDot_y = 0;
-    private int blueDot_r = 15;
-    private boolean blueDotLocked = false;
-    private boolean dotVisible = true;
 
     private Set<Point> persistentDots;
     private Set<NavDot> navigationDots;
@@ -122,16 +117,18 @@ public class MyMapView extends AppCompatImageView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!blueDotLocked) {
-            int touchX = (int) event.getX();
-            int touchY = (int) event.getY();
+        for (NavDot p : navigationDots) {
+            if (p.getID() == GENERIC_DOT && p.isVisible() && !p.isLocked()) {
+                int touchX = (int) event.getX();
+                int touchY = (int) event.getY();
 
-            switch(event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    updateNavDot(GENERIC_DOT, touchX, touchY);
-                    return true;
-                default:
-                    return false;
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        updateNavDot(GENERIC_DOT, touchX, touchY);
+                        return true;
+                    default:
+                        return false;
+                }
             }
         }
         return false;
@@ -152,8 +149,8 @@ public class MyMapView extends AppCompatImageView {
     public void addNavDot(int ID, int x, int y, int colourResource) {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(getResources().getColor(colourResource)); //FIXME will this work?
-        navigationDots.add(new NavDot(ID, paint));
+        paint.setColor(getResources().getColor(colourResource));
+        navigationDots.add(new NavDot(ID, x, y, paint));
         invalidate();
     }
 

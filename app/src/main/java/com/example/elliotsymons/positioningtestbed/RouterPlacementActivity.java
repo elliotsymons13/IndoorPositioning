@@ -24,6 +24,8 @@ import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPo
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
 public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
     private static final String TAG = "RouterPlacementActivity";
@@ -49,6 +51,9 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         getSupportActionBar().setTitle("Router placement");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
+        MyMapView myMapView = map.getMyMapView();
+        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
+        myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
         //mapID = getIntent().getIntExtra("mapID", 0);
