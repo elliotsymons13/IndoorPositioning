@@ -13,6 +13,10 @@ import android.view.ViewGroup;
 public class MapViewFragment extends Fragment {
     private View rootView;
 
+    public static final int GENERIC_DOT = 1;
+    public static final int TRILAT_DOT = 2;
+    public static final int FINGERPRINT_DOT = 3;
+
     private MyMapView myMapView;
 
     private int startX, startY;
@@ -26,7 +30,12 @@ public class MapViewFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public int getCurrentX() {
+    public MyMapView getMyMapView() {
+        return myMapView;
+    }
+
+    //TODO ALL FIX
+    /*public int getCurrentX() {
         return myMapView.getBlueDot_x();
     }
 
@@ -40,30 +49,30 @@ public class MapViewFragment extends Fragment {
 
     public void setCurrentY(int y) {
         myMapView.setBlueDot_y(y);
-    }
+    }*/
 
-    public void resetBlueDot() {
+    /*public void resetBlueDot() {
         myMapView.updateBlueDot(startX,startY);
-    }
+    }*/
 
-    public void setBlueDotLocked() {
+    /*public void setBlueDotLocked() {
         myMapView.setBlueDotLocked(true);
     }
 
     public void setBlueDotUnlocked() {
         myMapView.setBlueDotLocked(false);
-    }
+    }*/
 
-    public boolean blueDotLocked() {
+    /*public boolean blueDotLocked() {
         return myMapView.isBlueDotLocked();
-    }
+    }*/
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
 
     public void setMapBackground(int mapResourceID) { myMapView.setMapBackground(mapResourceID);}
 
-    public void showBlueDot() { myMapView.showBlueDot();}
-    public void hideBlueDot() { myMapView.hideBlueDot();}
+    /*public void showBlueDot() { myMapView.showBlueDot();}
+    public void hideBlueDot() { myMapView.hideBlueDot();}*/
 
 
     @Override
@@ -110,7 +119,7 @@ public class MapViewFragment extends Fragment {
         //Move dot to starting location (center)
         startX = myMapView.getMapWidth()/2;
         startY = myMapView.getMapHeight()/2;
-        myMapView.updateBlueDot(startX,startY);
+        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
 
         return rootView;
 

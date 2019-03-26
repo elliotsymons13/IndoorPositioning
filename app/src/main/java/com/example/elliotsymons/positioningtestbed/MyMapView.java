@@ -41,6 +41,7 @@ public class MyMapView extends AppCompatImageView {
     private boolean dotVisible = true;
 
     private Set<Point> persistentDots;
+    private Set<NavDot> navigationDots;
 
     MapViewFragment.LocationPassListener locationPassListener;
 
@@ -77,12 +78,15 @@ public class MyMapView extends AppCompatImageView {
         displayRect = new Rect(0, 0, MAP_WIDTH, MAP_HEIGHT);
 
         //Setup Paints
-        BLUE_DOT_PAINT = new Paint();
-        BLUE_DOT_PAINT.setColor(Color.parseColor("#4285f4")); //'Google maps dot blue'
-        BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
-        PERSISTENT_DOT_PAINT = new Paint();
-        PERSISTENT_DOT_PAINT.setColor(Color.parseColor("#808080"));
-        PERSISTENT_DOT_PAINT.setStyle(Paint.Style.FILL);
+        //TODO NavDots setups (2 for two modes), or add by calling from paernt calss
+        navigationDots = new HashSet<>();
+
+//        BLUE_DOT_PAINT = new Paint();
+//        BLUE_DOT_PAINT. //'Google maps dot blue'
+//        BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
+//        PERSISTENT_DOT_PAINT = new Paint();
+//        PERSISTENT_DOT_PAINT.setColor(Color.parseColor("#808080"));
+//        PERSISTENT_DOT_PAINT.setStyle(Paint.Style.FILL);
 
         persistentDots = new HashSet<Point>();
 
@@ -113,10 +117,11 @@ public class MyMapView extends AppCompatImageView {
         for (Point p : persistentDots) {
             canvas.drawCircle(p.x, p.y, DEFAULT_PERSISTENT_DOT_RADIUS, PERSISTENT_DOT_PAINT);
         }
-        if (dotVisible)
-            canvas.drawCircle(blueDot_x, blueDot_y, blueDot_r, BLUE_DOT_PAINT);
-
-        //invalidate();
+        for (NavDot p : navigationDots) {
+            if (p.isVisible()) {
+                canvas.drawCircle(p.getX(), p.getY(), p.getR(), p.getPaint());
+            }
+        }
     }
 
     @Override
@@ -127,6 +132,7 @@ public class MyMapView extends AppCompatImageView {
 
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    //TODO update
                     updateBlueDot(touchX, touchY);
                     return true;
                 default:
@@ -139,7 +145,21 @@ public class MyMapView extends AppCompatImageView {
     public void setMapBackground(int mapResourceID) {
         mapBackground = BitmapFactory.decodeResource(getResources(), mapResourceID);
         invalidate();
-        //Toast.makeText(getContext(), "Fingerprints need updating", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Adds a graphical dot to the map representing a users location,
+     * or the placed location for fingerprint capture.
+     *
+     * @param x pixel coordinate of center of dot horizontally
+     * @param y pixel coordinate of center of dot vertically
+     */
+    public void addNavDot(int ID, int x, int y, int colourResource) {
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(colourResource); //FIXME will this work?
+        navigationDots.add(new NavDot(ID, paint));
+        invalidate();
     }
 
     /**
@@ -147,22 +167,52 @@ public class MyMapView extends AppCompatImageView {
      *
      * @param x pixel coordinate of center of dot horizontally
      * @param y pixel coordinate of center of dot vertically
-     * @param r radius of dot to draw.
      */
-    public void updateBlueDot(int x, int y, int r) {
-        blueDot_x = x;
-        blueDot_y = y;
-        blueDot_r = r;
-
+    public void updateNavDot(int ID, int x, int y) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setX(x);
+                p.setY(y);
+            }
+        }
         locationPassListener.passLocation(x, y);
 
         invalidate(); //redraw view
     }
 
-    public void updateBlueDot(int x, int y) {
-        updateBlueDot(x, y, blueDot_r);
+    public void hideNavDot(int ID) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setVisible(false);
+            }
+        }
+        invalidate();
     }
 
+    public void showNavDot(int ID) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setVisible(true);
+            }
+        }
+        invalidate();
+    }
+
+    public void lockNavDot(int ID) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setLocked(true);
+            }
+        }
+    }
+
+    public void unlockNavDot(int ID) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setLocked(false);
+            }
+        }
+    }
 
     /**
      * Adds a graphical dot to the map representing a fingerprinted point.
@@ -176,7 +226,6 @@ public class MyMapView extends AppCompatImageView {
         invalidate();
     }
 
-
     public int getMapWidth() {
         return MAP_WIDTH;
     }
@@ -184,41 +233,6 @@ public class MyMapView extends AppCompatImageView {
     public int getMapHeight() {
         return MAP_HEIGHT;
     }
-
-    public int getBlueDot_x() {
-        return blueDot_x;
-    }
-
-    public void setBlueDot_x(int blueDot_x) {
-        updateBlueDot(blueDot_x, this.blueDot_y);
-    }
-
-    public int getBlueDot_y() {
-        return blueDot_y;
-    }
-
-    public void setBlueDot_y(int blueDot_y) {
-        updateBlueDot(this.blueDot_x, blueDot_y);
-    }
-
-    public void setBlueDotLocked(boolean locked) {
-        blueDotLocked = locked;
-    }
-
-    public boolean isBlueDotLocked() {
-        return blueDotLocked;
-    }
-
-    public void hideBlueDot() {
-        dotVisible = false;
-        invalidate();
-    }
-
-    public void showBlueDot() {
-        dotVisible = true;
-        invalidate();
-    }
-
 
 }
 

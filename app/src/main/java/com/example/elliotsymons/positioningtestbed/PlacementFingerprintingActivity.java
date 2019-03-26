@@ -28,7 +28,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     private final String TAG = "Pl.Fing.Activity";
     Preferences prefs;
 
-    private MapViewFragment map;
+    private MapViewFragment mapFragment;
+    private MyMapView map;
     private FingerprintPlacementButtonsFragment buttons;
 
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
@@ -50,7 +51,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_placement_fingerprinting);
         getSupportActionBar().setTitle("Fingerprint capture");
 
-        map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
+        mapFragment = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
+        map = mapFragment.getMyMapView();
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         prefs = Preferences.getInstance(getApplicationContext());
@@ -68,6 +70,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
                 new IntentFilter("fingerprinting-finished"));
 
     }
+
+
 
     @Override
     public void passLocation(int x, int y) {
