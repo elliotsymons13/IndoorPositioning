@@ -79,8 +79,10 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
         progressBar = findViewById(R.id.progressBar_locateProgress);
         progressBar.setVisibility(View.INVISIBLE);
-        map.setBlueDotLocked(); //the user is not able to place the dot in this activity, it should be located for them
-        map.hideBlueDot();
+        map.lockNavDot(MapViewFragment.GENERIC_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        map.hideNavDot(MapViewFragment.GENERIC_DOT);
+
+        //TODO add other dots here for various methods
     }
 
     @Override
@@ -134,9 +136,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             int y = location.getY();
             Log.d(TAG, "onPostExecute: Updating map: x,y = " + x + ", " + y);
             // update map
-            map.setCurrentX(x);
-            map.setCurrentY(y);
-            map.showBlueDot();
+            map.setCurrentX(MapViewFragment.GENERIC_DOT, x);
+            map.setCurrentY(MapViewFragment.GENERIC_DOT, y);
+            map.showNavDot(MapViewFragment.GENERIC_DOT);
             findViewById(R.id.btn_locate).setEnabled(true);
         }
 
@@ -225,7 +227,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                         point.getRouterPoint().getY() + " is " +
                         point.getDistance() + " @ RSSI " + point.getRSSI());
             }
-            //TODO
             Log.d(TAG, "doInBackground: All data ready for trilateration");
             publishProgress(40);
 
@@ -350,9 +351,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             int y = location.getY();
 
             // update map
-            map.setCurrentX(x);
-            map.setCurrentY(y);
-            map.showBlueDot();
+            map.setCurrentX(MapViewFragment.GENERIC_DOT, x);
+            map.setCurrentY(MapViewFragment.GENERIC_DOT, y);
+            map.showNavDot(MapViewFragment.GENERIC_DOT);
             progressBar.setVisibility(View.INVISIBLE);
             findViewById(R.id.btn_locate).setEnabled(true);
         }

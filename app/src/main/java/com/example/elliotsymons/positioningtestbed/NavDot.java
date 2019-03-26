@@ -18,6 +18,7 @@ public class NavDot {
     public NavDot(int ID, Paint paint) {
         this.ID = ID;
         this.paint = paint;
+        r = 0; x = 10; y = 10; //default values
     }
     public int getID() {
         return ID;

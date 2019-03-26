@@ -19,6 +19,8 @@ import android.widget.Toast;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
+
 public class MyMapView extends AppCompatImageView {
     private Preferences prefs;
 
@@ -78,17 +80,12 @@ public class MyMapView extends AppCompatImageView {
         displayRect = new Rect(0, 0, MAP_WIDTH, MAP_HEIGHT);
 
         //Setup Paints
-        //TODO NavDots setups (2 for two modes), or add by calling from paernt calss
+        PERSISTENT_DOT_PAINT = new Paint();
+        PERSISTENT_DOT_PAINT.setStyle(Paint.Style.FILL);
+        PERSISTENT_DOT_PAINT.setColor(getResources().getColor(R.color.colorPersistentDot));
+
         navigationDots = new HashSet<>();
-
-//        BLUE_DOT_PAINT = new Paint();
-//        BLUE_DOT_PAINT. //'Google maps dot blue'
-//        BLUE_DOT_PAINT.setStyle(Paint.Style.FILL);
-//        PERSISTENT_DOT_PAINT = new Paint();
-//        PERSISTENT_DOT_PAINT.setColor(Color.parseColor("#808080"));
-//        PERSISTENT_DOT_PAINT.setStyle(Paint.Style.FILL);
-
-        persistentDots = new HashSet<Point>();
+        persistentDots = new HashSet<>();
 
         //make sure the required interfaces are implemented by the parent activity
         try {
@@ -105,7 +102,6 @@ public class MyMapView extends AppCompatImageView {
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
-        // this.invalidate(); //TODO uncomment
     }
 
 
@@ -132,8 +128,7 @@ public class MyMapView extends AppCompatImageView {
 
             switch(event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    //TODO update
-                    updateBlueDot(touchX, touchY);
+                    updateNavDot(GENERIC_DOT, touchX, touchY);
                     return true;
                 default:
                     return false;
@@ -157,9 +152,17 @@ public class MyMapView extends AppCompatImageView {
     public void addNavDot(int ID, int x, int y, int colourResource) {
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(colourResource); //FIXME will this work?
+        paint.setColor(getResources().getColor(colourResource)); //FIXME will this work?
         navigationDots.add(new NavDot(ID, paint));
         invalidate();
+    }
+
+    public void setNavDotRadius(int ID, int r) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setR(r);
+            }
+        }
     }
 
     /**
@@ -178,6 +181,42 @@ public class MyMapView extends AppCompatImageView {
         locationPassListener.passLocation(x, y);
 
         invalidate(); //redraw view
+    }
+
+    public int getDotX(int ID) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                return p.getX();
+            }
+        }
+        return -1;
+    }
+
+    public int getDotY(int ID) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                return p.getY();
+            }
+        }
+        return -1;
+    }
+
+    public void setDotX(int ID, int newX) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setX(newX);
+            }
+        }
+        invalidate();
+    }
+
+    public void setDotY(int ID, int newY) {
+        for (NavDot p : navigationDots) {
+            if (p.getID() == ID) {
+                p.setY(newY);
+            }
+        }
+        invalidate();
     }
 
     public void hideNavDot(int ID) {

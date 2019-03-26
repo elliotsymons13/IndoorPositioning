@@ -23,13 +23,14 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Fin
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
 
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
+
 
 public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, StageProvider {
     private final String TAG = "Pl.Fing.Activity";
     Preferences prefs;
 
-    private MapViewFragment mapFragment;
-    private MyMapView map;
+    private MapViewFragment map;
     private FingerprintPlacementButtonsFragment buttons;
 
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
@@ -51,8 +52,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_placement_fingerprinting);
         getSupportActionBar().setTitle("Fingerprint capture");
 
-        mapFragment = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
-        map = mapFragment.getMyMapView();
+        map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         prefs = Preferences.getInstance(getApplicationContext());
@@ -125,16 +125,16 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         int increment = 1;
         switch (v.getId()) {
             case R.id.btn_up:
-                map.setCurrentY(map.getCurrentY() - increment);
+                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) - increment);
                 break;
             case R.id.btn_right:
-                map.setCurrentX(map.getCurrentX() + increment);
+                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_down:
-                map.setCurrentY(map.getCurrentY() + increment);
+                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_left:
-                map.setCurrentX(map.getCurrentX() - increment);
+                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) - increment);
                 break;
             default:
                 Log.w(TAG, "Invalid direction received");
@@ -149,7 +149,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
                 stage = "Locked";
 
                 //Lock blue dot
-                map.setBlueDotLocked();
+                map.lockNavDot(GENERIC_DOT);
 
                 //Change button text
                 placeCaptureButton.setText(R.string.capture);
@@ -158,14 +158,14 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
                 //User has pressed capture. Phone needs to record RSSI values.
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
                 stage = "Capture";
-                startFingerprintService(map.getCurrentX(), map.getCurrentY());
+                startFingerprintService(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
                 break;
             case "Capture":
                 //Capture is complete
                 stage = "Place";
 
-                map.addPersistentDot(map.getCurrentX(), map.getCurrentY());
-                map.setBlueDotUnlocked();
+                map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
+                map.unlockNavDot(GENERIC_DOT);
                 break;
         }
         buttons.updateButtonStates(stage); //redraws UI with buttons updates to guide user

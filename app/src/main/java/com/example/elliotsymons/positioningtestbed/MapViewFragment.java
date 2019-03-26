@@ -34,45 +34,41 @@ public class MapViewFragment extends Fragment {
         return myMapView;
     }
 
-    //TODO ALL FIX
-    /*public int getCurrentX() {
-        return myMapView.getBlueDot_x();
+    public int getCurrentX(int dotID) {
+        return myMapView.getDotX(dotID);
     }
 
-    public int getCurrentY() {
-        return myMapView.getBlueDot_y();
+    public int getCurrentY(int dotID) {
+        return myMapView.getDotY(dotID);
     }
 
-    public void setCurrentX(int x) {
-        myMapView.setBlueDot_x(x);
+    public void setCurrentX(int dotID, int x) {
+        myMapView.setDotX(dotID, x);
     }
 
-    public void setCurrentY(int y) {
-        myMapView.setBlueDot_y(y);
-    }*/
-
-    /*public void resetBlueDot() {
-        myMapView.updateBlueDot(startX,startY);
-    }*/
-
-    /*public void setBlueDotLocked() {
-        myMapView.setBlueDotLocked(true);
+    public void setCurrentY(int dotID, int y) {
+        myMapView.setDotY(dotID, y);
     }
 
-    public void setBlueDotUnlocked() {
-        myMapView.setBlueDotLocked(false);
-    }*/
+    public void hideNavDot(int dotID) {
+        myMapView.hideNavDot(dotID);
+    }
 
-    /*public boolean blueDotLocked() {
-        return myMapView.isBlueDotLocked();
-    }*/
+    public void showNavDot(int dotID) {
+        myMapView.showNavDot(dotID);
+    }
+
+    public void lockNavDot(int dotID) {
+        myMapView.lockNavDot(dotID);
+    }
+
+    public void unlockNavDot(int dotID) {
+        myMapView.unlockNavDot(dotID);
+    }
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
 
     public void setMapBackground(int mapResourceID) { myMapView.setMapBackground(mapResourceID);}
-
-    /*public void showBlueDot() { myMapView.showBlueDot();}
-    public void hideBlueDot() { myMapView.hideBlueDot();}*/
 
 
     @Override
@@ -120,6 +116,7 @@ public class MapViewFragment extends Fragment {
         startX = myMapView.getMapWidth()/2;
         startY = myMapView.getMapHeight()/2;
         myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
+        myMapView.setNavDotRadius(GENERIC_DOT, 15);
 
         return rootView;
 

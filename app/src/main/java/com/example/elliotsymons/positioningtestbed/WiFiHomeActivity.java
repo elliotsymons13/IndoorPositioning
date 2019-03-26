@@ -115,9 +115,7 @@ public class WiFiHomeActivity extends AppCompatActivity {
                     Toast.makeText(this, "Location permission granted", Toast.LENGTH_SHORT).show();
                 } else {
                     //permission was not granted
-                    //transition to activity forcing the user to grant the permission
-                    Intent permissionTransition = new Intent(getBaseContext(), PermissionGrantActivity.class);
-                    startActivity(permissionTransition);
+                    Toast.makeText(this, "Location permissions must be granted", Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
