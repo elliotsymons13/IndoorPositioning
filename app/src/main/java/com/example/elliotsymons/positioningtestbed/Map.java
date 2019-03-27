@@ -1,11 +1,19 @@
 package com.example.elliotsymons.positioningtestbed;
 
-public class Map {
-    private String name, location;
+import android.graphics.Bitmap;
+import android.net.Uri;
 
-    public Map(String name, String location) {
+public class Map {
+    private String name;
+    Bitmap mapBitmap;
+    private Uri mapURI;
+
+
+
+    public Map(String name, Bitmap mapBitmap, Uri mapURI) {
         this.name = name;
-        this.location = location;
+        this.mapBitmap = mapBitmap;
+        this.mapURI = mapURI;
     }
 
     public String getName() {
@@ -16,11 +24,19 @@ public class Map {
         this.name = name;
     }
 
-    public String getLocation() {
-        return location;
+    public Bitmap getMapBitmap() {
+        return mapBitmap;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setMapBitmap(Bitmap mapBitmap) {
+        this.mapBitmap = mapBitmap;
+    }
+
+    public Uri getMapURI() {
+        return mapURI;
+    }
+
+    public void setMapURI(Uri mapURI) {
+        this.mapURI = mapURI;
     }
 }

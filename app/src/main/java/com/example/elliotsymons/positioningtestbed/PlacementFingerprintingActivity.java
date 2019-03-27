@@ -150,7 +150,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         Log.d(TAG, "placeOrCaptureStep: Called");
         switch (stage) {
             case "Place":
-                //User is to place the fingerprint location
+                //User is to place the fingerprint mapBitmap
                 stage = "Locked";
 
                 //Lock blue dot

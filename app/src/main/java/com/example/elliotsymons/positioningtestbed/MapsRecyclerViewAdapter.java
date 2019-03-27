@@ -2,6 +2,7 @@ package com.example.elliotsymons.positioningtestbed;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import java.util.List;
 
 public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerViewAdapter.ViewHolder> {
+    private static final String TAG = "MapsRecyclerViewAdapter";
 
     private List<Map> data;
     private LayoutInflater inflater;
@@ -30,7 +32,7 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
     public void onBindViewHolder(ViewHolder holder, int position) {
         Map item = data.get(position);
         holder.nameTextView.setText(item.getName());
-        holder.filepathTextView.setText(item.getLocation());
+        holder.filepathTextView.setText(item.getMapURI().toString());
     }
 
     // total number of rows
@@ -48,7 +50,6 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
             super(itemView);
             nameTextView = itemView.findViewById(R.id.tv_mapName);
             filepathTextView = itemView.findViewById(R.id.tv_mapLocation);
-            //TODO
             itemView.setOnClickListener(this);
         }
 
@@ -60,6 +61,11 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
 
     Map getItem(int id) {
         return data.get(id);
+    }
+
+    public void addItem(Map map) {
+        data.add(map);
+        Log.d(TAG, "addItem: Added new map to adapter list");
     }
 
     void setClickListener(ItemClickListener itemClickListener) {

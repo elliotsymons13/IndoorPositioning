@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
-import android.preference.Preference;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -21,9 +20,13 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -75,9 +78,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         }
 
         ArrayList<Map> mapNames = new ArrayList<>();
-        mapNames.add(new Map("dcs", "/file/to/it"));
-        mapNames.add(new Map("msb", "/file/to/it2"));
-        mapNames.add(new Map("customsdasd", "/fasd/it"));
 
         RecyclerView mapRecyclerView = findViewById(R.id.rv_maps);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this  );
@@ -200,7 +200,57 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         prefs.setMapID(mapID);
     }
 
+    Bitmap newMapBitmap;
+    boolean mapBitmapSelected;
+
     public void addMapBackground(View view) {
+        Log.d(TAG, "addMapBackground: Adding new map");
+        mapBitmapSelected = false;
+
+        //Popup for map name entry
+        AlertDialog.Builder mapNameAlertDialog = new AlertDialog.Builder(this);
+        mapNameAlertDialog.setTitle("Enter map name");
+
+        //Set the content of the popup
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_addmap, null);
+        mapNameAlertDialog.setView(dialogView);
+        final EditText input = dialogView.findViewById(R.id.et_mapName);
+
+        //Set popup buttons
+        mapNameAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //TODO validate input
+                String newMapName = input.getText().toString();
+                Log.d(TAG, "onClick: Entered " + newMapName);
+                if (mapBitmapSelected) {
+                    Uri newMapUri = getImageUri(getApplicationContext(), newMapBitmap);
+                    mapListAdapter.addItem(new Map(newMapName, newMapBitmap, newMapUri));
+                    mapListAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(WiFiHomeActivity.this,
+                            "No image selected, so no map added", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        mapNameAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        mapNameAlertDialog.show();
+    }
+
+    public Uri getImageUri(Context context, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public void selectNewMapFile(View view) {
         //TODO
         //Select map image resource
         Intent intent = new Intent();
@@ -221,9 +271,9 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             Uri uri = data.getData();
 
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(
+                newMapBitmap = MediaStore.Images.Media.getBitmap(
                         getApplicationContext().getContentResolver(), uri);
-                //myMapView.setMapBackground(bitmap); //TODO
+                mapBitmapSelected = true;
             } catch (IOException e) {
                 e.printStackTrace();
             }

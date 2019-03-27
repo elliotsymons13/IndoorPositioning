@@ -130,7 +130,7 @@ public class MapViewFragment extends Fragment {
 
         set.applyTo(rootLayout);
 
-        //Move dot to starting location (center)
+        //Move dot to starting mapBitmap (center)
         startX = myMapView.getMapWidth()/2;
         startY = myMapView.getMapHeight()/2;
 

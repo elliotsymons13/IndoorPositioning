@@ -68,7 +68,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wi_fi_locating);
-        getSupportActionBar().setTitle("WiFi location");
+        getSupportActionBar().setTitle("WiFi mapBitmap");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         prefs = Preferences.getInstance(getApplicationContext());
@@ -151,7 +151,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             String routersFilename = prefs.getRoutersFilename();
             rm.loadFile(routersFilename);
 
-            //Get captures at current location
+            //Get captures at current mapBitmap
             publishProgress(5);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             enableWifi();
@@ -312,13 +312,13 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
 
     /**
-     * Task to asynchronously calculate the users location, by snapping to the nearest fingerprint point.
+     * Task to asynchronously calculate the users mapBitmap, by snapping to the nearest fingerprint point.
      *
      * 1 - setup progress bar
      * 2 - get a wifi scan of the current environment and parse RSSI, MAC to set of captures
      * 3 - compare this set with the set at every fingerprint point,
      * recording the proximity in terms of Euclidean distance
-     * 4 - Select the closest fingerprint points (min(distance)) and snap map location to the fingerprint coordinates
+     * 4 - Select the closest fingerprint points (min(distance)) and snap map mapBitmap to the fingerprint coordinates
      */
     private class WiFiFingerprintLocatorTask extends AsyncTask<Void, Integer, Point> {
         private static final String TAG = "WiFiFingerprintLocatorT";
@@ -367,7 +367,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             fm = JSONFingerprintManager.getInstance(getApplicationContext());
             fm.loadIfNotAlready();
 
-            //Get capture of current location
+            //Get capture of current mapBitmap
             publishProgress(5);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             enableWifi();
