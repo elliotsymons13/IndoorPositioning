@@ -2,21 +2,34 @@ package com.example.elliotsymons.positioningtestbed;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import java.io.IOException;
+
+import static android.app.Activity.RESULT_OK;
+import static android.support.v4.content.ContextCompat.startActivity;
 
 public class MapViewFragment extends Fragment {
+    private static final String TAG = "MapViewFragment";
     private View rootView;
 
     public static final int GENERIC_DOT = 1;
     public static final int TRILAT_DOT = 2;
     public static final int FINGERPRINT_DOT = 3;
+
 
     private MyMapView myMapView;
 
@@ -124,4 +137,6 @@ public class MapViewFragment extends Fragment {
         return rootView;
 
     }
+
+
 }

@@ -2,6 +2,7 @@ package com.example.elliotsymons.positioningtestbed;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 import java.util.HashSet;
 import java.util.Set;
 
+import static android.support.v4.app.ActivityCompat.startActivityForResult;
+import static android.support.v4.content.ContextCompat.startActivity;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
 public class MyMapView extends AppCompatImageView {
@@ -56,6 +59,7 @@ public class MyMapView extends AppCompatImageView {
         int mapID = prefs.getMapID();
         mapBackground = BitmapFactory.decodeResource(getResources(), mapID);
 
+
         //Size display
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
         Point displaySize = new Point();
@@ -64,11 +68,14 @@ public class MyMapView extends AppCompatImageView {
         dispHeight = displaySize.y;
 
         //Calculate dimensions for image
-        final int MAP_WIDTH_ORIGINAL = 1241;
-        final int MAP_HEIGHT_ORIGINAL = 1080;
+        final int MAP_WIDTH_ORIGINAL = mapBackground.getWidth();
+        final int MAP_HEIGHT_ORIGINAL = mapBackground.getHeight();
+        Log.d(TAG, "MyMapView: ORI_WIDTH: " + MAP_WIDTH_ORIGINAL);
+        Log.d(TAG, "MyMapView: ORI_HEIGHT: " + MAP_HEIGHT_ORIGINAL);
 
         MAP_WIDTH = dispWidth;
         final double SF = (double) MAP_WIDTH / MAP_WIDTH_ORIGINAL;
+        Log.d(TAG, "MyMapView: SF = " + SF);
         MAP_HEIGHT = (int) (MAP_HEIGHT_ORIGINAL * SF);
 
         //Construct rectangle container for background sizing
@@ -136,6 +143,13 @@ public class MyMapView extends AppCompatImageView {
 
     public void setMapBackground(int mapResourceID) {
         mapBackground = BitmapFactory.decodeResource(getResources(), mapResourceID);
+        //TODO resizing calculations!! call thsi from oncreate with default image
+        invalidate();
+    }
+
+    public void setMapBackground(Bitmap bitmap) {
+        mapBackground = bitmap;
+        //TODO resizing calculations!! call thsi from oncreate with default image
         invalidate();
     }
 
@@ -169,6 +183,11 @@ public class MyMapView extends AppCompatImageView {
      * @param y pixel coordinate of center of dot vertically
      */
     public void updateNavDot(int ID, int x, int y) {
+        Log.d(TAG, "setDotY: newY: " + y);
+        if (x < 0 || x > MAP_WIDTH)
+            return;
+        if (y < 0 || y > MAP_HEIGHT)
+            return;
         for (NavDot p : navigationDots) {
             if (p.getID() == ID) {
                 p.setX(x);
@@ -199,6 +218,8 @@ public class MyMapView extends AppCompatImageView {
     }
 
     public void setDotX(int ID, int newX) {
+        if (newX < 0 || newX > MAP_WIDTH)
+            return;
         for (NavDot p : navigationDots) {
             if (p.getID() == ID) {
                 p.setX(newX);
@@ -208,6 +229,10 @@ public class MyMapView extends AppCompatImageView {
     }
 
     public void setDotY(int ID, int newY) {
+        Log.d(TAG, "setDotY: newY: " + newY);
+        Log.d(TAG, "setDotY: map height: " + MAP_HEIGHT);
+        if (newY < 0 || newY > MAP_HEIGHT)
+            return;
         for (NavDot p : navigationDots) {
             if (p.getID() == ID) {
                 p.setY(newY);

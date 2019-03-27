@@ -5,27 +5,39 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.preference.Preference;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-public class WiFiHomeActivity extends AppCompatActivity {
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerViewAdapter.ItemClickListener {
 
     private static final String TAG = "WiFiHomeActivity";
 
     private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
 
+    public static final int PICK_IMAGE_REQUEST = 1;
+
     WifiManager wifiManager;
     Preferences prefs;
+    MapsRecyclerViewAdapter mapListAdapter;
 
     private int mapID = R.drawable.msb_floor_plan;
 
@@ -61,6 +73,22 @@ public class WiFiHomeActivity extends AppCompatActivity {
             Log.d(TAG, "onCreate: Location not enabled. Requesting enable. ");
             requestLocationEnabled();
         }
+
+        ArrayList<Map> mapNames = new ArrayList<>();
+        mapNames.add(new Map("dcs", "/file/to/it"));
+        mapNames.add(new Map("msb", "/file/to/it2"));
+        mapNames.add(new Map("customsdasd", "/fasd/it"));
+
+        RecyclerView mapRecyclerView = findViewById(R.id.rv_maps);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this  );
+        mapRecyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mapRecyclerView.getContext(),
+                layoutManager.getOrientation());
+        mapRecyclerView.addItemDecoration(dividerItemDecoration);
+
+        mapListAdapter = new MapsRecyclerViewAdapter(this, mapNames);
+        mapListAdapter.setClickListener(this);
+        mapRecyclerView.setAdapter(mapListAdapter);
 
     }
 
@@ -172,6 +200,36 @@ public class WiFiHomeActivity extends AppCompatActivity {
         prefs.setMapID(mapID);
     }
 
+    public void addMapBackground(View view) {
+        //TODO
+        //Select map image resource
+        Intent intent = new Intent();
+        // Show only images, no videos or anything else
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        // Always show the chooser (if there are multiple options available)
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+        // TODO add to recycler view + persistent list of maps (file backed?)
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(
+                        getApplicationContext().getContentResolver(), uri);
+                //myMapView.setMapBackground(bitmap); //TODO
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void routerPlacementSelected(View view) {
         Intent transitionToRouterPlacement = new Intent(getBaseContext(),
                 RouterPlacementActivity.class);
@@ -180,5 +238,8 @@ public class WiFiHomeActivity extends AppCompatActivity {
     }
 
 
-
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this, "Item clicked", Toast.LENGTH_SHORT).show();
+    }
 }

@@ -126,6 +126,8 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 getView().findViewById(R.id.btn_right).setEnabled(true);
                 getView().findViewById(R.id.btn_down).setEnabled(true);
                 getView().findViewById(R.id.btn_left).setEnabled(true);
+                getView().findViewById(R.id.btn_deleteDataset).setEnabled(true);
+                getView().findViewById(R.id.btn_finishPlacing).setEnabled(true);
                 placeCaptureButton.setText(R.string.place);
                 placeCaptureButton.setEnabled(true);
                 break;
@@ -140,6 +142,8 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 break;
             case "Capture":
                 placeCaptureButton.setEnabled(false);
+                getView().findViewById(R.id.btn_deleteDataset).setEnabled(false);
+                getView().findViewById(R.id.btn_finishPlacing).setEnabled(false);
                 getView().invalidate();
                 break;
         }
