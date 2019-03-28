@@ -1,8 +1,5 @@
 package com.example.elliotsymons.positioningtestbed.MapManagement;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
-
 import java.io.Serializable;
 
 public class MapData implements Serializable {

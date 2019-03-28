@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
-import android.preference.Preference;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +39,6 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
 
     public int mapWidth;
     public int mapHeight;
-    private int mapID;
 
     private Button placeCaptureButton;
     private TextView infoTextView;
@@ -61,9 +59,6 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         prefs = Preferences.getInstance(getApplicationContext());
-        //mapID = prefs.getMapID();
-        //mapID = getIntent().getIntExtra("mapID", 0);
-        //map.setMapBackground(mapID);
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 

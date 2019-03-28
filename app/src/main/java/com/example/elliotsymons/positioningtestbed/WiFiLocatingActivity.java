@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPoint;
@@ -45,10 +46,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         MapViewFragment.LocationPassListener, LocationControlsFragment.LocationControllerFragmentInteractionListener {
     private static final String TAG = "WiFiLocatingActivity";
     Preferences prefs;
+    MapManager mapManager;
 
     MapViewFragment map;
     LocationControlsFragment controls;
-    int mapID;
+    String mapURI;
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
     private double TxPwr = 100; //Default is 70mW for 'normal' routers, up to 400mW for others - <100 for uni? //TODO set/calibrate
@@ -72,8 +74,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         prefs = Preferences.getInstance(getApplicationContext());
-        //mapID = getIntent().getIntExtra("mapID", 0);
-        //map.setMapBackground(mapID);
+        mapManager = MapManager.getInstance(getApplicationContext());
         controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
         progressBarFingerprinting = findViewById(R.id.progressBar_locateProgressFingerprinting);
         progressBarFingerprinting.setVisibility(View.INVISIBLE);
@@ -88,6 +89,16 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
         map.hideNavDot(FINGERPRINT_DOT);
     }
+
+    /*@Override
+    public void onResume() {
+        super.onResume();
+        // load specified map with URI
+        mapURI = prefs.getMapURI();
+        //Bitmap newBackground = mapManager.decodeImageFromURIString(mapURI);
+        //map.setMapBackground(newBackground);
+        //TODO not needed as works without?
+    }*/
 
     @Override
     public void passLocation(int x, int y) {

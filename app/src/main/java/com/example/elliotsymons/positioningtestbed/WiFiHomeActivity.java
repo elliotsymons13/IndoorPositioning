@@ -25,11 +25,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.MapManagement.Map;
 import com.example.elliotsymons.positioningtestbed.MapManagement.MapData;
 import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -38,6 +36,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     private static final String TAG = "WiFiHomeActivity";
 
     private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
+    public static final int PERMISSIONS_RQ_WRITE_EXTERNAL = 3;
 
     public static final int PICK_IMAGE_REQUEST = 1;
 
@@ -45,7 +44,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     Preferences prefs;
     MapsRecyclerViewAdapter mapListAdapter;
 
-    private int mapID = R.drawable.msb_floor_plan;
+    //private int mapURI = R.drawable.msb_floor_plan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,16 +59,21 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
         //Set up preferences singleton
         prefs = Preferences.getInstance(getApplicationContext());
-        prefs.setMapID(mapID);
 
         // ( Non-dangerous permissions are granted automatically and do not need checking.)
-
-
-        //For android versions higher than 6.0 (API 23).  Versions earlier than this not supported. :
+        // Location permission ('dangerous') needs checked.
+        // For android versions higher than 6.0 (API 23).  Versions earlier than this not supported. :
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "onCreate: Location permission not granted. Requesting grant. ");
             requestLocationPermission();
+        }
+
+        // External storage permission ('dangerous') needs checked:
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "onCreate: External storage permission not granted. Requesting grant. ");
+            requestStoragePermission();
         }
 
 
@@ -81,17 +85,16 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         }
         ArrayList<MapData> mapNames = (ArrayList<MapData>)
                 MapManager.getInstance(getApplicationContext()).loadMaps();
-       if (mapNames == null) {
-           Log.d(TAG, "onCreate: Initialised empty map list");
-           mapNames= new ArrayList<>();
-       } else {
-           Log.d(TAG, "onCreate: List of maps loaded from file");
+        if (mapNames == null) {
+            Log.d(TAG, "onCreate: Initialised empty map list");
+            mapNames = new ArrayList<>();
+        } else {
+            Log.d(TAG, "onCreate: List of maps loaded from file");
         }
-        
-         
+
 
         RecyclerView mapRecyclerView = findViewById(R.id.rv_maps);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this  );
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mapRecyclerView.setLayoutManager(layoutManager);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mapRecyclerView.getContext(),
                 layoutManager.getOrientation());
@@ -103,10 +106,13 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
     }
 
-    private void grantLocationPermission() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                PERMISSIONS_RQ_FINE_LOCATION);
+    @Override
+    public void onResume() {
+        super.onResume();
+        MapManager mapManager = MapManager.getInstance(getApplicationContext());
+        if (mapManager.shouldSelectedBeRemoved()) {
+            mapListAdapter.removeItem(mapListAdapter.getSelected());
+        }` `
     }
 
     private void requestLocationPermission() {
@@ -127,7 +133,39 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         final AlertDialog alert = builder.create();
         alert.show();
     }
-    
+
+    private void grantLocationPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSIONS_RQ_FINE_LOCATION);
+    }
+
+    private void requestStoragePermission() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Storage permission needed to add images. Enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        grantStoragePermission();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        dialog.cancel();
+                        Toast.makeText(WiFiHomeActivity.this, "Permission required, exiting", Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void grantStoragePermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                PERMISSIONS_RQ_WRITE_EXTERNAL);
+    }
+
     private void requestLocationEnabled() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Location setting must be enabled for this app to function. Enable it?")
@@ -140,7 +178,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         dialog.cancel();
-                        Toast.makeText(WiFiHomeActivity.this, "App may function incorrectly", Toast.LENGTH_LONG).show();
+                        Toast.makeText(WiFiHomeActivity.this, "Permission required, exiting", Toast.LENGTH_LONG).show();
+                        finish();
                     }
                 }); 
         final AlertDialog alert = builder.create();
@@ -175,41 +214,43 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         }
     }
 
+    public void routerPlacementSelected(View view) {
+        if (prefs.getMapURI() == null) {
+            Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent transitionToRouterPlacement = new Intent(getBaseContext(),
+                RouterPlacementActivity.class);
+        //transitionToRouterPlacement.putExtra("mapURI", mapURI);
+        startActivity(transitionToRouterPlacement);
+    }
+
     /**
      * Transition to fingerprinting menu activity.
      * @param view
      */
     public void fingerprintingSelected(View view) {
+        if (prefs.getMapURI() == null) {
+            Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent transitionToFingerprinting = new Intent(getBaseContext(),
                 PlacementFingerprintingActivity.class);
-        //transitionToFingerprinting.putExtra("mapID", mapID);
+        //transitionToFingerprinting.putExtra("mapURI", mapURI);
         startActivity(transitionToFingerprinting);
     }
 
     public void locatingSelected(View view) {
+        if (prefs.getMapURI() == null) {
+            Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Intent transitionToLocating = new Intent(getBaseContext(),
                 WiFiLocatingActivity.class);
-        //transitionToLocating.putExtra("mapID", mapID);
+        //transitionToLocating.putExtra("mapURI", mapURI);
         startActivity(transitionToLocating);
     }
 
-    public void setMapBackground(View view) {
-        switch(view.getId()) {
-            case R.id.rb_dcs:
-                Log.d(TAG, "onClick: dcs selected");
-                mapID = R.drawable.floor_plan;
-                break;
-            case R.id.rb_home:
-                Log.d(TAG, "onClick: home selected");
-                mapID = R.drawable.house_floor_plan;
-                break;
-            case R.id.rb_msb:
-                Log.d(TAG, "setMapBackground: msb selected");
-                mapID = R.drawable.msb_floor_plan;
-                break;
-        }
-        prefs.setMapID(mapID);
-    }
 
     Bitmap newMapBitmap;
     boolean mapBitmapSelected;
@@ -260,7 +301,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     }
 
     public void selectNewMapFile(View view) {
-        //TODO
         //Select map image resource
         Intent intent = new Intent();
         // Show only images, no videos or anything else
@@ -268,7 +308,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         intent.setAction(Intent.ACTION_GET_CONTENT);
         // Always show the chooser (if there are multiple options available)
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-        // TODO add to recycler view + persistent list of maps (file backed?)
     }
 
     @Override
@@ -289,17 +328,11 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         }
     }
 
-    public void routerPlacementSelected(View view) {
-        Intent transitionToRouterPlacement = new Intent(getBaseContext(),
-                RouterPlacementActivity.class);
-        //transitionToRouterPlacement.putExtra("mapID", mapID);
-        startActivity(transitionToRouterPlacement);
-    }
-
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this, "Item clicked", Toast.LENGTH_SHORT).show();
+        mapListAdapter.setSelected(position);
+        prefs.setMapURI(mapListAdapter.getItem(position).getMapURI());
     }
 
     @Override

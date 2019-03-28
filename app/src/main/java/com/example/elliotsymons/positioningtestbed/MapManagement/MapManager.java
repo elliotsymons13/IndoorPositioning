@@ -1,29 +1,31 @@
 package com.example.elliotsymons.positioningtestbed.MapManagement;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
-
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPoint;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
-
+import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
+
 import java.util.List;
 
 public class MapManager {
     private static final String TAG = "MapManager";
     private static MapManager instance; //singleton
-    Context applicationContext;
+    private Context applicationContext;
 
 
-    public static final String mapsFilename = "maps.dat";
+    private static final String mapsFilename = "maps.dat";
     private List<MapData> maps;
+    private boolean shouldRemoveSelected = false;
 
 
     /*
@@ -44,7 +46,7 @@ public class MapManager {
 
 
     public void saveMaps(List<MapData> maps) {
-        //TODO save maps to external file using fos
+        //save maps to external file using fos
         try {
             FileOutputStream fos = applicationContext.openFileOutput(mapsFilename, Context.MODE_PRIVATE);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -58,8 +60,7 @@ public class MapManager {
     }
 
     public List<MapData> loadMaps() {
-        //TODO load and return maps from external file using fis
-        //File fout = new File(applicationContext.getFilesDir(), mapsFilename);
+        // load and return maps from external file using fis
         FileInputStream fis;
         try {
             fis = applicationContext.openFileInput(mapsFilename);
@@ -73,5 +74,31 @@ public class MapManager {
             Log.e(TAG, "loadMaps: Could not find map data in map file", cnf);
         }
         return null;
+    }
+
+    public Bitmap decodeImageFromURIString(String uri) {
+        if (uri == null) return null;
+
+        final Uri URI = Uri.parse(uri);
+        Bitmap bitmap;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(applicationContext.getContentResolver(),
+                    URI);
+            return bitmap;
+        } catch (FileNotFoundException fnf) {
+            Log.e(TAG, "decodeImageFromURIString: File not found from map URI", fnf);
+        } catch (IOException io) {
+            Log.e(TAG, "decodeImageFromURIString: IO exception when loading map from URI", io);
+        }
+        Toast.makeText(applicationContext, "Could not find map image", Toast.LENGTH_LONG).show();
+        return null;
+    }
+
+    public void setShouldRemoveSelected() {
+        shouldRemoveSelected = true;
+    }
+
+    public boolean shouldSelectedBeRemoved() {
+        return shouldRemoveSelected;
     }
 }

@@ -33,7 +33,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
     Button placeCaptureButton;
-    int mapID;
     String filename;
     Preferences prefs;
 
@@ -56,11 +55,8 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
-        //mapID = getIntent().getIntExtra("mapID", 0);
         prefs = Preferences.getInstance(getApplicationContext());
-        //mapID = prefs.getMapID();
-        //map.setMapBackground(mapID);
-        filename = prefs.getRoutersFilename();
+        filename = prefs.getRoutersFilename(); //TODO replicate in fingerprints
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
@@ -178,8 +174,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     }
 
     public void loadRouters() {
-        String filename = "";
-
         //Popup for filename entry
         AlertDialog.Builder filenameAlertDialog = new AlertDialog.Builder(this);
         filenameAlertDialog.setTitle("Enter custom filename");

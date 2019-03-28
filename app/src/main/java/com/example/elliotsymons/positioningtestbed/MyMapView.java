@@ -2,32 +2,28 @@ package com.example.elliotsymons.positioningtestbed;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.preference.Preference;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
-import android.widget.Toast;
+
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static android.support.v4.app.ActivityCompat.startActivityForResult;
-import static android.support.v4.content.ContextCompat.startActivity;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
 public class MyMapView extends AppCompatImageView {
     private static final String TAG = "MyMapView";
     private Preferences prefs;
+    private MapManager mapManager;
 
     private Canvas mapCanvas;
 
@@ -54,11 +50,20 @@ public class MyMapView extends AppCompatImageView {
     public MyMapView(Context context, AttributeSet attributeSet) {
         super(context);
         prefs = Preferences.getInstance(getContext());
+        mapManager = MapManager.getInstance(getContext());
 
         //Import map image resource
-        int mapID = prefs.getMapID();
-        mapBackground = BitmapFactory.decodeResource(getResources(), mapID);
+        String mapURI = prefs.getMapURI();
+        mapBackground = mapManager.decodeImageFromURIString(mapURI);
+        if (mapBackground == null) {
+            // remove this map as a possibility, as the image may no longer exist, or be reachable.
+            MapManager.getInstance(context).setShouldRemoveSelected();
 
+            // redirect the user to the main activity, with back stack cleared
+
+            // finish the current activity, so the user cannot navigate back to here
+            ((Activity) context).finish(); //FIXME works?
+        }
 
         //Size display
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
@@ -141,15 +146,8 @@ public class MyMapView extends AppCompatImageView {
         return false;
     }
 
-    public void setMapBackground(int mapResourceID) {
-        mapBackground = BitmapFactory.decodeResource(getResources(), mapResourceID);
-        //TODO resizing calculations!! call thsi from oncreate with default image
-        invalidate();
-    }
-
     public void setMapBackground(Bitmap bitmap) {
         mapBackground = bitmap;
-        //TODO resizing calculations!! call thsi from oncreate with default image
         invalidate();
     }
 
