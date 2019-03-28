@@ -8,49 +8,6 @@
     android:gravity="bottom"
     tools:context=".WiFiHomeActivity">
 
-    <RadioGroup
-        android:id="@+id/rbGroup_mapSelector"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:checkedButton="@+id/rb_msb"
-        app:layout_constraintBottom_toTopOf="@+id/btn_routerPlace"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <TextView
-            android:id="@+id/tv_map"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Select map:"
-            android:textStyle="bold" />
-
-        <RadioButton
-            android:id="@+id/rb_dcs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="setMapBackground"
-            android:text="DCS" />
-
-        <RadioButton
-            android:id="@+id/rb_home"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="setMapBackground"
-            android:text="Home" />
-
-        <RadioButton
-            android:id="@+id/rb_msb"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="setMapBackground"
-            android:text="MSB" />
-    </RadioGroup>
-
     <Button
         android:id="@+id/btn_routerPlace"
         android:layout_width="0dp"
@@ -97,16 +54,16 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/rbGroup_mapSelector"
+        app:layout_constraintBottom_toTopOf="@+id/btn_routerPlace"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <Button
         android:id="@+id/btn_addMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="44dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="38dp"
@@ -114,7 +71,7 @@
         android:text="Add map"
         app:layout_constraintBottom_toTopOf="@+id/btn_routerPlace"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/rbGroup_mapSelector"
-        app:layout_constraintTop_toBottomOf="@+id/rv_maps" />
+        app:layout_constraintTop_toBottomOf="@+id/rv_maps"
+        app:layout_constraintVertical_bias="0.852" />
 
 </android.support.constraint.ConstraintLayout>

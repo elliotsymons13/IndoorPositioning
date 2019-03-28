@@ -86,7 +86,7 @@ public class MapViewFragment extends Fragment {
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
 
-    public void setMapBackground(int mapResourceID) { myMapView.setMapBackground(mapResourceID);}
+    public void setMapBackground(Bitmap bitmap) { myMapView.setMapBackground(bitmap);}
 
 
     @Override
