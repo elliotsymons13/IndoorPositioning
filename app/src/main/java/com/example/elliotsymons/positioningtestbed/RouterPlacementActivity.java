@@ -23,13 +23,16 @@ import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPo
 
 import java.util.Set;
 
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
+
 public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
     private static final String TAG = "RouterPlacementActivity";
 
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
     Button placeCaptureButton;
-    int mapID;
     String filename;
     Preferences prefs;
 
@@ -47,13 +50,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         getSupportActionBar().setTitle("Router placement");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
+        MyMapView myMapView = map.getMyMapView();
+        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
+        myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
-        //mapID = getIntent().getIntExtra("mapID", 0);
         prefs = Preferences.getInstance(getApplicationContext());
-        //mapID = prefs.getMapID();
-        //map.setMapBackground(mapID);
-        filename = prefs.getRoutersFilename();
+        filename = prefs.getRoutersFilename(); //TODO replicate in fingerprints
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
@@ -106,16 +109,16 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         int increment = 1;
         switch (v.getId()) {
             case R.id.btn_up:
-                map.setCurrentY(map.getCurrentY() - increment);
+                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) - increment);
                 break;
             case R.id.btn_right:
-                map.setCurrentX(map.getCurrentX() + increment);
+                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_down:
-                map.setCurrentY(map.getCurrentY() + increment);
+                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_left:
-                map.setCurrentX(map.getCurrentX() - increment);
+                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) - increment);
                 break;
             default:
                 Log.w(TAG, "Invalid direction received");
@@ -125,7 +128,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     public void placeRouter(View v) {
         Log.d(TAG, "placeRouter: called");
         //Lock blue dot
-        map.setBlueDotLocked();
+        map.lockNavDot(GENERIC_DOT);
 
         //Popup for MAC entry
         AlertDialog.Builder macAlertDialog = new AlertDialog.Builder(this);
@@ -140,14 +143,14 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         macAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                rm.addRouter(map.getCurrentX(), map.getCurrentY(),
+                rm.addRouter(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT),
                         input.getText().toString());
-                map.addPersistentDot(map.getCurrentX(), map.getCurrentY());
+                map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
                 Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
-                        " @ " + map.getCurrentX() + ", " + map.getCurrentY());
+                        " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT));
                 Toast.makeText(RouterPlacementActivity.this, "Added "
                         + input.getText().toString() +  " @ "
-                        + map.getCurrentX() + ", " + map.getCurrentY(), Toast.LENGTH_SHORT).show();
+                        + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT), Toast.LENGTH_SHORT).show();
             }
         });
         macAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -159,7 +162,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         });
         macAlertDialog.show();
 
-        map.setBlueDotUnlocked();
+        map.unlockNavDot(GENERIC_DOT);
         
     }
 
@@ -171,8 +174,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     }
 
     public void loadRouters() {
-        String filename = "";
-
         //Popup for filename entry
         AlertDialog.Builder filenameAlertDialog = new AlertDialog.Builder(this);
         filenameAlertDialog.setTitle("Enter custom filename");

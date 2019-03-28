@@ -1,17 +1,23 @@
 package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
+import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
+
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
 
 public class FingerprintPlacementButtonsFragment extends Fragment implements View.OnClickListener {
@@ -73,8 +79,23 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 break;
             case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete fingerprints");
-
-                JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();
+                AlertDialog.Builder confirmDeleteDialog = new AlertDialog.Builder(getActivity());
+                confirmDeleteDialog.setTitle("Really delete all fingeprints?");
+                confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();
+                        Log.d(TAG, "onClick: Fingerprints deleted by user");
+                    }
+                });
+                confirmDeleteDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                        Log.d(TAG, "onClick: delete fingerprints cancelled by user");
+                    }
+                });
+                confirmDeleteDialog.show();
                 break;
         }
     }
@@ -105,6 +126,8 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 getView().findViewById(R.id.btn_right).setEnabled(true);
                 getView().findViewById(R.id.btn_down).setEnabled(true);
                 getView().findViewById(R.id.btn_left).setEnabled(true);
+                getView().findViewById(R.id.btn_deleteDataset).setEnabled(true);
+                getView().findViewById(R.id.btn_finishPlacing).setEnabled(true);
                 placeCaptureButton.setText(R.string.place);
                 placeCaptureButton.setEnabled(true);
                 break;
@@ -119,6 +142,8 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 break;
             case "Capture":
                 placeCaptureButton.setEnabled(false);
+                getView().findViewById(R.id.btn_deleteDataset).setEnabled(false);
+                getView().findViewById(R.id.btn_finishPlacing).setEnabled(false);
                 getView().invalidate();
                 break;
         }

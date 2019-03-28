@@ -2,20 +2,38 @@ package com.example.elliotsymons.positioningtestbed;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import java.io.IOException;
+
+import static android.app.Activity.RESULT_OK;
+import static android.support.v4.content.ContextCompat.startActivity;
 
 public class MapViewFragment extends Fragment {
+    private static final String TAG = "MapViewFragment";
     private View rootView;
+
+    public static final int GENERIC_DOT = 1;
+    public static final int TRILAT_DOT = 2;
+    public static final int FINGERPRINT_DOT = 3;
+
 
     private MyMapView myMapView;
 
-    private int startX, startY;
+    public static int startX, startY;
 
     LocationPassListener locationPassListener;
     public interface LocationPassListener {
@@ -26,44 +44,49 @@ public class MapViewFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public int getCurrentX() {
-        return myMapView.getBlueDot_x();
+    public MyMapView getMyMapView() {
+        return myMapView;
     }
 
-    public int getCurrentY() {
-        return myMapView.getBlueDot_y();
+    public int getCurrentX(int dotID) {
+        return myMapView.getDotX(dotID);
     }
 
-    public void setCurrentX(int x) {
-        myMapView.setBlueDot_x(x);
+    public int getCurrentY(int dotID) {
+        return myMapView.getDotY(dotID);
     }
 
-    public void setCurrentY(int y) {
-        myMapView.setBlueDot_y(y);
+    public void setCurrentX(int dotID, int x) {
+        myMapView.setDotX(dotID, x);
     }
 
-    public void resetBlueDot() {
-        myMapView.updateBlueDot(startX,startY);
+    public void setCurrentY(int dotID, int y) {
+        myMapView.setDotY(dotID, y);
     }
 
-    public void setBlueDotLocked() {
-        myMapView.setBlueDotLocked(true);
+    public void hideNavDot(int dotID) {
+        myMapView.hideNavDot(dotID);
     }
 
-    public void setBlueDotUnlocked() {
-        myMapView.setBlueDotLocked(false);
+    public void showNavDot(int dotID) {
+        myMapView.showNavDot(dotID);
     }
 
-    public boolean blueDotLocked() {
-        return myMapView.isBlueDotLocked();
+    public void lockNavDot(int dotID) {
+        myMapView.lockNavDot(dotID);
+    }
+
+    public void unlockNavDot(int dotID) {
+        myMapView.unlockNavDot(dotID);
+    }
+
+    public void addNavDot(int ID, int x, int y, int colourResource) {
+        myMapView.addNavDot(ID, x, y, colourResource);
     }
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
 
-    public void setMapBackground(int mapResourceID) { myMapView.setMapBackground(mapResourceID);}
-
-    public void showBlueDot() { myMapView.showBlueDot();}
-    public void hideBlueDot() { myMapView.hideBlueDot();}
+    public void setMapBackground(Bitmap bitmap) { myMapView.setMapBackground(bitmap);}
 
 
     @Override
@@ -107,12 +130,13 @@ public class MapViewFragment extends Fragment {
 
         set.applyTo(rootLayout);
 
-        //Move dot to starting location (center)
+        //Move dot to starting mapBitmap (center)
         startX = myMapView.getMapWidth()/2;
         startY = myMapView.getMapHeight()/2;
-        myMapView.updateBlueDot(startX,startY);
 
         return rootView;
 
     }
+
+
 }

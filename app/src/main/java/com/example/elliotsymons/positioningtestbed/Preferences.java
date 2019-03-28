@@ -12,28 +12,21 @@ public class Preferences {
     private Context applicationContext;
 
     //Variables
-    private int mapID = 0;
-    private String routersFilename = "defaultRoutersFile.json";
+    private String mapURI = null;
+    private String routersFilename = "defaultRoutersFile.json"; //FIXME
 
-//    private String dcsFPfilename = "dcsFingerprints.json";
-//    private String msbFPfilename = "msbFingerprints.json";
-//    private String homeFPfilename = "homeFingerprints.json";
-//    private String dcsRoutersFilename = "dcsRouters.json";
-//    private String msbRoutersFilename = "msbRouters.json";
-//    private String homeRoutersFilename = "homeRoutersFilename.json";
-
-    public int getMapID() {
-        return mapID;
+    String getMapURI() {
+        return mapURI;
     }
-    public void setMapID(int id) {
-        mapID = id;
+    void setMapURI(String uri) {
+        mapURI = uri;
     }
 
-    public String getRoutersFilename() {
+    String getRoutersFilename() {
         return routersFilename;
     }
 
-    public void setRoutersFilename(String routersFilename) {
+    void setRoutersFilename(String routersFilename) {
         this.routersFilename = routersFilename;
     }
 
@@ -65,8 +58,7 @@ public class Preferences {
         try {
             SharedPreferences sp =
                     PreferenceManager.getDefaultSharedPreferences(ctx);
-            //TODO
-            mapID = sp.getInt("mapID", mapID);
+            mapURI = sp.getString("mapURI", mapURI);
             routersFilename = sp.getString("routersFilename", routersFilename);
         } catch (Exception e) {
             Log.e(TAG, "exception reading preferences: " + e, e);
@@ -75,13 +67,13 @@ public class Preferences {
         }
     }
 
-    // Should be called manually from onPause
+    // Should be called manually from onPause (only required in activities where preferences are changed)
     public void savePrefs(Context ctx) {
         try {
             SharedPreferences.Editor sp =
                     PreferenceManager.getDefaultSharedPreferences(ctx).edit();
             //TODO
-            sp.putInt("mapID", mapID);
+            sp.putString("mapURI", mapURI);
             sp.putString("routersFilename", routersFilename);
             sp.commit();
         } catch (Exception e) {
