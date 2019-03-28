@@ -22,9 +22,12 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.elliotsymons.positioningtestbed.MapManagement.Map;
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapData;
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -76,8 +79,16 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             Log.d(TAG, "onCreate: Location not enabled. Requesting enable. ");
             requestLocationEnabled();
         }
-
-        ArrayList<Map> mapNames = new ArrayList<>();
+        ArrayList<MapData> mapNames = (ArrayList<MapData>)
+                MapManager.getInstance(getApplicationContext()).loadMaps();
+       if (mapNames == null) {
+           Log.d(TAG, "onCreate: Initialised empty map list");
+           mapNames= new ArrayList<>();
+       } else {
+           Log.d(TAG, "onCreate: List of maps loaded from file");
+        }
+        
+         
 
         RecyclerView mapRecyclerView = findViewById(R.id.rv_maps);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this  );
@@ -225,8 +236,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 String newMapName = input.getText().toString();
                 Log.d(TAG, "onClick: Entered " + newMapName);
                 if (mapBitmapSelected) {
-                    Uri newMapUri = getImageUri(getApplicationContext(), newMapBitmap);
-                    mapListAdapter.addItem(new Map(newMapName, newMapBitmap, newMapUri));
+                    String newMapUri = getImageUri(getApplicationContext(), newMapBitmap).toString();
+                    mapListAdapter.addItem(new MapData(newMapName, newMapUri));
                     mapListAdapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(WiFiHomeActivity.this,
@@ -244,8 +255,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     }
 
     public Uri getImageUri(Context context, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
     }
@@ -291,5 +300,11 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     @Override
     public void onItemClick(View view, int position) {
         Toast.makeText(this, "Item clicked", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MapManager.getInstance(getApplicationContext()).saveMaps(mapListAdapter.getList());
     }
 }

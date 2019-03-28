@@ -8,16 +8,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.elliotsymons.positioningtestbed.MapManagement.Map;
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapData;
+
 import java.util.List;
 
 public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "MapsRecyclerViewAdapter";
 
-    private List<Map> data;
+    private List<MapData> data;
     private LayoutInflater inflater;
     private ItemClickListener clickListener;
 
-    MapsRecyclerViewAdapter(Context context, List<Map> data) {
+    MapsRecyclerViewAdapter(Context context, List<MapData> data) {
         this.inflater = LayoutInflater.from(context);
         this.data = data;
     }
@@ -30,9 +33,9 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Map item = data.get(position);
+        MapData item = data.get(position);
         holder.nameTextView.setText(item.getName());
-        holder.filepathTextView.setText(item.getMapURI().toString());
+        holder.filepathTextView.setText(item.getMapURI());
     }
 
     // total number of rows
@@ -59,11 +62,19 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         }
     }
 
-    Map getItem(int id) {
+    MapData getItem(int id) {
         return data.get(id);
     }
 
-    public void addItem(Map map) {
+    List<MapData> getList() {
+        return data;
+    }
+
+    void setList(List<MapData> list) {
+        this.data = list;
+    }
+
+    public void addItem(MapData map) {
         data.add(map);
         Log.d(TAG, "addItem: Added new map to adapter list");
     }
