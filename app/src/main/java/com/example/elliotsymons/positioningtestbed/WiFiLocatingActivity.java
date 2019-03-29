@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.FINGERPRINT_DOT;
@@ -70,7 +71,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wi_fi_locating);
-        getSupportActionBar().setTitle("WiFi mapBitmap");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi mapBitmap");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         prefs = Preferences.getInstance(getApplicationContext());
@@ -89,16 +90,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
         map.hideNavDot(FINGERPRINT_DOT);
     }
-
-    /*@Override
-    public void onResume() {
-        super.onResume();
-        // load specified map with URI
-        mapURI = prefs.getMapURI();
-        //Bitmap newBackground = mapManager.decodeImageFromURIString(mapURI);
-        //map.setMapBackground(newBackground);
-        //TODO not needed as works without?
-    }*/
 
     @Override
     public void passLocation(int x, int y) {
@@ -288,7 +279,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                if (Objects.equals(intent.getAction(), WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
                     boolean success = intent.getBooleanExtra(
                             WifiManager.EXTRA_RESULTS_UPDATED, false);
                     if (success) {

@@ -1,6 +1,7 @@
 package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,7 @@ import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivi
 import com.example.elliotsymons.positioningtestbed.R;
 import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
@@ -26,6 +28,12 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
 
     TextView tvInfo;
     private StageProvider stageProvider;
+
+
+    DatasetStatusListener datasetStatusListener;
+    public interface DatasetStatusListener {
+        void clearDataset();
+    }
 
     public FingerprintPlacementButtonsFragment() {
         // Required empty public constructor
@@ -85,8 +93,7 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();
-                        JSONFingerprintManager.getInstance(getContext()).destroyInstance(); //FIXME needed?, or mix method called above??
+                        datasetStatusListener.clearDataset();
                         Log.d(TAG, "onClick: Fingerprints deleted by user");
                     }
                 });
@@ -108,6 +115,16 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
         Bundle args = getArguments();
         if (args != null) {
             tvInfo.setText(Integer.toString(args.getInt("x")) + ", " + Integer.toString(args.getInt("y")));
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            datasetStatusListener = (DatasetStatusListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement DatasetStatusListener");
         }
     }
 

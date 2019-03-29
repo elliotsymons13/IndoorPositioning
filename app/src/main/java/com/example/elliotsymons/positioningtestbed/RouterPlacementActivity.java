@@ -18,6 +18,7 @@ import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterMa
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
 
+import java.util.Objects;
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
@@ -42,7 +43,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
 
     @Override
     public void clearDataset() {
-        //TODO
+        JSONRouterManager.getInstance(getApplicationContext()).deleteAllRouters();
         myMapView.removeAllPeristentDots();
     }
 
@@ -50,7 +51,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_router_placement);
-        getSupportActionBar().setTitle("Router placement");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Router placement");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
         myMapView = map.getMyMapView();
@@ -60,7 +61,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
         prefs = Preferences.getInstance(getApplicationContext());
 
-        placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
+        placeCaptureButton = buttons.getView().findViewById(R.id.btn_multiPurpose);
 
 
         rm = JSONRouterManager.getInstance(getApplicationContext());
@@ -139,14 +140,20 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         macAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                rm.addRouter(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT),
+                boolean success = rm.addRouter(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT),
                         input.getText().toString());
-                map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
-                Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
-                        " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT));
-                Toast.makeText(RouterPlacementActivity.this, "Added "
-                        + input.getText().toString() +  " @ "
-                        + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT), Toast.LENGTH_SHORT).show();
+                if (success) {
+                    map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
+                    Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
+                            " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT));
+                    Toast.makeText(RouterPlacementActivity.this, "Added "
+                            + input.getText().toString() +  " @ "
+                            + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(RouterPlacementActivity.this,
+                            "Did not add duplicate MAC", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
         macAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -196,13 +203,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             }
         });
         filenameAlertDialog.show();
-    }
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        prefs.savePrefs(getApplicationContext()); //FIXME call elsewhere also?
     }
 
     @Override

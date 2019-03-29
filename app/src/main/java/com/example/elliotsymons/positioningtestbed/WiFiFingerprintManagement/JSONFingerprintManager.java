@@ -58,7 +58,7 @@ public class JSONFingerprintManager implements FingerprintManager {
             filename = "default.json";
         }
 
-        Log.d(TAG, "JSONRouterManager: Filename = " + filename);
+        Log.d(TAG, "JSONFingerprintManager: Filename = " + filename);
         points = new HashSet<>();
     }
     public static JSONFingerprintManager getInstance(Context context) {
@@ -96,12 +96,12 @@ public class JSONFingerprintManager implements FingerprintManager {
     public void loadIfNotAlready() {
         if (!loaded) {
             load();
-            loaded = true;
         }
     }
 
     private void load() {
         String jsonString = "";
+        loaded = true;
 
         //Import file
         try {
@@ -210,19 +210,23 @@ public class JSONFingerprintManager implements FingerprintManager {
     }
 
     public void save() {
-        try {
-            File folder = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath);
-            File fout = new File(folder.getAbsolutePath(), filename);
+        if (loaded) {
+            try {
+                File folder = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath);
+                File fout = new File(folder.getAbsolutePath(), filename);
 
-            FileOutputStream fouts = new FileOutputStream(fout);
-            fouts.write(jsonRoot.toString(4).getBytes()); //4 specifies the size of indent
-            fouts.close();
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to write to file when saving wifi fingerprints");
-            e.printStackTrace();
-        } catch (JSONException j) {
-            Log.w(TAG, "Unable to convert JSON to string when saving wifi fingerprints");
-            j.printStackTrace();
+                FileOutputStream fouts = new FileOutputStream(fout);
+                fouts.write(jsonRoot.toString(4).getBytes()); //4 specifies the size of indent
+                fouts.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to write to file when saving wifi fingerprints");
+                e.printStackTrace();
+            } catch (JSONException j) {
+                Log.w(TAG, "Unable to convert JSON to string when saving wifi fingerprints");
+                j.printStackTrace();
+            }
+        } else {
+        Log.d(TAG, "save: Not saving, as not yet loaded from file");
         }
     }
 

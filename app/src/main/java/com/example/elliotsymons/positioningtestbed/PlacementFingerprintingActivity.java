@@ -18,16 +18,20 @@ import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPlacementButtonsFragment;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPoint;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintingIntentService;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
+
+import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
 
-public class PlacementFingerprintingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, StageProvider {
+public class PlacementFingerprintingActivity extends AppCompatActivity implements
+        MapViewFragment.LocationPassListener, StageProvider, FingerprintPlacementButtonsFragment.DatasetStatusListener {
     private final String TAG = "Pl.Fing.Activity";
     Preferences prefs;
 
@@ -37,6 +41,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
     private String stage = "Place";
     private Button placeCaptureButton;
+    MyMapView myMapView;
 
     private FingerprintManager fm;
 
@@ -48,7 +53,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
         getSupportActionBar().setTitle("Fingerprint capture");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
-        MyMapView myMapView = map.getMyMapView();
+        myMapView = map.getMyMapView();
         myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
         myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
@@ -63,6 +68,8 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
 
         LocalBroadcastManager.getInstance(this).registerReceiver(msgReceiver,
                 new IntentFilter("fingerprinting-finished"));
+
+        drawExistingFingerprints();
 
     }
 
@@ -85,6 +92,19 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
     @Override
     public String getStage() {
         return stage;
+    }
+
+    @Override
+    public void clearDataset() {
+        JSONFingerprintManager.getInstance(getApplicationContext()).deleteAllFingerprints();
+        myMapView.removeAllPeristentDots();
+    }
+
+    public void drawExistingFingerprints() {
+        Set<FingerprintPoint> existingFingerprints = fm.getAllFingerprints();
+        for (FingerprintPoint point : existingFingerprints) {
+            map.addPersistentDot(point.getX(), point.getY());
+        }
     }
 
     private class FingerprintLoaderTask extends AsyncTask<Void, Void, Void> {

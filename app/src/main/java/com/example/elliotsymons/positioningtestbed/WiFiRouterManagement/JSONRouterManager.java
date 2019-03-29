@@ -5,8 +5,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPoint;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,7 +24,6 @@ public class JSONRouterManager implements RouterManager {
     private Context applicationContext;
 
     private final String routerDirectoryPath = "/routers";
-    private MapManager mapManager;
     private String filename;
     private boolean loaded = false;
 
@@ -43,7 +40,7 @@ public class JSONRouterManager implements RouterManager {
      * */
     private JSONRouterManager(Context context) {
         this.applicationContext = context;
-        mapManager = MapManager.getInstance(context);
+        MapManager mapManager = MapManager.getInstance(context);
         try {
             filename = mapManager.getMapData(mapManager.getSelected()).getName() + ".json";
         } catch (IndexOutOfBoundsException e) {
@@ -72,12 +69,13 @@ public class JSONRouterManager implements RouterManager {
     public void loadIfNotAlready() {
         if (!loaded) {
             load();
-            loaded = true;
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void load() {
         String jsonString = "";
+        loaded = true;
 
         //Import file
         try {
@@ -144,6 +142,7 @@ public class JSONRouterManager implements RouterManager {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void deleteAllRouters() {
         //Delete file
@@ -158,19 +157,18 @@ public class JSONRouterManager implements RouterManager {
     }
 
     @Override
-    public void addRouter(int X, int Y, String mac) {
+    public boolean addRouter(int X, int Y, String mac) {
         RouterPoint router = new RouterPoint(++maxID, X, Y, mac);
 
-        //TODO check for existing - actually don't want this,
-        // as different networks in same router have different MACs, EG in DCS, but would have same X, Y
-
-        /*for (RouterPoint pointTemp : points) {
-            if (pointTemp.equals(point)) {
-                Log.i(TAG, "Did not add point at existing location. ");
-                return;
+        // Multiple routers can share the same coordinates (as a single AP may have multiple MACs).
+        // MAC addressed should be unique, however.
+        for (RouterPoint point : points) {
+            if (point.getMac().equalsIgnoreCase(mac)) {
+                Log.i(TAG, "Did not add point with existing MAC. ");
+                return false;
             }
         }
-        Log.i(TAG, "Point did not yet exist, added. ");*/
+        Log.i(TAG, "Point did not yet exist, added. ");
         points.add(router);
 
         try {
@@ -183,8 +181,9 @@ public class JSONRouterManager implements RouterManager {
         } catch (JSONException j) {
             Log.e(TAG, "Error adding router to JSON database. ");
             j.printStackTrace();
+            return false;
         }
-
+        return true;
     }
 
     @Override
@@ -194,19 +193,24 @@ public class JSONRouterManager implements RouterManager {
 
     @Override
     public void save() {
-        try {
-            File folder = new File(applicationContext.getFilesDir() + routerDirectoryPath);
-            File fout = new File(folder.getAbsolutePath(), filename);
+        if (loaded) {
+            try {
+                File folder = new File(applicationContext.getFilesDir() + routerDirectoryPath);
+                File fout = new File(folder.getAbsolutePath(), filename);
 
-            FileOutputStream fouts = new FileOutputStream(fout);
-            fouts.write(jsonRoot.toString(4).getBytes()); //4 specifies the size of indent
-            fouts.close();
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to write to file when saving wifi routers");
-            e.printStackTrace();
-        } catch (JSONException j) {
-            Log.w(TAG, "Unable to convert JSON to string when saving wifi routers");
-            j.printStackTrace();
+                FileOutputStream fouts = new FileOutputStream(fout);
+                fouts.write(jsonRoot.toString(4).getBytes()); //4 specifies the size of indent
+                fouts.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to write to file when saving wifi routers");
+                e.printStackTrace();
+            } catch (JSONException j) {
+                Log.w(TAG, "Unable to convert JSON to string when saving wifi routers");
+                j.printStackTrace();
+            }
+        } else {
+            Log.d(TAG, "save: Not saving, as not yet loaded from file");
         }
+
     }
 }

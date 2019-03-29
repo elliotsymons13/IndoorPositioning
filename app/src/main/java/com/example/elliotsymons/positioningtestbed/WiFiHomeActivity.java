@@ -30,6 +30,7 @@ import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerViewAdapter.ItemClickListener {
 
@@ -50,7 +51,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifihome);
 
-        getSupportActionBar().setTitle("WiFi positioning");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi positioning");
 
         //Set up wifi manager
         wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
@@ -80,7 +81,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Log.d(TAG, "onCreate: Location not enabled. Requesting enable. ");
             requestLocationEnabled();
         }
@@ -104,8 +105,11 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         mapListAdapter = new MapsRecyclerViewAdapter(this, mapNames);
         mapListAdapter.setClickListener(this);
         mapRecyclerView.setAdapter(mapListAdapter);
+
         if (mapListAdapter.getItemCount() == 0)
             prefs.setMapURI(null); //to ensure the user cannot proceed until maps are added
+        else
+            prefs.setMapURI(mapListAdapter.getItem(0).getMapURI());
 
     }
 
@@ -221,7 +225,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
     /**
      * Transition to fingerprinting menu activity.
-     * @param view
      */
     public void fingerprintingSelected(View view) {
         if (prefs.getMapURI() == null) {
@@ -267,7 +270,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         mapNameAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                //TODO validate input
+                //TODO validate input as non blank (other?)
                 String newMapName = input.getText().toString();
                 Log.d(TAG, "onClick: Entered " + newMapName);
                 if (mapBitmapSelected) {

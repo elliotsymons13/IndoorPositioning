@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 
 import java.io.File;
@@ -46,12 +47,12 @@ public class MapManager {
         if (this.selected != selected) {
             this.selected = selected;
             //map selection changed, so new manager for new file
-            //JSONRouterManager.getInstance(applicationContext).deleteAllRouters(); //FIXME
-            //TODO also destroy local data
-            Log.d(TAG, "setSelected: Destroying instance of JSONRouterManager to force file refresh");
+            Log.d(TAG, "setSelected: Destroying instance of JSONRouterManager, JSONFingerprintManager to force file refresh");
             JSONRouterManager.getInstance(applicationContext).destroyInstance();
-            Log.d(TAG, "setSelected: Loading new file");
+            JSONFingerprintManager.getInstance(applicationContext).destroyInstance();
+            Log.d(TAG, "setSelected: Loading new files");
             JSONRouterManager.getInstance(applicationContext).loadIfNotAlready();
+            JSONFingerprintManager.getInstance(applicationContext).loadIfNotAlready();
         }
     }
 

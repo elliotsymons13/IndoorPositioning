@@ -92,9 +92,7 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
                 confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        JSONRouterManager.getInstance(getContext()).deleteAllRouters();
                         datasetStatusListener.clearDataset();
-                        //TODO signal to delete perissitent dots
                         Log.d(TAG, "onClick: Routers deleted by user");
                     }
                 });
