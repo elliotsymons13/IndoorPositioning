@@ -178,7 +178,7 @@ public class JSONRouterManager implements RouterManager {
             newRouter.put("X", router.getX());
             newRouter.put("Y", router.getY());
             newRouter.put("MAC", router.getMac());
-            newRouter.put("TxPower", router.getPower());
+            newRouter.put("TxPower", router.getTxPower());
             routers.put(newRouter);
         } catch (JSONException j) {
             Log.e(TAG, "Error adding router to JSON database. ");

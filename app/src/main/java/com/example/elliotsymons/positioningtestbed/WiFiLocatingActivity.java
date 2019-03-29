@@ -215,10 +215,10 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
-            Log.d(TAG, "doInBackground: Tx = " + TxPwr + ", PathLossExponent = " + pathLossExponent);
+            Log.d(TAG, "doInBackground: Tx = " + TxPwr + ", PathLossExponent = " + pathLossExponent); //FIXME
             for (TrilaterationPoint point : NtrilaterationPoints) {
                 point.setDistance(
-                        Math.pow(10,  ((TxPwr - point.getRSSI()) / (10 * pathLossExponent))  )
+                        Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
                 );
                 Log.d(TAG, "doInBackground: Distance to router at " + 
                         point.getRouterPoint().getX() + ", " + 

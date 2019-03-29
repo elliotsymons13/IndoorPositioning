@@ -43,6 +43,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
     WifiManager wifiManager;
     Preferences prefs;
+    UtilityMethods utils;
     MapsRecyclerViewAdapter mapListAdapter;
     private MapManager mapManager;
     private final float MAP_SCALING_THRESHOLD = 1.5f;
@@ -51,6 +52,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wifihome);
+        utils = new UtilityMethods(getApplicationContext());
 
         Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi positioning");
 
@@ -271,6 +273,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         mapNameAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                utils.closeKeyboard();
                 //TODO validate input as non blank (other?)
                 String newMapName = input.getText().toString();
                 Log.d(TAG, "onClick: Entered " + newMapName);
@@ -304,9 +307,11 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
+                utils.closeKeyboard();
             }
         });
         mapNameAlertDialog.show();
+        utils.showKeyboard();
     }
 
     public Uri getImageUri(Context context, Bitmap inImage) {

@@ -34,6 +34,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     Button placeCaptureButton;
     MyMapView myMapView;
     Preferences prefs;
+    UtilityMethods utils;
 
     private RouterManager rm;
 
@@ -53,6 +54,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_router_placement);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Router placement");
+        utils = new UtilityMethods(getApplicationContext());
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
         myMapView = map.getMyMapView();
@@ -143,9 +145,17 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         routerAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                boolean success = rm.addRouter(map.getCurrentX(GENERIC_DOT),
-                        map.getCurrentY(GENERIC_DOT), etMAC.getText().toString(),
-                        Double.parseDouble(etPower.getText().toString()));
+                utils.closeKeyboard();
+                boolean success;
+                try {
+                    success = rm.addRouter(map.getCurrentX(GENERIC_DOT),
+                            map.getCurrentY(GENERIC_DOT), etMAC.getText().toString(),
+                            Double.parseDouble(etPower.getText().toString()));
+                } catch (NumberFormatException e) {
+                    Log.d(TAG, "onClick: No power entered for router");
+                    success = false;
+                }
+
                 if (success) {
                     map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
                     Log.d(TAG, "onClick: " + "Added " + etMAC.getText().toString() +
@@ -167,10 +177,12 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
+                utils.closeKeyboard();
                 Log.d(TAG, "onClick: Add MAC cancelled by user");
             }
         });
         routerAlertDialog.show();
+        utils.showKeyboard();
 
         map.unlockNavDot(GENERIC_DOT);
         
