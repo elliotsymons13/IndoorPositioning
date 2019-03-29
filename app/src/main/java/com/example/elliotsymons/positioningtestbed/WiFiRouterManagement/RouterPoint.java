@@ -7,7 +7,15 @@ public class RouterPoint extends Point {
     private int X;
     private int Y;
     private String mac;
+    private double power;
 
+    public double getPower() {
+        return power;
+    }
+
+    public void setPower(double power) {
+        this.power = power;
+    }
 
     public int getID() {
         return ID;
@@ -46,11 +54,12 @@ public class RouterPoint extends Point {
     }
 
 
-    public RouterPoint(int ID, int X, int Y, String mac) {
+    public RouterPoint(int ID, int X, int Y, String mac, double power) {
         this.ID = ID;
         this.X = X;
         this.Y = Y;
         this.mac = mac;
+        this.power = power;
     }
 
 

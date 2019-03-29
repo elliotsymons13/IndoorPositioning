@@ -10,7 +10,7 @@ public interface RouterManager {
     void deleteAllRouters();
 
     //Boolean to indicate success
-    boolean addRouter(int X, int Y, String mac);
+    boolean addRouter(int X, int Y, String mac, double power);
 
     Set<RouterPoint> getAllRouters();
 

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -127,28 +128,34 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         //Lock blue dot
         map.lockNavDot(GENERIC_DOT);
 
-        //Popup for MAC entry
-        AlertDialog.Builder macAlertDialog = new AlertDialog.Builder(this);
-        macAlertDialog.setTitle("Enter MAC address");
+        //Popup for router entry
+        AlertDialog.Builder routerAlertDialog = new AlertDialog.Builder(this);
+        routerAlertDialog.setTitle("Enter MAC address");
 
         //Set the content of the popup
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        macAlertDialog.setView(input);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_addrouter, null);
+        routerAlertDialog.setView(dialogView);
+        final EditText etMAC = dialogView.findViewById(R.id.et_mac);
+        final EditText etPower = dialogView.findViewById(R.id.et_power);
 
         //Set popup buttons
-        macAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        routerAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                boolean success = rm.addRouter(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT),
-                        input.getText().toString());
+                boolean success = rm.addRouter(map.getCurrentX(GENERIC_DOT),
+                        map.getCurrentY(GENERIC_DOT), etMAC.getText().toString(),
+                        Double.parseDouble(etPower.getText().toString()));
                 if (success) {
                     map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
-                    Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
-                            " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT));
+                    Log.d(TAG, "onClick: " + "Added " + etMAC.getText().toString() +
+                            " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT)
+                    + ", TxPower = " + etPower.getText().toString());
                     Toast.makeText(RouterPlacementActivity.this, "Added "
-                            + input.getText().toString() +  " @ "
-                            + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT), Toast.LENGTH_SHORT).show();
+                            + etMAC.getText().toString() +  " @ "
+                            + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT)
+                            + ", TxPower = " + etPower.getText().toString()
+                            , Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(RouterPlacementActivity.this,
                             "Did not add duplicate MAC", Toast.LENGTH_SHORT).show();
@@ -156,14 +163,14 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
 
             }
         });
-        macAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        routerAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
                 Log.d(TAG, "onClick: Add MAC cancelled by user");
             }
         });
-        macAlertDialog.show();
+        routerAlertDialog.show();
 
         map.unlockNavDot(GENERIC_DOT);
         

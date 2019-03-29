@@ -116,8 +116,9 @@ public class JSONRouterManager implements RouterManager {
                 int X = point.getInt("X");
                 int Y = point.getInt("Y");
                 String mac = point.getString("MAC");
+                double power = point.getDouble("TxPower");
 
-                points.add(new RouterPoint(ID, X, Y, mac));
+                points.add(new RouterPoint(ID, X, Y, mac, power));
             }
         } catch (JSONException j) {
             Log.e(TAG, "Error loading routers from JSON");
@@ -157,8 +158,8 @@ public class JSONRouterManager implements RouterManager {
     }
 
     @Override
-    public boolean addRouter(int X, int Y, String mac) {
-        RouterPoint router = new RouterPoint(++maxID, X, Y, mac);
+    public boolean addRouter(int X, int Y, String mac, double power) {
+        RouterPoint router = new RouterPoint(++maxID, X, Y, mac, power);
 
         // Multiple routers can share the same coordinates (as a single AP may have multiple MACs).
         // MAC addressed should be unique, however.
@@ -177,6 +178,7 @@ public class JSONRouterManager implements RouterManager {
             newRouter.put("X", router.getX());
             newRouter.put("Y", router.getY());
             newRouter.put("MAC", router.getMac());
+            newRouter.put("TxPower", router.getPower());
             routers.put(newRouter);
         } catch (JSONException j) {
             Log.e(TAG, "Error adding router to JSON database. ");
