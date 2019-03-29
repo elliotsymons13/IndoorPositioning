@@ -5,6 +5,7 @@ import android.preference.Preference;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 import com.example.elliotsymons.positioningtestbed.Preferences;
 
 import org.json.JSONArray;
@@ -19,7 +20,8 @@ public class JSONFingerprintManager implements FingerprintManager {
     private Context applicationContext;
 
     private final String fingerprintDirectoryPath = "/fingerprints";
-    private final String filename = "defaultFingerprintsFile.json";
+    private MapManager mapManager;
+    private String filename;
     private boolean loaded = false;
 
     //JSON file storage
@@ -49,7 +51,15 @@ public class JSONFingerprintManager implements FingerprintManager {
      * */
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
-        points = new HashSet<FingerprintPoint>();
+        mapManager = MapManager.getInstance(context);
+        try {
+            filename = mapManager.getMapData(mapManager.getSelected()).getName() + ".json";
+        } catch (ArrayIndexOutOfBoundsException e) {
+            filename = "default.json";
+        }
+
+        Log.d(TAG, "JSONRouterManager: Filename = " + filename);
+        points = new HashSet<>();
     }
     public static JSONFingerprintManager getInstance(Context context) {
         if (instance == null)
@@ -59,6 +69,12 @@ public class JSONFingerprintManager implements FingerprintManager {
     /*
      * <--
      * */
+
+    @Override
+    public void destroyInstance() {
+        save();
+        instance = null;
+    }
 
     private void initialise() {
         try {

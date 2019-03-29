@@ -1,6 +1,7 @@
 package com.example.elliotsymons.positioningtestbed.WiFiRouterManagement;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.MapViewFragment;
 import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
@@ -26,6 +28,11 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
     private static final String TAG = "RouterButtonsFragment";
 
     TextView tvInfo;
+
+    DatasetStatusListener datasetStatusListener;
+    public interface DatasetStatusListener {
+        void clearDataset();
+    }
 
 
     public RouterPlacementButtonsFragment() {
@@ -86,6 +93,8 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         JSONRouterManager.getInstance(getContext()).deleteAllRouters();
+                        datasetStatusListener.clearDataset();
+                        //TODO signal to delete perissitent dots
                         Log.d(TAG, "onClick: Routers deleted by user");
                     }
                 });
@@ -120,4 +129,13 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         //updateButtonStates(stageProvider.getStage());
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            datasetStatusListener = (DatasetStatusListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement DatasetStatusListener");
+        }
+    }
 }

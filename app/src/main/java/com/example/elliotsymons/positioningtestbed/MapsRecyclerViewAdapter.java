@@ -1,7 +1,6 @@
 package com.example.elliotsymons.positioningtestbed;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -11,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.elliotsymons.positioningtestbed.MapManagement.MapData;
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 
 import java.util.List;
 
@@ -20,15 +20,18 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
     private List<MapData> data;
     private LayoutInflater inflater;
     private ItemClickListener clickListener;
-    private int selected;
+    private int selectedRow;
+    MapManager mapManager;
 
     MapsRecyclerViewAdapter(Context context, List<MapData> data) {
+        mapManager = MapManager.getInstance(context);
         this.inflater = LayoutInflater.from(context);
         this.data = data;
-        if (data.size() == 0) {
-            selected = RecyclerView.NO_POSITION;
+        if (mapManager.getSelected() > data.size()) {
+            selectedRow = RecyclerView.NO_POSITION;
+            mapManager.setSelected(selectedRow);
         } else {
-            selected = 0;
+            selectedRow = mapManager.getSelected();
         }
 
     }
@@ -44,7 +47,7 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         MapData item = data.get(position);
         holder.nameTextView.setText(item.getName());
         holder.filepathTextView.setText(item.getMapURI());
-        holder.contentView.setSelected(selected == position);
+        holder.contentView.setSelected(selectedRow == position);
     }
 
     // total number of rows
@@ -86,14 +89,15 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         return data;
     }
 
-    void setSelected(int positionSelected) {
-        notifyItemChanged(selected);
-        selected = positionSelected;
-        notifyItemChanged(selected);
+    void setSelectedRow(int positionSelected) {
+        notifyItemChanged(selectedRow);
+        selectedRow = positionSelected;
+        mapManager.setSelected(selectedRow);
+        notifyItemChanged(selectedRow);
     }
 
-    public int getSelected() {
-        return selected;
+    public int getSelectedRow() {
+        return selectedRow;
     }
 
     void addItem(MapData map) {

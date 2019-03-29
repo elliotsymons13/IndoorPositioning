@@ -25,15 +25,12 @@ public class MyMapView extends AppCompatImageView {
     private Preferences prefs;
     private MapManager mapManager;
 
-    private Canvas mapCanvas;
-
     //Map
     private Bitmap mapBackground;
     private Rect displayRect;
-    private int dispWidth, dispHeight, MAP_WIDTH, MAP_HEIGHT;
+    private int MAP_WIDTH;
+    private int MAP_HEIGHT;
 
-    //Dots on map
-    private final int DEFAULT_PERSISTENT_DOT_RADIUS = 10;
     private Paint PERSISTENT_DOT_PAINT;
 
     private Set<Point> persistentDots;
@@ -57,7 +54,7 @@ public class MyMapView extends AppCompatImageView {
         mapBackground = mapManager.decodeImageFromURIString(mapURI);
         if (mapBackground == null) {
             // remove this map as a possibility, as the image may no longer exist, or be reachable.
-            MapManager.getInstance(context).setShouldRemoveSelected();
+            //TODO
 
             // redirect the user to the main activity, with back stack cleared
 
@@ -69,8 +66,8 @@ public class MyMapView extends AppCompatImageView {
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
         Point displaySize = new Point();
         display.getSize(displaySize);
-        dispWidth = displaySize.x;
-        dispHeight = displaySize.y;
+        int dispWidth = displaySize.x;
+        int dispHeight = displaySize.y;
 
         //Calculate dimensions for image
         final int MAP_WIDTH_ORIGINAL = mapBackground.getWidth();
@@ -95,7 +92,7 @@ public class MyMapView extends AppCompatImageView {
         persistentDots = new HashSet<>();
 
         //make sure the required interfaces are implemented by the parent activity
-        try {
+        try { //TODO try removing this, or the equiveleant in parent fragment
             locationPassListener = (MapViewFragment.LocationPassListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement MapViewLocationListener");
@@ -115,9 +112,11 @@ public class MyMapView extends AppCompatImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        mapCanvas = canvas;
+        Canvas mapCanvas = canvas;
         canvas.drawBitmap(mapBackground, null, displayRect, null);
         for (Point p : persistentDots) {
+            //Dots on map
+            int DEFAULT_PERSISTENT_DOT_RADIUS = 10;
             canvas.drawCircle(p.x, p.y, DEFAULT_PERSISTENT_DOT_RADIUS, PERSISTENT_DOT_PAINT);
         }
         for (NavDot p : navigationDots) {
@@ -282,6 +281,11 @@ public class MyMapView extends AppCompatImageView {
      */
     public void addPersistentDot(int x, int y) {
         persistentDots.add(new Point(x, y));
+        invalidate();
+    }
+
+    public void removeAllPeristentDots() {
+        persistentDots = new HashSet<>();
         invalidate();
     }
 

@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,7 +28,34 @@ public class MapManager {
 
     private static final String mapsFilename = "maps.dat";
     private List<MapData> maps;
-    private boolean shouldRemoveSelected = false;
+
+    public MapData getMapData(int index) {
+        return maps.get(index);
+    }
+
+    public void addMap(MapData newMap) {
+        maps.add(newMap);
+    }
+
+    private int selected;
+    public int getSelected() {
+        return selected;
+    }
+
+    public void setSelected(int selected) {
+        if (this.selected != selected) {
+            this.selected = selected;
+            //map selection changed, so new manager for new file
+            //JSONRouterManager.getInstance(applicationContext).deleteAllRouters(); //FIXME
+            //TODO also destroy local data
+            Log.d(TAG, "setSelected: Destroying instance of JSONRouterManager to force file refresh");
+            JSONRouterManager.getInstance(applicationContext).destroyInstance();
+            Log.d(TAG, "setSelected: Loading new file");
+            JSONRouterManager.getInstance(applicationContext).loadIfNotAlready();
+        }
+    }
+
+
 
 
     /*
@@ -92,13 +122,5 @@ public class MapManager {
         }
         Toast.makeText(applicationContext, "Could not find map image", Toast.LENGTH_LONG).show();
         return null;
-    }
-
-    public void setShouldRemoveSelected() {
-        shouldRemoveSelected = true;
-    }
-
-    public boolean shouldSelectedBeRemoved() {
-        return shouldRemoveSelected;
     }
 }

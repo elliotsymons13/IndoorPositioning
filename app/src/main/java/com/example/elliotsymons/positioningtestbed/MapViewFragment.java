@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 import static android.app.Activity.RESULT_OK;
 import static android.support.v4.content.ContextCompat.startActivity;
@@ -37,8 +38,9 @@ public class MapViewFragment extends Fragment {
 
     LocationPassListener locationPassListener;
     public interface LocationPassListener {
-        public void passLocation(int x, int y);
+        void passLocation(int x, int y);
     }
+
 
     public MapViewFragment() {
         // Required empty public constructor
@@ -86,6 +88,10 @@ public class MapViewFragment extends Fragment {
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
 
+    public void removeAllPeristentDots() {
+        myMapView.removeAllPeristentDots();
+    }
+
     public void setMapBackground(Bitmap bitmap) { myMapView.setMapBackground(bitmap);}
 
 
@@ -104,6 +110,7 @@ public class MapViewFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement LocationPassListener");
         }
+
     }
 
     @Override

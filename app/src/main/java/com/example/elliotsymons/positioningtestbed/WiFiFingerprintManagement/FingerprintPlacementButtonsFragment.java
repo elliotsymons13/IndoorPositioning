@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
@@ -85,6 +86,7 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();
+                        JSONFingerprintManager.getInstance(getContext()).destroyInstance(); //FIXME needed?, or mix method called above??
                         Log.d(TAG, "onClick: Fingerprints deleted by user");
                     }
                 });

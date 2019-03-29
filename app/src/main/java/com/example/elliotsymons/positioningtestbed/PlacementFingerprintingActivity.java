@@ -36,12 +36,7 @@ public class PlacementFingerprintingActivity extends AppCompatActivity implement
 
     //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
     private String stage = "Place";
-
-    public int mapWidth;
-    public int mapHeight;
-
     private Button placeCaptureButton;
-    private TextView infoTextView;
 
     private FingerprintManager fm;
 

@@ -159,8 +159,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         protected Point doInBackground(Void... voids) {
             Point location = new Point();
             rm = JSONRouterManager.getInstance(getApplicationContext());
-            String routersFilename = prefs.getRoutersFilename();
-            rm.loadFile(routersFilename);
+            rm.loadIfNotAlready();
 
             //Get captures at current mapBitmap
             publishProgress(5);

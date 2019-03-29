@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPoint;
 
@@ -25,12 +26,12 @@ public class JSONRouterManager implements RouterManager {
     private Context applicationContext;
 
     private final String routerDirectoryPath = "/routers";
-    private String filename = "defaultRoutersFile.json";
+    private MapManager mapManager;
+    private String filename;
     private boolean loaded = false;
 
     //JSON file storage
     private JSONObject jsonRoot;
-    private JSONObject routerData;
     private JSONArray routers;
 
     //Local 'live' storage
@@ -42,7 +43,15 @@ public class JSONRouterManager implements RouterManager {
      * */
     private JSONRouterManager(Context context) {
         this.applicationContext = context;
-        points = new HashSet<RouterPoint>();
+        mapManager = MapManager.getInstance(context);
+        try {
+            filename = mapManager.getMapData(mapManager.getSelected()).getName() + ".json";
+        } catch (IndexOutOfBoundsException e) {
+            filename = "default.json";
+        }
+
+        Log.d(TAG, "JSONRouterManager: Filename = " + filename);
+        points = new HashSet<>();
     }
     public static JSONRouterManager getInstance(Context context) {
         if (instance == null)
@@ -53,11 +62,16 @@ public class JSONRouterManager implements RouterManager {
      * <--
      * */
 
+    public void destroyInstance() {
+        save();
+        instance = null;
+    }
+
 
     @Override
-    public void loadIfNotAlready(String filename) {
+    public void loadIfNotAlready() {
         if (!loaded) {
-            loadFile(filename);
+            load();
             loaded = true;
         }
     }
@@ -94,7 +108,7 @@ public class JSONRouterManager implements RouterManager {
         int ID = 0;
         try {
             jsonRoot = new JSONObject(jsonString);
-            routerData = jsonRoot.getJSONObject("router-data");
+            JSONObject routerData = jsonRoot.getJSONObject("router-data");
             routers = routerData.getJSONArray("points");
 
 
@@ -112,13 +126,6 @@ public class JSONRouterManager implements RouterManager {
             j.printStackTrace();
         }
         maxID = ID; //record highest current ID
-    }
-
-    @Override
-    public void loadFile(String filename) {
-        this.filename = filename;
-        Log.d(TAG, "loadFile: Going to load file with NAME = " + filename);
-        this.load();
     }
 
     private void initialise() {

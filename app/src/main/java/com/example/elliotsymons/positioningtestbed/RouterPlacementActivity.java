@@ -13,9 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPlacementButtonsFragment;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
@@ -27,13 +24,13 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERI
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
-public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
+public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, RouterPlacementButtonsFragment.DatasetStatusListener {
     private static final String TAG = "RouterPlacementActivity";
 
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
     Button placeCaptureButton;
-    String filename;
+    MyMapView myMapView;
     Preferences prefs;
 
     private RouterManager rm;
@@ -44,19 +41,24 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     }
 
     @Override
+    public void clearDataset() {
+        //TODO
+        myMapView.removeAllPeristentDots();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_router_placement);
         getSupportActionBar().setTitle("Router placement");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
-        MyMapView myMapView = map.getMyMapView();
+        myMapView = map.getMyMapView();
         myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
         myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
         prefs = Preferences.getInstance(getApplicationContext());
-        filename = prefs.getRoutersFilename(); //TODO replicate in fingerprints
 
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
@@ -87,13 +89,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
 
         @Override
         protected Void doInBackground(String... strings) {
-            if (strings.length == 1) {
-                rm.loadFile(strings[0]); // passing filename
-                Log.d(TAG, "doInBackground: Loading custom router file " + strings[0]);
-            } else {
-                Log.d(TAG, "doInBackground: Loading default file");
-                rm.loadFile("defaultRoutersFile.json");
-            }
+            rm.loadIfNotAlready();
             return null;
         }
 
@@ -188,7 +184,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String filename = input.getText().toString() + ".json";
-                prefs.setRoutersFilename(filename);
                 new RouterLoaderTask().execute(filename);
                 Toast.makeText(getApplicationContext(), "Using file specified now", Toast.LENGTH_SHORT).show();
             }

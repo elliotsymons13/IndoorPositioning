@@ -43,8 +43,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     WifiManager wifiManager;
     Preferences prefs;
     MapsRecyclerViewAdapter mapListAdapter;
-
-    //private int mapURI = R.drawable.msb_floor_plan;
+    private MapManager mapManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +58,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
         //Set up preferences singleton
         prefs = Preferences.getInstance(getApplicationContext());
+        mapManager = MapManager.getInstance(getApplicationContext());
+
 
         // ( Non-dangerous permissions are granted automatically and do not need checking.)
         // Location permission ('dangerous') needs checked.
@@ -103,16 +104,9 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         mapListAdapter = new MapsRecyclerViewAdapter(this, mapNames);
         mapListAdapter.setClickListener(this);
         mapRecyclerView.setAdapter(mapListAdapter);
+        if (mapListAdapter.getItemCount() == 0)
+            prefs.setMapURI(null); //to ensure the user cannot proceed until maps are added
 
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        MapManager mapManager = MapManager.getInstance(getApplicationContext());
-        if (mapManager.shouldSelectedBeRemoved()) {
-            mapListAdapter.removeItem(mapListAdapter.getSelected());
-        }
     }
 
     private void requestLocationPermission() {
@@ -278,8 +272,10 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 Log.d(TAG, "onClick: Entered " + newMapName);
                 if (mapBitmapSelected) {
                     String newMapUri = getImageUri(getApplicationContext(), newMapBitmap).toString();
-                    mapListAdapter.addItem(new MapData(newMapName, newMapUri));
+                    MapData newMap = new MapData(newMapName, newMapUri);
+                    mapListAdapter.addItem(newMap);
                     mapListAdapter.notifyDataSetChanged();
+                    mapManager.addMap(newMap);
                 } else {
                     Toast.makeText(WiFiHomeActivity.this,
                             "No image selected, so no map added", Toast.LENGTH_SHORT).show();
@@ -331,7 +327,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
     @Override
     public void onItemClick(View view, int position) {
-        mapListAdapter.setSelected(position);
+        mapListAdapter.setSelectedRow(position);
         prefs.setMapURI(mapListAdapter.getItem(position).getMapURI());
     }
 

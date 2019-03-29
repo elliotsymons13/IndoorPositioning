@@ -13,21 +13,13 @@ public class Preferences {
 
     //Variables
     private String mapURI = null;
-    private String routersFilename = "defaultRoutersFile.json"; //FIXME
 
+    //Setters and getters
     String getMapURI() {
         return mapURI;
     }
     void setMapURI(String uri) {
         mapURI = uri;
-    }
-
-    String getRoutersFilename() {
-        return routersFilename;
-    }
-
-    void setRoutersFilename(String routersFilename) {
-        this.routersFilename = routersFilename;
     }
 
     /*
@@ -59,7 +51,6 @@ public class Preferences {
             SharedPreferences sp =
                     PreferenceManager.getDefaultSharedPreferences(ctx);
             mapURI = sp.getString("mapURI", mapURI);
-            routersFilename = sp.getString("routersFilename", routersFilename);
         } catch (Exception e) {
             Log.e(TAG, "exception reading preferences: " + e, e);
             e.printStackTrace();
@@ -72,9 +63,7 @@ public class Preferences {
         try {
             SharedPreferences.Editor sp =
                     PreferenceManager.getDefaultSharedPreferences(ctx).edit();
-            //TODO
             sp.putString("mapURI", mapURI);
-            sp.putString("routersFilename", routersFilename);
             sp.commit();
         } catch (Exception e) {
             Log.e(TAG, "exception writing preferences: " + e, e);
