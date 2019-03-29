@@ -45,6 +45,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     Preferences prefs;
     MapsRecyclerViewAdapter mapListAdapter;
     private MapManager mapManager;
+    private final float MAP_SCALING_THRESHOLD = 1.5f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,11 +275,25 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 String newMapName = input.getText().toString();
                 Log.d(TAG, "onClick: Entered " + newMapName);
                 if (mapBitmapSelected) {
-                    String newMapUri = getImageUri(getApplicationContext(), newMapBitmap).toString();
-                    MapData newMap = new MapData(newMapName, newMapUri);
-                    mapListAdapter.addItem(newMap);
-                    mapListAdapter.notifyDataSetChanged();
-                    mapManager.addMap(newMap);
+                    //check ratio of image size to check it is reasonably square
+                    int height = newMapBitmap.getHeight();
+                    int width = newMapBitmap.getWidth();
+
+                    if (height/width > MAP_SCALING_THRESHOLD || width/height > MAP_SCALING_THRESHOLD) {
+                        Log.d(TAG, "onClick: Image of inappropriate size");
+                        Toast.makeText(WiFiHomeActivity.this,
+                                "Inappropriately proportioned image", Toast.LENGTH_SHORT).show();
+                        mapBitmapSelected = false;
+                        Toast.makeText(WiFiHomeActivity.this,
+                                "Image should be 3:2 or 'squarer'", Toast.LENGTH_SHORT).show();
+                    } else {
+                        String newMapUri = getImageUri(getApplicationContext(), newMapBitmap).toString();
+                        MapData newMap = new MapData(newMapName, newMapUri);
+                        mapListAdapter.addItem(newMap);
+                        mapListAdapter.notifyDataSetChanged();
+                        mapManager.addMap(newMap);
+                    }
+
                 } else {
                     Toast.makeText(WiFiHomeActivity.this,
                             "No image selected, so no map added", Toast.LENGTH_SHORT).show();
