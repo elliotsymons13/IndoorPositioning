@@ -329,6 +329,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     private void setDialogButtonStatus() {
         if (nameValid && mapBitmapSelected) {
             acceptBtn.setEnabled(true);
+        } else {
+            acceptBtn.setEnabled(false);
         }
     }
 

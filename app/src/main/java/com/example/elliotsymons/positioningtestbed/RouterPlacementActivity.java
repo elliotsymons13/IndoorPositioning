@@ -7,7 +7,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +28,7 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERI
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
-public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, RouterPlacementButtonsFragment.DatasetStatusListener {
+public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, RouterPlacementButtonsFragment.DatasetStatusListener, TextWatcher {
     private static final String TAG = "RouterPlacementActivity";
 
     private MapViewFragment map;
@@ -37,6 +39,11 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     UtilityMethods utils;
 
     private RouterManager rm;
+
+    EditText etMAC;
+    EditText etPower;
+    private AlertDialog routerAlertDialog;
+    private Button acceptBtn;
 
     @Override
     public void passLocation(int x, int y) {
@@ -78,6 +85,55 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         Set<RouterPoint> existingRouters = rm.getAllRouters();
         for (RouterPoint point : existingRouters) {
             map.addPersistentDot(point.getX(), point.getY());
+        }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        /* Not used*/
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        /* Not used*/
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        boolean macValid = false;
+        boolean powerValid = false;
+
+        if (routerAlertDialog != null) {
+
+            // Check power input
+            String powerValue = etPower.getText().toString();
+            if (powerValue.equals("")) {
+                etPower.setError("Enter a power value");
+            } else if (!powerValue.matches("^[0-9]+(.[0-9]+)?$")) { // and positive number
+                etPower.setError("Positive number needed");
+            } else { //TODO further validation
+                powerValid = true;
+            }
+
+
+            // Check MAC address input
+            String macValue = etMAC.getText().toString();
+            if (macValue.equals("")) {
+                etMAC.setError("Enter a MAC");
+            } else if (!macValue.matches("^[a-fA-F0-9:]{17}|[a-fA-F0-9]{12}$")){
+                etMAC.setError("Invalid MAC address format");
+            } else {
+                macValid = true;
+            }
+
+        }
+
+
+        // Set dialog accept button accordingly:
+        if (powerValid && macValid) {
+            acceptBtn.setEnabled(true);
+        } else {
+            acceptBtn.setEnabled(false);
         }
     }
 
@@ -131,18 +187,18 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         map.lockNavDot(GENERIC_DOT);
 
         //Popup for router entry
-        AlertDialog.Builder routerAlertDialog = new AlertDialog.Builder(this);
-        routerAlertDialog.setTitle("Enter MAC address");
+        AlertDialog.Builder routerAlertDialogBuilder = new AlertDialog.Builder(this);
+        routerAlertDialogBuilder.setTitle("Enter MAC address");
 
         //Set the content of the popup
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_addrouter, null);
-        routerAlertDialog.setView(dialogView);
-        final EditText etMAC = dialogView.findViewById(R.id.et_mac);
-        final EditText etPower = dialogView.findViewById(R.id.et_power);
+        routerAlertDialogBuilder.setView(dialogView);
+        etMAC = dialogView.findViewById(R.id.et_mac);
+        etPower = dialogView.findViewById(R.id.et_power);
 
         //Set popup buttons
-        routerAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        routerAlertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 utils.closeKeyboard();
@@ -173,7 +229,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
 
             }
         });
-        routerAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        routerAlertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
@@ -181,7 +237,11 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
                 Log.d(TAG, "onClick: Add MAC cancelled by user");
             }
         });
-        routerAlertDialog.show();
+        routerAlertDialog = routerAlertDialogBuilder.show();
+        acceptBtn = routerAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        acceptBtn.setEnabled(false);
+        etMAC.addTextChangedListener(this);
+        etPower.addTextChangedListener(this);
         utils.showKeyboard();
 
         map.unlockNavDot(GENERIC_DOT);
@@ -195,7 +255,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         startActivity(intent);
     }
 
-    public void loadRouters() {
+    /*public void loadRouters() {
         //Popup for filename entry
         AlertDialog.Builder filenameAlertDialog = new AlertDialog.Builder(this);
         filenameAlertDialog.setTitle("Enter custom filename");
@@ -222,7 +282,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             }
         });
         filenameAlertDialog.show();
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
