@@ -12,15 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
+import com.example.elliotsymons.positioningtestbed.FingerprintPlacementActivity;
 import com.example.elliotsymons.positioningtestbed.R;
-import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
-import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
-import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
-
-import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
 
 public class FingerprintPlacementButtonsFragment extends Fragment implements View.OnClickListener {
@@ -76,15 +70,15 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
             case R.id.btn_left:
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
-                ((PlacementFingerprintingActivity) getActivity()).directionClick(v);
+                ((FingerprintPlacementActivity) getActivity()).directionClick(v);
                 break;
             case R.id.btn_finishPlacing:
                 Log.d(TAG, "onClick: finish");
-                ((PlacementFingerprintingActivity) getActivity()).finishCapturing(v);
+                ((FingerprintPlacementActivity) getActivity()).finishCapturing(v);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
-                ((PlacementFingerprintingActivity) getActivity()).placeOrCaptureStep();
+                ((FingerprintPlacementActivity) getActivity()).placeOrCaptureStep();
                 break;
             case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete fingerprints");

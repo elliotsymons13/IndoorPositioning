@@ -18,7 +18,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 
 import java.util.HashSet;

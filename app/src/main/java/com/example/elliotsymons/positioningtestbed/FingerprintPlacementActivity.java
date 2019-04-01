@@ -30,7 +30,7 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
 
-public class PlacementFingerprintingActivity extends AppCompatActivity implements
+public class FingerprintPlacementActivity extends AppCompatActivity implements
         MapViewFragment.LocationPassListener, StageProvider, FingerprintPlacementButtonsFragment.DatasetStatusListener {
     private final String TAG = "Pl.Fing.Activity";
     Preferences prefs;

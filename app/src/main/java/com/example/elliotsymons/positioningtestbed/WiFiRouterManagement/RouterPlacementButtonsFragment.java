@@ -6,22 +6,15 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.MapViewFragment;
-import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
 
 
 public class RouterPlacementButtonsFragment extends Fragment implements View.OnClickListener {
@@ -61,8 +54,6 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         btn_finish.setOnClickListener(this);
         Button btn_delete = (Button) view.findViewById(R.id.btn_deleteDataset);
         btn_delete.setOnClickListener(this);
-        Button btn_load = (Button) view.findViewById(R.id.btn_loadFile);
-        btn_load.setOnClickListener(this);
 
         return view;
     }
@@ -104,10 +95,6 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
                     }
                 });
                 confirmDeleteDialog.show();
-                break;
-            case R.id.btn_loadFile:
-                Log.d(TAG, "onClick: load routers");
-                ((RouterPlacementActivity) getActivity()).loadRouters();
                 break;
         }
     }

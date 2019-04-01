@@ -19,9 +19,12 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -32,7 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerViewAdapter.ItemClickListener {
+public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerViewAdapter.ItemClickListener, TextWatcher {
 
     private static final String TAG = "WiFiHomeActivity";
 
@@ -47,6 +50,12 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     MapsRecyclerViewAdapter mapListAdapter;
     private MapManager mapManager;
     private final float MAP_SCALING_THRESHOLD = 1.5f;
+
+    String newMapName;
+    AlertDialog mapNameAlertDialog;
+    Button acceptBtn;
+    EditText mapNameInput;
+    boolean nameValid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,7 +244,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             return;
         }
         Intent transitionToFingerprinting = new Intent(getBaseContext(),
-                PlacementFingerprintingActivity.class);
+                FingerprintPlacementActivity.class);
         //transitionToFingerprinting.putExtra("mapURI", mapURI);
         startActivity(transitionToFingerprinting);
     }
@@ -260,22 +269,22 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         mapBitmapSelected = false;
 
         //Popup for map name entry
-        AlertDialog.Builder mapNameAlertDialog = new AlertDialog.Builder(this);
-        mapNameAlertDialog.setTitle("Enter map name");
+        AlertDialog.Builder mapNameAlertDialogBuilder = new AlertDialog.Builder(this);
+        mapNameAlertDialogBuilder.setTitle("Enter map name");
 
         //Set the content of the popup
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_addmap, null);
-        mapNameAlertDialog.setView(dialogView);
-        final EditText input = dialogView.findViewById(R.id.et_mapName);
+        mapNameAlertDialogBuilder.setView(dialogView);
+        mapNameInput = dialogView.findViewById(R.id.et_mapName);
+
 
         //Set popup buttons
-        mapNameAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        mapNameAlertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 utils.closeKeyboard();
-                //TODO validate input as non blank (other?)
-                String newMapName = input.getText().toString();
+                newMapName = mapNameInput.getText().toString();
                 Log.d(TAG, "onClick: Entered " + newMapName);
                 if (mapBitmapSelected) {
                     //check ratio of image size to check it is reasonably square
@@ -303,15 +312,24 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 }
             }
         });
-        mapNameAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        mapNameAlertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
                 utils.closeKeyboard();
             }
         });
-        mapNameAlertDialog.show();
+        mapNameAlertDialog = mapNameAlertDialogBuilder.show();
+        acceptBtn = mapNameAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        acceptBtn.setEnabled(false);
+        mapNameInput.addTextChangedListener(this);
         utils.showKeyboard();
+    }
+
+    private void setDialogButtonStatus() {
+        if (nameValid && mapBitmapSelected) {
+            acceptBtn.setEnabled(true);
+        }
     }
 
     public Uri getImageUri(Context context, Bitmap inImage) {
@@ -341,6 +359,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 newMapBitmap = MediaStore.Images.Media.getBitmap(
                         getApplicationContext().getContentResolver(), uri);
                 mapBitmapSelected = true;
+                setDialogButtonStatus();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -358,5 +377,34 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     protected void onPause() {
         super.onPause();
         MapManager.getInstance(getApplicationContext()).saveMaps(mapListAdapter.getList());
+        utils.closeKeyboard();
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        /* Not used */
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        /* Not used */
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        nameValid = false;
+
+        // Check name input
+        newMapName = mapNameInput.getText().toString();
+        if (mapNameAlertDialog != null) {
+            if (newMapName.equals("")) {
+                // map name needs to be non-blank
+                mapNameInput.setError("Enter a name");
+            } else {
+                // input is valid
+                nameValid = true;
+            }
+        }
+        setDialogButtonStatus();
     }
 }

@@ -231,6 +231,12 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         super.onDestroy();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        utils.closeKeyboard();
+    }
+
     private static class RouterSaverTask extends AsyncTask<RouterManager, Void, Void> {
         public static final String TAG = "RouterSaverTask";
 
