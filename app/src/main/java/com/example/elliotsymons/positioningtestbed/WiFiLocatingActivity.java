@@ -54,13 +54,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     String mapURI;
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
-    private double TxPwr = 100; //Default is 70mW for 'normal' routers, up to 400mW for others - <100 for uni? //TODO set/calibrate
     private double pathLossExponent = 6;
-
-    public void setTxPwr(double txPwr) {
-        TxPwr = txPwr;
-        Log.d(TAG, "setTxPwr: set to " + txPwr);
-    }
 
     public void setPathLossExponent(double pathLossExponent) {
         this.pathLossExponent = pathLossExponent;
@@ -71,7 +65,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wi_fi_locating);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi mapBitmap");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi Locating");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         prefs = Preferences.getInstance(getApplicationContext());
@@ -215,7 +209,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
-            Log.d(TAG, "doInBackground: Tx = " + TxPwr + ", PathLossExponent = " + pathLossExponent); //FIXME
             for (TrilaterationPoint point : NtrilaterationPoints) {
                 point.setDistance(
                         Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
