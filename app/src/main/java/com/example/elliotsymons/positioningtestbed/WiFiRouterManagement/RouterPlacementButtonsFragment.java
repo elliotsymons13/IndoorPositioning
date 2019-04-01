@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.elliotsymons.positioningtestbed.R;
@@ -42,13 +43,13 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
 
         Button btn_multipurpose= (Button) view.findViewById(R.id.btn_multiPurpose);
         btn_multipurpose.setOnClickListener(this);
-        Button btn_left = (Button) view.findViewById(R.id.btn_left);
+        ImageButton btn_left = view.findViewById(R.id.btn_left);
         btn_left.setOnClickListener(this);
-        Button btn_up = (Button) view.findViewById(R.id.btn_up);
+        ImageButton btn_up = view.findViewById(R.id.btn_up);
         btn_up.setOnClickListener(this);
-        Button btn_right = (Button) view.findViewById(R.id.btn_right);
+        ImageButton btn_right = view.findViewById(R.id.btn_right);
         btn_right.setOnClickListener(this);
-        Button btn_down = (Button) view.findViewById(R.id.btn_down);
+        ImageButton btn_down = view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
         Button btn_finish = (Button) view.findViewById(R.id.btn_finishPlacing);
         btn_finish.setOnClickListener(this);
