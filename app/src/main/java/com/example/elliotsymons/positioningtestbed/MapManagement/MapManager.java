@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.Preferences;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 
@@ -36,6 +37,10 @@ public class MapManager {
 
     public void addMap(MapData newMap) {
         maps.add(newMap);
+    }
+
+    public void deleteMap(int position) {
+        maps.remove(position);
     }
 
     private int selected;

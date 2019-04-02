@@ -81,11 +81,9 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         return data.get(id);
     }
 
-    void removeItem(int position) {
-        data.remove(position);
-    }
-
     void setSelectedRow(int positionSelected) {
+        if (positionSelected >= getItemCount())
+            return;
         notifyItemChanged(selectedRow);
         selectedRow = positionSelected;
         mapManager.setSelected(selectedRow);
@@ -94,11 +92,6 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
 
     public int getSelectedRow() {
         return selectedRow;
-    }
-
-    void addItem(MapData map) {
-        data.add(map);
-        Log.d(TAG, "addItem: Added new map to adapter list");
     }
 
     void setClickListener(ItemClickListener itemClickListener) {

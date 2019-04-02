@@ -38,7 +38,6 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
     private MapViewFragment map;
     private FingerprintPlacementButtonsFragment buttons;
 
-    //0 represent placing dot, 1 represents capturing dot, 2 represents captured, -1 for not yet ready (file loading)
     private String stage = "Place";
     private Button placeCaptureButton;
     MyMapView myMapView;

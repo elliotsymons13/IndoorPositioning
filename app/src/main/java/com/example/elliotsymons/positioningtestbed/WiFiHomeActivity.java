@@ -328,6 +328,13 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         utils.showKeyboard();
     }
 
+    public void deleteMap(View view) {
+        mapManager.deleteMap(mapManager.getSelected());
+        mapListAdapter.notifyDataSetChanged();
+        prefs.setMapURI(null); // stops the user advancing using a stale map URI
+        mapListAdapter.setSelectedRow(-1);
+    }
+
     private void setDialogButtonStatus() {
         if (nameValid && mapBitmapSelected) {
             acceptBtn.setEnabled(true);
