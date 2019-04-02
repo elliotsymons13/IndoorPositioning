@@ -60,7 +60,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wifihome);
+        setContentView(R.layout.activity_wifi_home);
         utils = new UtilityMethods(getApplicationContext());
 
         Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi positioning");
@@ -122,7 +122,12 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             prefs.setMapURI(null); //to ensure the user cannot proceed until maps are added
         else
             prefs.setMapURI(mapListAdapter.getItem(0).getMapURI());
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapListAdapter.setSelectedRow(mapManager.getSelected());
     }
 
     private void requestLocationPermission() {
@@ -203,7 +208,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //permission was granted
-                    Toast.makeText(this, "Location permission granted", Toast.LENGTH_SHORT).show();
                 } else {
                     //permission was not granted
                     Toast.makeText(this, "Location permissions must be granted", Toast.LENGTH_SHORT).show();
@@ -270,7 +274,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
         //Popup for map name entry
         AlertDialog.Builder mapNameAlertDialogBuilder = new AlertDialog.Builder(this);
-        mapNameAlertDialogBuilder.setTitle("Enter map name");
+        mapNameAlertDialogBuilder.setTitle("Add new map");
 
         //Set the content of the popup
         LayoutInflater inflater = getLayoutInflater();
@@ -295,15 +299,13 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                         Log.d(TAG, "onClick: Image of inappropriate size");
                         Toast.makeText(WiFiHomeActivity.this,
                                 "Inappropriately proportioned image", Toast.LENGTH_SHORT).show();
-                        mapBitmapSelected = false;
                         Toast.makeText(WiFiHomeActivity.this,
-                                "Image should be 3:2 or 'squarer'", Toast.LENGTH_SHORT).show();
+                                "Image should be 3:2 or 'squarer'", Toast.LENGTH_LONG).show();
                     } else {
                         String newMapUri = getImageUri(getApplicationContext(), newMapBitmap).toString();
                         MapData newMap = new MapData(newMapName, newMapUri);
-                        mapListAdapter.addItem(newMap);
-                        mapListAdapter.notifyDataSetChanged();
-                        mapManager.addMap(newMap);
+                        mapManager.addMap(newMap); //add to persistent list
+                        mapListAdapter.notifyDataSetChanged(); //inform UI to check list
                     }
 
                 } else {
@@ -353,7 +355,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK &&
+                data != null && data.getData() != null) {
 
             Uri uri = data.getData();
 
@@ -378,13 +381,14 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     @Override
     protected void onPause() {
         super.onPause();
-        MapManager.getInstance(getApplicationContext()).saveMaps(mapListAdapter.getList());
+        MapManager.getInstance(getApplicationContext()).saveMaps();
         utils.closeKeyboard();
     }
 
     @Override
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
         /* Not used */
+        nameValid = false;
     }
 
     @Override
@@ -394,7 +398,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
 
     @Override
     public void afterTextChanged(Editable editable) {
-        nameValid = false;
 
         // Check name input
         newMapName = mapNameInput.getText().toString();

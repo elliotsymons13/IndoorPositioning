@@ -57,8 +57,6 @@ public class MapManager {
     }
 
 
-
-
     /*
      * Singleton support -->
      * */
@@ -76,7 +74,7 @@ public class MapManager {
      * */
 
 
-    public void saveMaps(List<MapData> maps) {
+    public void saveMaps() {
         //save maps to external file using fos
         try {
             FileOutputStream fos = applicationContext.openFileOutput(mapsFilename, Context.MODE_PRIVATE);

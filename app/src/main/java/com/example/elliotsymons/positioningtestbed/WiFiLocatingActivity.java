@@ -44,7 +44,7 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
 public class WiFiLocatingActivity extends AppCompatActivity implements
-        MapViewFragment.LocationPassListener, LocationControlsFragment.LocationControllerFragmentInteractionListener {
+        LocationControlsFragment.LocationControllerFragmentInteractionListener {
     private static final String TAG = "WiFiLocatingActivity";
     Preferences prefs;
     MapManager mapManager;
@@ -64,7 +64,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wi_fi_locating);
+        setContentView(R.layout.activity_wifi_locating);
         Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi Locating");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
@@ -83,12 +83,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         map.addNavDot(FINGERPRINT_DOT, startX, startY, R.color.colorRSSIDot);
         map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
         map.hideNavDot(FINGERPRINT_DOT);
-    }
-
-    @Override
-    public void passLocation(int x, int y) {
-        //TODO
-
     }
 
     @Override

@@ -85,10 +85,6 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         data.remove(position);
     }
 
-    List<MapData> getList() {
-        return data;
-    }
-
     void setSelectedRow(int positionSelected) {
         notifyItemChanged(selectedRow);
         selectedRow = positionSelected;

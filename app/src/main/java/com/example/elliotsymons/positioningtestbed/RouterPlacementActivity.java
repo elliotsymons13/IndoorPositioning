@@ -28,7 +28,8 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERI
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
-public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, RouterPlacementButtonsFragment.DatasetStatusListener, TextWatcher {
+public class RouterPlacementActivity extends AppCompatActivity implements
+        RouterPlacementButtonsFragment.DatasetStatusListener, TextWatcher {
     private static final String TAG = "RouterPlacementActivity";
 
     private MapViewFragment map;
@@ -44,11 +45,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     EditText etPower;
     private AlertDialog routerAlertDialog;
     private Button acceptBtn;
-
-    @Override
-    public void passLocation(int x, int y) {
-        //TODO?
-    }
 
     @Override
     public void clearDataset() {

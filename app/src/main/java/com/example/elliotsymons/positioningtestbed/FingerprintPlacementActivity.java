@@ -31,7 +31,7 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY
 
 
 public class FingerprintPlacementActivity extends AppCompatActivity implements
-        MapViewFragment.LocationPassListener, StageProvider, FingerprintPlacementButtonsFragment.DatasetStatusListener {
+        StageProvider, FingerprintPlacementButtonsFragment.DatasetStatusListener {
     private final String TAG = "Pl.Fing.Activity";
     Preferences prefs;
 
@@ -71,22 +71,6 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
 
         drawExistingFingerprints();
 
-    }
-
-
-
-    @Override
-    public void passLocation(int x, int y) {
-        Log.i(TAG, "passLocation: Called");
-        /*FingerprintPlacementButtonsFragment newButtons = new FingerprintPlacementButtonsFragment();
-        Bundle args = new Bundle();
-        args.putInt("x", x);
-        args.putInt("y", y);
-        args.putString("stage", stage);
-        newButtons.setArguments(args);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_placementButtons, newButtons).commit();
-        buttons = newButtons;*/ //FIXME
     }
 
     @Override

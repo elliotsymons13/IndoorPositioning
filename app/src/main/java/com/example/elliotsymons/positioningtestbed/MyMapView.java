@@ -39,9 +39,6 @@ public class MyMapView extends AppCompatImageView {
     private Set<Point> persistentDots;
     private Set<NavDot> navigationDots;
 
-    MapViewFragment.LocationPassListener locationPassListener;
-
-
     //Default constructor, calls through
     public MyMapView(Context context) {
         this(context, null);
@@ -98,14 +95,6 @@ public class MyMapView extends AppCompatImageView {
 
         navigationDots = new HashSet<>();
         persistentDots = new HashSet<>();
-
-        //make sure the required interfaces are implemented by the parent activity
-        try { //TODO try removing this, or the equiveleant in parent fragment
-            locationPassListener = (MapViewFragment.LocationPassListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement MapViewLocationListener");
-        }
-
     }
 
 
@@ -199,8 +188,6 @@ public class MyMapView extends AppCompatImageView {
                 p.setY(y);
             }
         }
-        locationPassListener.passLocation(x, y);
-
         invalidate(); //redraw view
     }
 
