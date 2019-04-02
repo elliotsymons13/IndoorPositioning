@@ -80,7 +80,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements
     public void drawExistingRouters() {
         Set<RouterPoint> existingRouters = rm.getAllRouters();
         for (RouterPoint point : existingRouters) {
-            map.addPersistentDot(point.getX(), point.getY());
+            myMapView.addPersistentDot(point.getX(), point.getY());
         }
     }
 
@@ -161,16 +161,16 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         int increment = 1;
         switch (v.getId()) {
             case R.id.btn_up:
-                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) - increment);
+                myMapView.setDotY(GENERIC_DOT, myMapView.getDotY(GENERIC_DOT) - increment);
                 break;
             case R.id.btn_right:
-                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) + increment);
+                myMapView.setDotX(GENERIC_DOT, myMapView.getDotX(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_down:
-                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) + increment);
+                myMapView.setDotY(GENERIC_DOT, myMapView.getDotY(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_left:
-                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) - increment);
+                myMapView.setDotX(GENERIC_DOT, myMapView.getDotX(GENERIC_DOT) - increment);
                 break;
             default:
                 Log.w(TAG, "Invalid direction received");
@@ -180,7 +180,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements
     public void placeRouter(View v) {
         Log.d(TAG, "placeRouter: called");
         //Lock blue dot
-        map.lockNavDot(GENERIC_DOT);
+        myMapView.lockNavDot(GENERIC_DOT);
 
         //Popup for router entry
         AlertDialog.Builder routerAlertDialogBuilder = new AlertDialog.Builder(this);
@@ -200,8 +200,8 @@ public class RouterPlacementActivity extends AppCompatActivity implements
                 utils.closeKeyboard();
                 boolean success;
                 try {
-                    success = rm.addRouter(map.getCurrentX(GENERIC_DOT),
-                            map.getCurrentY(GENERIC_DOT), etMAC.getText().toString(),
+                    success = rm.addRouter(myMapView.getDotX(GENERIC_DOT),
+                            myMapView.getDotY(GENERIC_DOT), etMAC.getText().toString(),
                             Double.parseDouble(etPower.getText().toString()));
                 } catch (NumberFormatException e) {
                     Log.d(TAG, "onClick: No power entered for router");
@@ -209,13 +209,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements
                 }
 
                 if (success) {
-                    map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
+                    myMapView.addPersistentDot(myMapView.getDotX(GENERIC_DOT), myMapView.getDotY(GENERIC_DOT));
                     Log.d(TAG, "onClick: " + "Added " + etMAC.getText().toString() +
-                            " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT)
+                            " @ " + myMapView.getDotX(GENERIC_DOT) + ", " + myMapView.getDotY(GENERIC_DOT)
                     + ", TxPower = " + etPower.getText().toString());
                     Toast.makeText(RouterPlacementActivity.this, "Added "
                             + etMAC.getText().toString() +  " @ "
-                            + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT)
+                            + myMapView.getDotX(GENERIC_DOT) + ", " + myMapView.getDotY(GENERIC_DOT)
                             + ", TxPower = " + etPower.getText().toString()
                             , Toast.LENGTH_LONG).show();
                 } else {
@@ -240,7 +240,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         etPower.addTextChangedListener(this);
         utils.showKeyboard();
 
-        map.unlockNavDot(GENERIC_DOT);
+        myMapView.unlockNavDot(GENERIC_DOT);
         
     }
 

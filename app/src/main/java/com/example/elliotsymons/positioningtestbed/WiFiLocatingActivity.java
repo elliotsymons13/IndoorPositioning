@@ -50,6 +50,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     MapManager mapManager;
 
     MapViewFragment map;
+    MyMapView myMapView;
     LocationControlsFragment controls;
     String mapURI;
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
@@ -68,6 +69,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi Locating");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
+        myMapView = map.getMyMapView();
         prefs = Preferences.getInstance(getApplicationContext());
         mapManager = MapManager.getInstance(getApplicationContext());
         controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
@@ -77,12 +79,12 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         progressBarTrilaterating.setVisibility(View.INVISIBLE);
 
 
-        map.addNavDot(TRILATERATION_DOT, startX, startY, R.color.colorTilatDot);
-        map.lockNavDot(TRILATERATION_DOT); //the user is not able to place the dot in this activity, it should be located for them
-        map.hideNavDot(TRILATERATION_DOT);
-        map.addNavDot(FINGERPRINT_DOT, startX, startY, R.color.colorRSSIDot);
-        map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
-        map.hideNavDot(FINGERPRINT_DOT);
+        myMapView.addNavDot(TRILATERATION_DOT, startX, startY, R.color.colorTilatDot);
+        myMapView.lockNavDot(TRILATERATION_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        myMapView.hideNavDot(TRILATERATION_DOT);
+        myMapView.addNavDot(FINGERPRINT_DOT, startX, startY, R.color.colorRSSIDot);
+        myMapView.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        myMapView.hideNavDot(FINGERPRINT_DOT);
     }
 
     @Override
@@ -121,9 +123,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             int y = location.getY();
             Log.d(TAG, "onPostExecute: Updating map: x,y = " + x + ", " + y);
             // update map
-            map.setCurrentX(MapViewFragment.TRILATERATION_DOT, x);
-            map.setCurrentY(MapViewFragment.TRILATERATION_DOT, y);
-            map.showNavDot(MapViewFragment.TRILATERATION_DOT);
+            myMapView.setDotX(MapViewFragment.TRILATERATION_DOT, x);
+            myMapView.setDotY(MapViewFragment.TRILATERATION_DOT, y);
+            myMapView.showNavDot(MapViewFragment.TRILATERATION_DOT);
 
             findViewById(R.id.btn_locate).setEnabled(true);
         }
@@ -336,9 +338,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             int y = location.getY();
 
             // update map
-            map.setCurrentX(MapViewFragment.FINGERPRINT_DOT, x);
-            map.setCurrentY(MapViewFragment.FINGERPRINT_DOT, y);
-            map.showNavDot(MapViewFragment.FINGERPRINT_DOT);
+            myMapView.setDotX(MapViewFragment.FINGERPRINT_DOT, x);
+            myMapView.setDotY(MapViewFragment.FINGERPRINT_DOT, y);
+            myMapView.showNavDot(MapViewFragment.FINGERPRINT_DOT);
             progressBarFingerprinting.setVisibility(View.INVISIBLE);
             findViewById(R.id.btn_locate).setEnabled(true);
         }

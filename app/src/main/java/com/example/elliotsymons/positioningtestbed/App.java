@@ -16,6 +16,7 @@ public class App extends Application {
     }
 
     private void createNotificationChannel() {
+        // create the notification channel used for long running background tasks (eg fingerprinting)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,

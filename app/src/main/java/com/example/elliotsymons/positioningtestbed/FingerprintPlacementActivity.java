@@ -36,11 +36,11 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
     Preferences prefs;
 
     private MapViewFragment map;
+    MyMapView myMapView;
     private FingerprintPlacementButtonsFragment buttons;
+    private Button placeCaptureButton;
 
     private String stage = "Place";
-    private Button placeCaptureButton;
-    MyMapView myMapView;
 
     private FingerprintManager fm;
 
@@ -51,20 +51,24 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_placement_fingerprinting);
         getSupportActionBar().setTitle("Fingerprint capture");
 
+        // Setup map
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
         myMapView = map.getMyMapView();
+        //Add a generic dot, to be placed by the users for fingerprints
         myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
         myMapView.setNavDotRadius(GENERIC_DOT, 15);
+
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         prefs = Preferences.getInstance(getApplicationContext());
-
         placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
 
+        // Load fingerprints from file
         fm = JSONFingerprintManager.getInstance(getApplicationContext());
         new FingerprintLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded fingerprints from file");
 
+        // Register to receive termination signals from background service
         LocalBroadcastManager.getInstance(this).registerReceiver(msgReceiver,
                 new IntentFilter("fingerprinting-finished"));
 
@@ -86,7 +90,7 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
     public void drawExistingFingerprints() {
         Set<FingerprintPoint> existingFingerprints = fm.getAllFingerprints();
         for (FingerprintPoint point : existingFingerprints) {
-            map.addPersistentDot(point.getX(), point.getY());
+            myMapView.addPersistentDot(point.getX(), point.getY());
         }
     }
 
@@ -123,16 +127,16 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
         int increment = 1;
         switch (v.getId()) {
             case R.id.btn_up:
-                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) - increment);
+                myMapView.setDotY(GENERIC_DOT, myMapView.getDotY(GENERIC_DOT) - increment);
                 break;
             case R.id.btn_right:
-                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) + increment);
+                myMapView.setDotX(GENERIC_DOT, myMapView.getDotX(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_down:
-                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) + increment);
+                myMapView.setDotY(GENERIC_DOT, myMapView.getDotY(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_left:
-                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) - increment);
+                myMapView.setDotX(GENERIC_DOT, myMapView.getDotX(GENERIC_DOT) - increment);
                 break;
             default:
                 Log.w(TAG, "Invalid direction received");
@@ -147,7 +151,7 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
                 stage = "Locked";
 
                 //Lock blue dot
-                map.lockNavDot(GENERIC_DOT);
+                myMapView.lockNavDot(GENERIC_DOT);
 
                 //Change button text
                 placeCaptureButton.setText(R.string.capture);
@@ -156,14 +160,14 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
                 //User has pressed capture. Phone needs to record RSSI values.
                 Toast.makeText(this, "Fingerprinting...", Toast.LENGTH_SHORT).show();
                 stage = "Capture";
-                startFingerprintService(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
+                startFingerprintService(myMapView.getDotX(GENERIC_DOT), myMapView.getDotY(GENERIC_DOT));
                 break;
             case "Capture":
                 //Capture is complete
                 stage = "Place";
 
-                map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
-                map.unlockNavDot(GENERIC_DOT);
+                myMapView.addPersistentDot(myMapView.getDotX(GENERIC_DOT), myMapView.getDotY(GENERIC_DOT));
+                myMapView.unlockNavDot(GENERIC_DOT);
                 break;
         }
         buttons.updateButtonStates(stage); //redraws UI with buttons updates to guide user

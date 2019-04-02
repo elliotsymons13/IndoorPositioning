@@ -43,50 +43,6 @@ public class MapViewFragment extends Fragment {
         return myMapView;
     }
 
-    public int getCurrentX(int dotID) {
-        return myMapView.getDotX(dotID);
-    }
-
-    public int getCurrentY(int dotID) {
-        return myMapView.getDotY(dotID);
-    }
-
-    public void setCurrentX(int dotID, int x) {
-        myMapView.setDotX(dotID, x);
-    }
-
-    public void setCurrentY(int dotID, int y) {
-        myMapView.setDotY(dotID, y);
-    }
-
-    public void hideNavDot(int dotID) {
-        myMapView.hideNavDot(dotID);
-    }
-
-    public void showNavDot(int dotID) {
-        myMapView.showNavDot(dotID);
-    }
-
-    public void lockNavDot(int dotID) {
-        myMapView.lockNavDot(dotID);
-    }
-
-    public void unlockNavDot(int dotID) {
-        myMapView.unlockNavDot(dotID);
-    }
-
-    public void addNavDot(int ID, int x, int y, int colourResource) {
-        myMapView.addNavDot(ID, x, y, colourResource);
-    }
-
-    public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
-
-    public void removeAllPeristentDots() {
-        myMapView.removeAllPeristentDots();
-    }
-
-    public void setMapBackground(Bitmap bitmap) { myMapView.setMapBackground(bitmap);}
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
