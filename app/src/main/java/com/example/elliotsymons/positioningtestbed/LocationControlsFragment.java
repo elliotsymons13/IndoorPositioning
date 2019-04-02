@@ -36,13 +36,11 @@ public class LocationControlsFragment extends Fragment implements
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_buttons, container, false);
 
-        SeekBar progress = (SeekBar) view.findViewById(R.id.seekBar_power);
-        progress.setOnSeekBarChangeListener(this);
+
         SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
         pathLoss.setOnSeekBarChangeListener(this);
 
         pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
-        powerTV = (TextView) view.findViewById(R.id.tv_power);
 
         return view;
     }
@@ -64,10 +62,6 @@ public class LocationControlsFragment extends Fragment implements
             case R.id.seekBar_pathLoss:
                 ((WiFiLocatingActivity) getActivity()).setPathLossExponent(i);
                 pathLossTV.setText("PthLss\n"+ i + "/10");
-                break;
-            case R.id.seekBar_power:
-                ((WiFiLocatingActivity) getActivity()).setTxPwr(i);
-                powerTV.setText("Pwr\n" + i + "/400");
                 break;
         }
     }

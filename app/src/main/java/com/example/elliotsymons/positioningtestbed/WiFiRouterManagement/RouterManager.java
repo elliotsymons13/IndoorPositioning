@@ -6,12 +6,14 @@ import java.util.Set;
 
 public interface RouterManager {
     void save();
-    void loadIfNotAlready(String filename);
+    void loadIfNotAlready();
     void deleteAllRouters();
-    void loadFile(String filename);
 
-    void addRouter(int X, int Y, String mac);
+    //Boolean to indicate success
+    boolean addRouter(int X, int Y, String mac, double power);
 
     Set<RouterPoint> getAllRouters();
+
+    void destroyInstance();
 
 }

@@ -1,6 +1,7 @@
 package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,14 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
+import com.example.elliotsymons.positioningtestbed.FingerprintPlacementActivity;
 import com.example.elliotsymons.positioningtestbed.R;
-import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
-
-import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
 
 public class FingerprintPlacementButtonsFragment extends Fragment implements View.OnClickListener {
@@ -25,6 +23,12 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
 
     TextView tvInfo;
     private StageProvider stageProvider;
+
+
+    DatasetStatusListener datasetStatusListener;
+    public interface DatasetStatusListener {
+        void clearDataset();
+    }
 
     public FingerprintPlacementButtonsFragment() {
         // Required empty public constructor
@@ -43,13 +47,13 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
 
         Button btn_multipurpose= (Button) view.findViewById(R.id.btn_multiPurpose);
         btn_multipurpose.setOnClickListener(this);
-        Button btn_left = (Button) view.findViewById(R.id.btn_left);
+        ImageButton btn_left = view.findViewById(R.id.btn_left);
         btn_left.setOnClickListener(this);
-        Button btn_up = (Button) view.findViewById(R.id.btn_up);
+        ImageButton btn_up = view.findViewById(R.id.btn_up);
         btn_up.setOnClickListener(this);
-        Button btn_right = (Button) view.findViewById(R.id.btn_right);
+        ImageButton btn_right = view.findViewById(R.id.btn_right);
         btn_right.setOnClickListener(this);
-        Button btn_down = (Button) view.findViewById(R.id.btn_down);
+        ImageButton btn_down = view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
         Button btn_finish = (Button) view.findViewById(R.id.btn_finishPlacing);
         btn_finish.setOnClickListener(this);
@@ -67,15 +71,15 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
             case R.id.btn_left:
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
-                ((PlacementFingerprintingActivity) getActivity()).directionClick(v);
+                ((FingerprintPlacementActivity) getActivity()).directionClick(v);
                 break;
             case R.id.btn_finishPlacing:
                 Log.d(TAG, "onClick: finish");
-                ((PlacementFingerprintingActivity) getActivity()).finishCapturing(v);
+                ((FingerprintPlacementActivity) getActivity()).finishCapturing(v);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
-                ((PlacementFingerprintingActivity) getActivity()).placeOrCaptureStep();
+                ((FingerprintPlacementActivity) getActivity()).placeOrCaptureStep();
                 break;
             case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete fingerprints");
@@ -84,7 +88,7 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        JSONFingerprintManager.getInstance(getContext()).deleteAllFingerprints();
+                        datasetStatusListener.clearDataset();
                         Log.d(TAG, "onClick: Fingerprints deleted by user");
                     }
                 });
@@ -106,6 +110,16 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
         Bundle args = getArguments();
         if (args != null) {
             tvInfo.setText(Integer.toString(args.getInt("x")) + ", " + Integer.toString(args.getInt("y")));
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            datasetStatusListener = (DatasetStatusListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement DatasetStatusListener");
         }
     }
 

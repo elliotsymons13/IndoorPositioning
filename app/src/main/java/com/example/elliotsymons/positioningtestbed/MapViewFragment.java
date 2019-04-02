@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 import static android.app.Activity.RESULT_OK;
 import static android.support.v4.content.ContextCompat.startActivity;
@@ -27,18 +28,12 @@ public class MapViewFragment extends Fragment {
     private View rootView;
 
     public static final int GENERIC_DOT = 1;
-    public static final int TRILAT_DOT = 2;
+    public static final int TRILATERATION_DOT = 2;
     public static final int FINGERPRINT_DOT = 3;
 
 
     private MyMapView myMapView;
-
     public static int startX, startY;
-
-    LocationPassListener locationPassListener;
-    public interface LocationPassListener {
-        public void passLocation(int x, int y);
-    }
 
     public MapViewFragment() {
         // Required empty public constructor
@@ -86,25 +81,11 @@ public class MapViewFragment extends Fragment {
 
     public void addPersistentDot(int x, int y) { myMapView.addPersistentDot(x, y);}
 
+    public void removeAllPeristentDots() {
+        myMapView.removeAllPeristentDots();
+    }
+
     public void setMapBackground(Bitmap bitmap) { myMapView.setMapBackground(bitmap);}
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        //make sure the required interfaces are implemented by the parent activity
-        try {
-            locationPassListener = (LocationPassListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement LocationPassListener");
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

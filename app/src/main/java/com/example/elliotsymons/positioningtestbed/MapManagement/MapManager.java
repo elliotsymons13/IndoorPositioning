@@ -6,6 +6,11 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.elliotsymons.positioningtestbed.Preferences;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,7 +30,36 @@ public class MapManager {
 
     private static final String mapsFilename = "maps.dat";
     private List<MapData> maps;
-    private boolean shouldRemoveSelected = false;
+
+    public MapData getMapData(int index) {
+        return maps.get(index);
+    }
+
+    public void addMap(MapData newMap) {
+        maps.add(newMap);
+    }
+
+    public void deleteMap(int position) {
+        maps.remove(position);
+    }
+
+    private int selected;
+    public int getSelected() {
+        return selected;
+    }
+
+    public void setSelected(int selected) {
+        if (this.selected != selected) {
+            this.selected = selected;
+            //map selection changed, so new manager for new file
+            Log.d(TAG, "setSelected: Destroying instance of JSONRouterManager, JSONFingerprintManager to force file refresh");
+            JSONRouterManager.getInstance(applicationContext).destroyInstance();
+            JSONFingerprintManager.getInstance(applicationContext).destroyInstance();
+            Log.d(TAG, "setSelected: Loading new files");
+            JSONRouterManager.getInstance(applicationContext).loadIfNotAlready();
+            JSONFingerprintManager.getInstance(applicationContext).loadIfNotAlready();
+        }
+    }
 
 
     /*
@@ -45,7 +79,7 @@ public class MapManager {
      * */
 
 
-    public void saveMaps(List<MapData> maps) {
+    public void saveMaps() {
         //save maps to external file using fos
         try {
             FileOutputStream fos = applicationContext.openFileOutput(mapsFilename, Context.MODE_PRIVATE);
@@ -92,13 +126,5 @@ public class MapManager {
         }
         Toast.makeText(applicationContext, "Could not find map image", Toast.LENGTH_LONG).show();
         return null;
-    }
-
-    public void setShouldRemoveSelected() {
-        shouldRemoveSelected = true;
-    }
-
-    public boolean shouldSelectedBeRemoved() {
-        return shouldRemoveSelected;
     }
 }

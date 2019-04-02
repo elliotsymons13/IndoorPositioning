@@ -35,15 +35,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.FINGERPRINT_DOT;
-import static com.example.elliotsymons.positioningtestbed.MapViewFragment.TRILAT_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.TRILATERATION_DOT;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
 public class WiFiLocatingActivity extends AppCompatActivity implements
-        MapViewFragment.LocationPassListener, LocationControlsFragment.LocationControllerFragmentInteractionListener {
+        LocationControlsFragment.LocationControllerFragmentInteractionListener {
     private static final String TAG = "WiFiLocatingActivity";
     Preferences prefs;
     MapManager mapManager;
@@ -53,13 +54,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     String mapURI;
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
-    private double TxPwr = 100; //Default is 70mW for 'normal' routers, up to 400mW for others - <100 for uni? //TODO set/calibrate
     private double pathLossExponent = 6;
-
-    public void setTxPwr(double txPwr) {
-        TxPwr = txPwr;
-        Log.d(TAG, "setTxPwr: set to " + txPwr);
-    }
 
     public void setPathLossExponent(double pathLossExponent) {
         this.pathLossExponent = pathLossExponent;
@@ -69,8 +64,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wi_fi_locating);
-        getSupportActionBar().setTitle("WiFi mapBitmap");
+        setContentView(R.layout.activity_wifi_locating);
+        Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi Locating");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         prefs = Preferences.getInstance(getApplicationContext());
@@ -82,28 +77,12 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         progressBarTrilaterating.setVisibility(View.INVISIBLE);
 
 
-        map.addNavDot(TRILAT_DOT, startX, startY, R.color.colorTilatDot);
-        map.lockNavDot(TRILAT_DOT); //the user is not able to place the dot in this activity, it should be located for them
-        map.hideNavDot(TRILAT_DOT);
+        map.addNavDot(TRILATERATION_DOT, startX, startY, R.color.colorTilatDot);
+        map.lockNavDot(TRILATERATION_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        map.hideNavDot(TRILATERATION_DOT);
         map.addNavDot(FINGERPRINT_DOT, startX, startY, R.color.colorRSSIDot);
         map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
         map.hideNavDot(FINGERPRINT_DOT);
-    }
-
-    /*@Override
-    public void onResume() {
-        super.onResume();
-        // load specified map with URI
-        mapURI = prefs.getMapURI();
-        //Bitmap newBackground = mapManager.decodeImageFromURIString(mapURI);
-        //map.setMapBackground(newBackground);
-        //TODO not needed as works without?
-    }*/
-
-    @Override
-    public void passLocation(int x, int y) {
-        //TODO
-
     }
 
     @Override
@@ -142,9 +121,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             int y = location.getY();
             Log.d(TAG, "onPostExecute: Updating map: x,y = " + x + ", " + y);
             // update map
-            map.setCurrentX(MapViewFragment.TRILAT_DOT, x);
-            map.setCurrentY(MapViewFragment.TRILAT_DOT, y);
-            map.showNavDot(MapViewFragment.TRILAT_DOT);
+            map.setCurrentX(MapViewFragment.TRILATERATION_DOT, x);
+            map.setCurrentY(MapViewFragment.TRILATERATION_DOT, y);
+            map.showNavDot(MapViewFragment.TRILATERATION_DOT);
 
             findViewById(R.id.btn_locate).setEnabled(true);
         }
@@ -159,8 +138,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         protected Point doInBackground(Void... voids) {
             Point location = new Point();
             rm = JSONRouterManager.getInstance(getApplicationContext());
-            String routersFilename = prefs.getRoutersFilename();
-            rm.loadFile(routersFilename);
+            rm.loadIfNotAlready();
 
             //Get captures at current mapBitmap
             publishProgress(5);
@@ -225,10 +203,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
-            Log.d(TAG, "doInBackground: Tx = " + TxPwr + ", PathLossExponent = " + pathLossExponent);
             for (TrilaterationPoint point : NtrilaterationPoints) {
                 point.setDistance(
-                        Math.pow(10,  ((TxPwr - point.getRSSI()) / (10 * pathLossExponent))  )
+                        Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
                 );
                 Log.d(TAG, "doInBackground: Distance to router at " + 
                         point.getRouterPoint().getX() + ", " + 
@@ -289,7 +266,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                if (Objects.equals(intent.getAction(), WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
                     boolean success = intent.getBooleanExtra(
                             WifiManager.EXTRA_RESULTS_UPDATED, false);
                     if (success) {

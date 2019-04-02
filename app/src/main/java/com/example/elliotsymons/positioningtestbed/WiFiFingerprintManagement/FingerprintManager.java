@@ -15,4 +15,6 @@ public interface FingerprintManager {
     Set<FingerprintPoint> getAllFingerprints();
 
     String fileToString();
+
+    void destroyInstance();
 }

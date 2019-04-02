@@ -57,8 +57,7 @@
         app:layout_constraintBottom_toTopOf="@+id/btn_routerPlace"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btn_addMap"
@@ -73,5 +72,25 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rv_maps"
         app:layout_constraintVertical_bias="0.852" />
+
+    <Button
+        android:id="@+id/btn_deleteMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:onClick="deleteMap"
+        android:text="Delete map"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_addMap"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toTopOf="@+id/btn_routerPlace"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_maps" />
 
 </android.support.constraint.ConstraintLayout>

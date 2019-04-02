@@ -21,7 +21,7 @@
             android:name=".WiFiLocatingActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PlacementFingerprintingActivity"
+            android:name=".FingerprintPlacementActivity"
             android:screenOrientation="portrait" />
 
         <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService" />
