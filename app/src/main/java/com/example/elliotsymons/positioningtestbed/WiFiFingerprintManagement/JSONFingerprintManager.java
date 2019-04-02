@@ -5,6 +5,7 @@ import android.preference.Preference;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 import com.example.elliotsymons.positioningtestbed.Preferences;
 
 import org.json.JSONArray;
@@ -19,7 +20,8 @@ public class JSONFingerprintManager implements FingerprintManager {
     private Context applicationContext;
 
     private final String fingerprintDirectoryPath = "/fingerprints";
-    private final String filename = "defaultFingerprintsFile.json";
+    private MapManager mapManager;
+    private String filename;
     private boolean loaded = false;
 
     //JSON file storage
@@ -49,7 +51,15 @@ public class JSONFingerprintManager implements FingerprintManager {
      * */
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
-        points = new HashSet<FingerprintPoint>();
+        mapManager = MapManager.getInstance(context);
+        try {
+            filename = mapManager.getMapData(mapManager.getSelected()).getName() + ".json";
+        } catch (ArrayIndexOutOfBoundsException e) {
+            filename = "default.json";
+        }
+
+        Log.d(TAG, "JSONFingerprintManager: Filename = " + filename);
+        points = new HashSet<>();
     }
     public static JSONFingerprintManager getInstance(Context context) {
         if (instance == null)
@@ -59,6 +69,12 @@ public class JSONFingerprintManager implements FingerprintManager {
     /*
      * <--
      * */
+
+    @Override
+    public void destroyInstance() {
+        save();
+        instance = null;
+    }
 
     private void initialise() {
         try {
@@ -80,12 +96,12 @@ public class JSONFingerprintManager implements FingerprintManager {
     public void loadIfNotAlready() {
         if (!loaded) {
             load();
-            loaded = true;
         }
     }
 
     private void load() {
         String jsonString = "";
+        loaded = true;
 
         //Import file
         try {
@@ -194,19 +210,23 @@ public class JSONFingerprintManager implements FingerprintManager {
     }
 
     public void save() {
-        try {
-            File folder = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath);
-            File fout = new File(folder.getAbsolutePath(), filename);
+        if (loaded) {
+            try {
+                File folder = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath);
+                File fout = new File(folder.getAbsolutePath(), filename);
 
-            FileOutputStream fouts = new FileOutputStream(fout);
-            fouts.write(jsonRoot.toString(4).getBytes()); //4 specifies the size of indent
-            fouts.close();
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to write to file when saving wifi fingerprints");
-            e.printStackTrace();
-        } catch (JSONException j) {
-            Log.w(TAG, "Unable to convert JSON to string when saving wifi fingerprints");
-            j.printStackTrace();
+                FileOutputStream fouts = new FileOutputStream(fout);
+                fouts.write(jsonRoot.toString(4).getBytes()); //4 specifies the size of indent
+                fouts.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to write to file when saving wifi fingerprints");
+                e.printStackTrace();
+            } catch (JSONException j) {
+                Log.w(TAG, "Unable to convert JSON to string when saving wifi fingerprints");
+                j.printStackTrace();
+            }
+        } else {
+        Log.d(TAG, "save: Not saving, as not yet loaded from file");
         }
     }
 

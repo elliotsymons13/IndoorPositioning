@@ -18,11 +18,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.elliotsymons.positioningtestbed.PlacementFingerprintingActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.App.CHANNEL_ID;
@@ -37,7 +37,7 @@ public class FingerprintingIntentService extends IntentService {
 
     public FingerprintingIntentService() {
         super(TAG);
-        setIntentRedelivery(false); //TODO true if we want service to restart if killed by system
+        setIntentRedelivery(false);
     }
 
     @Override
@@ -109,8 +109,6 @@ public class FingerprintingIntentService extends IntentService {
         }
         //pass to fingerprint manager
         fm.addFingerprint(x, y, captures);
-        //fm.save(); //TODO no call here
-
 
         //trigger next stage in UI thread
         Intent finishedIntent = new Intent("fingerprinting-finished");
@@ -122,7 +120,7 @@ public class FingerprintingIntentService extends IntentService {
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+            if (Objects.equals(intent.getAction(), WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
                 boolean success = intent.getBooleanExtra(
                         WifiManager.EXTRA_RESULTS_UPDATED, false);
                 if (success) {

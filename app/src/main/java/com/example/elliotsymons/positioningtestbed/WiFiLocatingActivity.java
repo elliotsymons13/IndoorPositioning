@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPoint;
@@ -28,82 +29,66 @@ import com.lemmingapex.trilateration.TrilaterationFunction;
 
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener, LocationControlsFragment.LocationControllerFragmentInteractionListener {
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.FINGERPRINT_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.TRILATERATION_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
+
+public class WiFiLocatingActivity extends AppCompatActivity implements
+        LocationControlsFragment.LocationControllerFragmentInteractionListener {
     private static final String TAG = "WiFiLocatingActivity";
     Preferences prefs;
+    MapManager mapManager;
 
     MapViewFragment map;
     LocationControlsFragment controls;
-    int mapID;
-    ProgressBar progressBar;
+    String mapURI;
+    ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
-    private double TxPwr = 100; //Default is 70mW for 'normal' routers, up to 400mW for others - <100 for uni? //TODO set/calibrate
     private double pathLossExponent = 6;
-
-    public void setTxPwr(double txPwr) {
-        TxPwr = txPwr;
-        Log.d(TAG, "setTxPwr: set to " + txPwr);
-    }
 
     public void setPathLossExponent(double pathLossExponent) {
         this.pathLossExponent = pathLossExponent;
         Log.d(TAG, "setPathLossExponent: set to " + pathLossExponent);
     }
 
-
-
-
-    int mode = MODE_FINGERPRINTING;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_wi_fi_locating);
-        getSupportActionBar().setTitle("WiFi location");
+        setContentView(R.layout.activity_wifi_locating);
+        Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi Locating");
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         prefs = Preferences.getInstance(getApplicationContext());
-        //mapID = getIntent().getIntExtra("mapID", 0);
-        //map.setMapBackground(mapID);
+        mapManager = MapManager.getInstance(getApplicationContext());
         controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
-        progressBar = findViewById(R.id.progressBar_locateProgress);
-        progressBar.setVisibility(View.INVISIBLE);
-        map.setBlueDotLocked(); //the user is not able to place the dot in this activity, it should be located for them
-        map.hideBlueDot();
-    }
+        progressBarFingerprinting = findViewById(R.id.progressBar_locateProgressFingerprinting);
+        progressBarFingerprinting.setVisibility(View.INVISIBLE);
+        progressBarTrilaterating = findViewById(R.id.progressBar_locateProgressTrilateration);
+        progressBarTrilaterating.setVisibility(View.INVISIBLE);
 
-    @Override
-    public void passLocation(int x, int y) {
-        //TODO
 
-    }
-
-    @Override
-    public void selectMode(int mode) {
-        this.mode = mode;
+        map.addNavDot(TRILATERATION_DOT, startX, startY, R.color.colorTilatDot);
+        map.lockNavDot(TRILATERATION_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        map.hideNavDot(TRILATERATION_DOT);
+        map.addNavDot(FINGERPRINT_DOT, startX, startY, R.color.colorRSSIDot);
+        map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        map.hideNavDot(FINGERPRINT_DOT);
     }
 
     @Override
     public void updateLocation(View view) {
-        switch (mode) {
-            case MODE_FINGERPRINTING:
-                new WiFiFingerprintLocatorTask().execute();
-                break;
-            case MODE_TRILATERATION:
-                new WiFiTrilaterationLocatorTask().execute();
-                break;
-        }
+        new WiFiFingerprintLocatorTask().execute();
+        new WiFiTrilaterationLocatorTask().execute();
     }
 
 
@@ -119,40 +104,43 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            progressBarTrilaterating.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
+            progressBarTrilaterating.setVisibility(View.INVISIBLE);
             if (location == null) {
-                Toast.makeText(WiFiLocatingActivity.this, "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
-                Toast.makeText(WiFiLocatingActivity.this, "Cannot locate", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WiFiLocatingActivity.this,
+                        "Insufficient points in range for trilateration", Toast.LENGTH_LONG).show();
                 findViewById(R.id.btn_locate).setEnabled(true);
                 return;
             }
             int x = location.getX();
             int y = location.getY();
-
+            Log.d(TAG, "onPostExecute: Updating map: x,y = " + x + ", " + y);
             // update map
-            map.setCurrentX(x);
-            map.setCurrentY(y);
-            map.showBlueDot();
+            map.setCurrentX(MapViewFragment.TRILATERATION_DOT, x);
+            map.setCurrentY(MapViewFragment.TRILATERATION_DOT, y);
+            map.showNavDot(MapViewFragment.TRILATERATION_DOT);
+
             findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
+            progressBarTrilaterating.setProgress(values[0]);
         }
 
         @Override
         protected Point doInBackground(Void... voids) {
             Point location = new Point();
             rm = JSONRouterManager.getInstance(getApplicationContext());
-            String routersFilename = prefs.getRoutersFilename();
-            rm.loadIfNotAlready(routersFilename);
+            rm.loadIfNotAlready();
 
-            //Get captures at current location
+            //Get captures at current mapBitmap
             publishProgress(5);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             enableWifi();
@@ -205,23 +193,25 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
                 N = length;
             }
             Log.d(TAG, "doInBackground: N = " + N);
+            if (N < 3) {
+                Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points");
+                return null;
+            }
             List<TrilaterationPoint> NtrilaterationPoints = trilaterationPoints.subList(0, N);
 
 
 
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
-            Log.d(TAG, "doInBackground: Tx = " + TxPwr + ", PathLossExponent = " + pathLossExponent);
             for (TrilaterationPoint point : NtrilaterationPoints) {
                 point.setDistance(
-                        Math.pow(10,  ((TxPwr - point.getRSSI()) / (10 * pathLossExponent))  )
+                        Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
                 );
                 Log.d(TAG, "doInBackground: Distance to router at " + 
                         point.getRouterPoint().getX() + ", " + 
                         point.getRouterPoint().getY() + " is " +
                         point.getDistance() + " @ RSSI " + point.getRSSI());
             }
-            //TODO
             Log.d(TAG, "doInBackground: All data ready for trilateration");
             publishProgress(40);
 
@@ -231,8 +221,18 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             //DUMMY FIXME
             //CREDIT: https://github.com/lemmingapex/Trilateration
             // -->> (adapted)
-            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
-            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
+            double[][] positions = new double[N][2];
+            double[] distances = new double[N];
+            int i = 0;
+            for (TrilaterationPoint p : NtrilaterationPoints) {
+                positions[i][0] = p.getRouterPoint().getX();
+                positions[i][1] = p.getRouterPoint().getY();
+                distances[i] = p.getDistance();
+
+                i++;
+            }
+//            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
+//            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
 
             NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(new TrilaterationFunction(positions, distances), new LevenbergMarquardtOptimizer());
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
@@ -266,7 +266,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+                if (Objects.equals(intent.getAction(), WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
                     boolean success = intent.getBooleanExtra(
                             WifiManager.EXTRA_RESULTS_UPDATED, false);
                     if (success) {
@@ -300,13 +300,13 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
 
 
     /**
-     * Task to asynchronously calculate the users location, by snapping to the nearest fingerprint point.
+     * Task to asynchronously calculate the users mapBitmap, by snapping to the nearest fingerprint point.
      *
      * 1 - setup progress bar
      * 2 - get a wifi scan of the current environment and parse RSSI, MAC to set of captures
      * 3 - compare this set with the set at every fingerprint point,
      * recording the proximity in terms of Euclidean distance
-     * 4 - Select the closest fingerprint points (min(distance)) and snap map location to the fingerprint coordinates
+     * 4 - Select the closest fingerprint points (min(distance)) and snap map mapBitmap to the fingerprint coordinates
      */
     private class WiFiFingerprintLocatorTask extends AsyncTask<Void, Integer, Point> {
         private static final String TAG = "WiFiFingerprintLocatorT";
@@ -318,7 +318,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
         protected void onPreExecute() {
             super.onPreExecute();
             findViewById(R.id.btn_locate).setEnabled(false);
-            progressBar.setVisibility(View.VISIBLE);
+            progressBarFingerprinting.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -327,8 +327,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this, "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
                 Toast.makeText(WiFiLocatingActivity.this, "Cannot locate", Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.INVISIBLE);
-                progressBar.setProgress(0);
+                progressBarFingerprinting.setVisibility(View.INVISIBLE);
+                progressBarFingerprinting.setProgress(0);
                 findViewById(R.id.btn_locate).setEnabled(true);
                 return;
             }
@@ -336,17 +336,17 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             int y = location.getY();
 
             // update map
-            map.setCurrentX(x);
-            map.setCurrentY(y);
-            map.showBlueDot();
-            progressBar.setVisibility(View.INVISIBLE);
+            map.setCurrentX(MapViewFragment.FINGERPRINT_DOT, x);
+            map.setCurrentY(MapViewFragment.FINGERPRINT_DOT, y);
+            map.showNavDot(MapViewFragment.FINGERPRINT_DOT);
+            progressBarFingerprinting.setVisibility(View.INVISIBLE);
             findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            progressBar.setProgress(values[0]);
+            progressBarFingerprinting.setProgress(values[0]);
         }
 
         @Override
@@ -355,7 +355,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements MapViewFr
             fm = JSONFingerprintManager.getInstance(getApplicationContext());
             fm.loadIfNotAlready();
 
-            //Get capture of current location
+            //Get capture of current mapBitmap
             publishProgress(5);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             enableWifi();

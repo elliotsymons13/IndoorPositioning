@@ -3,4 +3,8 @@
     <color name="colorPrimary">#5D576B</color>
     <color name="colorPrimaryDark">#3C3845</color>
     <color name="colorAccent">#C69C72</color>
+    <color name="colorPersistentDot">#808080</color>
+    <color name="colorGenericDot">#425ff4</color>
+    <color name="colorRSSIDot">#F441AC</color>
+    <color name="colorTilatDot">#42F4E2</color>
 </resources>

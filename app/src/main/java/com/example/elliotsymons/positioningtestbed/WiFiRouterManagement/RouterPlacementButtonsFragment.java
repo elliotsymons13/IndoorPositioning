@@ -1,4 +1,4 @@
-package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
+package com.example.elliotsymons.positioningtestbed.WiFiRouterManagement;
 
 
 import android.content.Context;
@@ -14,23 +14,22 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.elliotsymons.positioningtestbed.FingerprintPlacementActivity;
 import com.example.elliotsymons.positioningtestbed.R;
+import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
 
 
-public class FingerprintPlacementButtonsFragment extends Fragment implements View.OnClickListener {
-    private static final String TAG = "PlacementButtonsFragmen";
+public class RouterPlacementButtonsFragment extends Fragment implements View.OnClickListener {
+    private static final String TAG = "RouterButtonsFragment";
 
     TextView tvInfo;
-    private StageProvider stageProvider;
-
 
     DatasetStatusListener datasetStatusListener;
     public interface DatasetStatusListener {
         void clearDataset();
     }
 
-    public FingerprintPlacementButtonsFragment() {
+
+    public RouterPlacementButtonsFragment() {
         // Required empty public constructor
     }
 
@@ -39,11 +38,8 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_fingerprint_placement_buttons, container, false);
+        View view = inflater.inflate(R.layout.fragment_router_placement_buttons, container, false);
         tvInfo = (TextView) view.findViewById(R.id.tv_info);
-        stageProvider = (StageProvider) getActivity();
-        if (stageProvider == null)
-            Log.e(TAG, "onCreateView: STAGE PROVIDER NULL");
 
         Button btn_multipurpose= (Button) view.findViewById(R.id.btn_multiPurpose);
         btn_multipurpose.setOnClickListener(this);
@@ -71,32 +67,32 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
             case R.id.btn_left:
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
-                ((FingerprintPlacementActivity) getActivity()).directionClick(v);
+                ((RouterPlacementActivity) getActivity()).directionClick(v);
                 break;
             case R.id.btn_finishPlacing:
                 Log.d(TAG, "onClick: finish");
-                ((FingerprintPlacementActivity) getActivity()).finishCapturing(v);
+                ((RouterPlacementActivity) getActivity()).finishCapturing(v);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
-                ((FingerprintPlacementActivity) getActivity()).placeOrCaptureStep();
+                ((RouterPlacementActivity) getActivity()).placeRouter(v);
                 break;
             case R.id.btn_deleteDataset:
-                Log.d(TAG, "onClick: delete fingerprints");
+                Log.d(TAG, "onClick: delete routers");
                 AlertDialog.Builder confirmDeleteDialog = new AlertDialog.Builder(getActivity());
-                confirmDeleteDialog.setTitle("Really delete all fingeprints?");
+                confirmDeleteDialog.setTitle("Really delete all routers?");
                 confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         datasetStatusListener.clearDataset();
-                        Log.d(TAG, "onClick: Fingerprints deleted by user");
+                        Log.d(TAG, "onClick: Routers deleted by user");
                     }
                 });
                 confirmDeleteDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.cancel();
-                        Log.d(TAG, "onClick: delete fingerprints cancelled by user");
+                        Log.d(TAG, "onClick: delete routers cancelled by user");
                     }
                 });
                 confirmDeleteDialog.show();
@@ -114,52 +110,18 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        //updateButtonStates(stageProvider.getStage());
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         try {
             datasetStatusListener = (DatasetStatusListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement DatasetStatusListener");
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateButtonStates(stageProvider.getStage());
-    }
-
-
-
-    public void updateButtonStates(String stage) {
-        Button placeCaptureButton = getView().findViewById(R.id.btn_multiPurpose);
-        Log.d(TAG, "updateButtonStates: Updating based on stage: " + stage);
-        switch (stage) {
-            case "Place":
-                getView().findViewById(R.id.btn_up).setEnabled(true);
-                getView().findViewById(R.id.btn_right).setEnabled(true);
-                getView().findViewById(R.id.btn_down).setEnabled(true);
-                getView().findViewById(R.id.btn_left).setEnabled(true);
-                getView().findViewById(R.id.btn_deleteDataset).setEnabled(true);
-                getView().findViewById(R.id.btn_finishPlacing).setEnabled(true);
-                placeCaptureButton.setText(R.string.place);
-                placeCaptureButton.setEnabled(true);
-                break;
-            case "Locked":
-                placeCaptureButton.setEnabled(true);
-                getView().findViewById(R.id.btn_up).setEnabled(false);
-                getView().findViewById(R.id.btn_right).setEnabled(false);
-                getView().findViewById(R.id.btn_down).setEnabled(false);
-                getView().findViewById(R.id.btn_left).setEnabled(false);
-                getView().invalidate();
-                placeCaptureButton.setText(R.string.capture);
-                break;
-            case "Capture":
-                placeCaptureButton.setEnabled(false);
-                getView().findViewById(R.id.btn_deleteDataset).setEnabled(false);
-                getView().findViewById(R.id.btn_finishPlacing).setEnabled(false);
-                getView().invalidate();
-                break;
         }
     }
 }

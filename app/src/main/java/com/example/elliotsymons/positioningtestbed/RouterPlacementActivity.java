@@ -7,55 +7,67 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintManager;
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.FingerprintPlacementButtonsFragment;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPlacementButtonsFragment;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
 
+import java.util.Objects;
 import java.util.Set;
 
-public class RouterPlacementActivity extends AppCompatActivity implements MapViewFragment.LocationPassListener {
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
+
+public class RouterPlacementActivity extends AppCompatActivity implements
+        RouterPlacementButtonsFragment.DatasetStatusListener, TextWatcher {
     private static final String TAG = "RouterPlacementActivity";
 
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
     Button placeCaptureButton;
-    int mapID;
-    String filename;
+    MyMapView myMapView;
     Preferences prefs;
+    UtilityMethods utils;
 
     private RouterManager rm;
 
+    EditText etMAC;
+    EditText etPower;
+    private AlertDialog routerAlertDialog;
+    private Button acceptBtn;
+
     @Override
-    public void passLocation(int x, int y) {
-        //TODO?
+    public void clearDataset() {
+        JSONRouterManager.getInstance(getApplicationContext()).deleteAllRouters();
+        myMapView.removeAllPeristentDots();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_router_placement);
-        getSupportActionBar().setTitle("Router placement");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Router placement");
+        utils = new UtilityMethods(getApplicationContext());
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
+        myMapView = map.getMyMapView();
+        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
+        myMapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
-        //mapID = getIntent().getIntExtra("mapID", 0);
         prefs = Preferences.getInstance(getApplicationContext());
-        //mapID = prefs.getMapID();
-        //map.setMapBackground(mapID);
-        filename = prefs.getRoutersFilename();
 
-        placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
+        placeCaptureButton = buttons.getView().findViewById(R.id.btn_multiPurpose);
 
 
         rm = JSONRouterManager.getInstance(getApplicationContext());
@@ -72,6 +84,55 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         }
     }
 
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        /* Not used*/
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        /* Not used*/
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        boolean macValid = false;
+        boolean powerValid = false;
+
+        if (routerAlertDialog != null) {
+
+            // Check power input
+            String powerValue = etPower.getText().toString();
+            if (powerValue.equals("")) {
+                etPower.setError("Enter a power value");
+            } else if (!powerValue.matches("^[0-9]+(.[0-9]+)?$")) { // and positive number
+                etPower.setError("Positive number needed");
+            } else { //TODO further validation
+                powerValid = true;
+            }
+
+
+            // Check MAC address input
+            String macValue = etMAC.getText().toString();
+            if (macValue.equals("")) {
+                etMAC.setError("Enter a MAC");
+            } else if (!macValue.matches("^[a-fA-F0-9:]{17}|[a-fA-F0-9]{12}$")){
+                etMAC.setError("Invalid MAC address format");
+            } else {
+                macValid = true;
+            }
+
+        }
+
+
+        // Set dialog accept button accordingly:
+        if (powerValid && macValid) {
+            acceptBtn.setEnabled(true);
+        } else {
+            acceptBtn.setEnabled(false);
+        }
+    }
+
     private class RouterLoaderTask extends AsyncTask<String, Void, Void> {
         public static final String TAG = "RouterLoaderTask";
 
@@ -84,13 +145,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
 
         @Override
         protected Void doInBackground(String... strings) {
-            if (strings.length == 1) {
-                rm.loadFile(strings[0]); // passing filename
-                Log.d(TAG, "doInBackground: Loading custom router file " + strings[0]);
-            } else {
-                Log.d(TAG, "doInBackground: Loading default file");
-                rm.loadFile("defaultRoutersFile.json");
-            }
+            rm.loadIfNotAlready();
             return null;
         }
 
@@ -106,16 +161,16 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         int increment = 1;
         switch (v.getId()) {
             case R.id.btn_up:
-                map.setCurrentY(map.getCurrentY() - increment);
+                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) - increment);
                 break;
             case R.id.btn_right:
-                map.setCurrentX(map.getCurrentX() + increment);
+                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_down:
-                map.setCurrentY(map.getCurrentY() + increment);
+                map.setCurrentY(GENERIC_DOT, map.getCurrentY(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_left:
-                map.setCurrentX(map.getCurrentX() - increment);
+                map.setCurrentX(GENERIC_DOT, map.getCurrentX(GENERIC_DOT) - increment);
                 break;
             default:
                 Log.w(TAG, "Invalid direction received");
@@ -125,41 +180,67 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     public void placeRouter(View v) {
         Log.d(TAG, "placeRouter: called");
         //Lock blue dot
-        map.setBlueDotLocked();
+        map.lockNavDot(GENERIC_DOT);
 
-        //Popup for MAC entry
-        AlertDialog.Builder macAlertDialog = new AlertDialog.Builder(this);
-        macAlertDialog.setTitle("Enter MAC address");
+        //Popup for router entry
+        AlertDialog.Builder routerAlertDialogBuilder = new AlertDialog.Builder(this);
+        routerAlertDialogBuilder.setTitle("Enter MAC address");
 
         //Set the content of the popup
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        macAlertDialog.setView(input);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_addrouter, null);
+        routerAlertDialogBuilder.setView(dialogView);
+        etMAC = dialogView.findViewById(R.id.et_mac);
+        etPower = dialogView.findViewById(R.id.et_power);
 
         //Set popup buttons
-        macAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        routerAlertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                rm.addRouter(map.getCurrentX(), map.getCurrentY(),
-                        input.getText().toString());
-                map.addPersistentDot(map.getCurrentX(), map.getCurrentY());
-                Log.d(TAG, "onClick: " + "Added " + input.getText().toString() +
-                        " @ " + map.getCurrentX() + ", " + map.getCurrentY());
-                Toast.makeText(RouterPlacementActivity.this, "Added "
-                        + input.getText().toString() +  " @ "
-                        + map.getCurrentX() + ", " + map.getCurrentY(), Toast.LENGTH_SHORT).show();
+                utils.closeKeyboard();
+                boolean success;
+                try {
+                    success = rm.addRouter(map.getCurrentX(GENERIC_DOT),
+                            map.getCurrentY(GENERIC_DOT), etMAC.getText().toString(),
+                            Double.parseDouble(etPower.getText().toString()));
+                } catch (NumberFormatException e) {
+                    Log.d(TAG, "onClick: No power entered for router");
+                    success = false;
+                }
+
+                if (success) {
+                    map.addPersistentDot(map.getCurrentX(GENERIC_DOT), map.getCurrentY(GENERIC_DOT));
+                    Log.d(TAG, "onClick: " + "Added " + etMAC.getText().toString() +
+                            " @ " + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT)
+                    + ", TxPower = " + etPower.getText().toString());
+                    Toast.makeText(RouterPlacementActivity.this, "Added "
+                            + etMAC.getText().toString() +  " @ "
+                            + map.getCurrentX(GENERIC_DOT) + ", " + map.getCurrentY(GENERIC_DOT)
+                            + ", TxPower = " + etPower.getText().toString()
+                            , Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(RouterPlacementActivity.this,
+                            "Did not add duplicate MAC", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
-        macAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        routerAlertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
+                utils.closeKeyboard();
                 Log.d(TAG, "onClick: Add MAC cancelled by user");
             }
         });
-        macAlertDialog.show();
+        routerAlertDialog = routerAlertDialogBuilder.show();
+        acceptBtn = routerAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        acceptBtn.setEnabled(false);
+        etMAC.addTextChangedListener(this);
+        etPower.addTextChangedListener(this);
+        utils.showKeyboard();
 
-        map.setBlueDotUnlocked();
+        map.unlockNavDot(GENERIC_DOT);
         
     }
 
@@ -170,9 +251,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
         startActivity(intent);
     }
 
-    public void loadRouters() {
-        String filename = "";
-
+    /*public void loadRouters() {
         //Popup for filename entry
         AlertDialog.Builder filenameAlertDialog = new AlertDialog.Builder(this);
         filenameAlertDialog.setTitle("Enter custom filename");
@@ -187,7 +266,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String filename = input.getText().toString() + ".json";
-                prefs.setRoutersFilename(filename);
                 new RouterLoaderTask().execute(filename);
                 Toast.makeText(getApplicationContext(), "Using file specified now", Toast.LENGTH_SHORT).show();
             }
@@ -200,20 +278,14 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
             }
         });
         filenameAlertDialog.show();
-    }
-
+    }*/
 
     @Override
     protected void onPause() {
         super.onPause();
-        prefs.savePrefs(getApplicationContext()); //FIXME call elsewhere also?
-    }
-
-    @Override
-    protected void onDestroy() {
         new RouterSaverTask().execute(rm);
         Log.i(TAG, "onDestroy: Saving routers to file");
-        super.onDestroy();
+        utils.closeKeyboard();
     }
 
     private static class RouterSaverTask extends AsyncTask<RouterManager, Void, Void> {

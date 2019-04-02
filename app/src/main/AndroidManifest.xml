@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".App"
@@ -15,15 +16,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RouterPlacementActivity"></activity>
+        <activity android:name=".RouterPlacementActivity" />
         <activity
             android:name=".WiFiLocatingActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PlacementFingerprintingActivity"
+            android:name=".FingerprintPlacementActivity"
             android:screenOrientation="portrait" />
 
         <service android:name=".WiFiFingerprintManagement.FingerprintingIntentService" />
+
         <activity
             android:name=".WiFiHomeActivity"
             android:screenOrientation="portrait">
