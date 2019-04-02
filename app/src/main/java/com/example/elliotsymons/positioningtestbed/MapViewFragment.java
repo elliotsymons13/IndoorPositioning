@@ -28,7 +28,7 @@ public class MapViewFragment extends Fragment {
     private View rootView;
 
     public static final int GENERIC_DOT = 1;
-    public static final int TRILAT_DOT = 2;
+    public static final int TRILATERATION_DOT = 2;
     public static final int FINGERPRINT_DOT = 3;
 
 

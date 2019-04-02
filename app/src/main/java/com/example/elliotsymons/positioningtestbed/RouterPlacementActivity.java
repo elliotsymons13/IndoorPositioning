@@ -285,15 +285,10 @@ public class RouterPlacementActivity extends AppCompatActivity implements MapVie
     }*/
 
     @Override
-    protected void onDestroy() {
-        new RouterSaverTask().execute(rm);
-        Log.i(TAG, "onDestroy: Saving routers to file");
-        super.onDestroy();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
+        new RouterSaverTask().execute(rm);
+        Log.i(TAG, "onDestroy: Saving routers to file");
         utils.closeKeyboard();
     }
 

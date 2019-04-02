@@ -39,7 +39,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.FINGERPRINT_DOT;
-import static com.example.elliotsymons.positioningtestbed.MapViewFragment.TRILAT_DOT;
+import static com.example.elliotsymons.positioningtestbed.MapViewFragment.TRILATERATION_DOT;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
@@ -77,9 +77,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         progressBarTrilaterating.setVisibility(View.INVISIBLE);
 
 
-        map.addNavDot(TRILAT_DOT, startX, startY, R.color.colorTilatDot);
-        map.lockNavDot(TRILAT_DOT); //the user is not able to place the dot in this activity, it should be located for them
-        map.hideNavDot(TRILAT_DOT);
+        map.addNavDot(TRILATERATION_DOT, startX, startY, R.color.colorTilatDot);
+        map.lockNavDot(TRILATERATION_DOT); //the user is not able to place the dot in this activity, it should be located for them
+        map.hideNavDot(TRILATERATION_DOT);
         map.addNavDot(FINGERPRINT_DOT, startX, startY, R.color.colorRSSIDot);
         map.lockNavDot(FINGERPRINT_DOT); //the user is not able to place the dot in this activity, it should be located for them
         map.hideNavDot(FINGERPRINT_DOT);
@@ -127,9 +127,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             int y = location.getY();
             Log.d(TAG, "onPostExecute: Updating map: x,y = " + x + ", " + y);
             // update map
-            map.setCurrentX(MapViewFragment.TRILAT_DOT, x);
-            map.setCurrentY(MapViewFragment.TRILAT_DOT, y);
-            map.showNavDot(MapViewFragment.TRILAT_DOT);
+            map.setCurrentX(MapViewFragment.TRILATERATION_DOT, x);
+            map.setCurrentY(MapViewFragment.TRILATERATION_DOT, y);
+            map.showNavDot(MapViewFragment.TRILATERATION_DOT);
 
             findViewById(R.id.btn_locate).setEnabled(true);
         }

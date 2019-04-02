@@ -201,12 +201,15 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
     }
 
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        new FingerprintSaverTask().execute(fm);
+        Log.i(TAG, "onDestroy: Saving fingerprints to file");
+    }
 
     @Override
     protected void onDestroy() {
-        new FingerprintSaverTask().execute(fm);
-        Log.i(TAG, "onDestroy: Saving fingerprints to file");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(msgReceiver);
         Log.i(TAG, "onDestroy: Unregistered receivers");
         super.onDestroy();

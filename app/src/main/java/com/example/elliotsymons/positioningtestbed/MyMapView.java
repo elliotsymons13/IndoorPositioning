@@ -30,6 +30,9 @@ public class MyMapView extends AppCompatImageView {
     private Rect displayRect;
     private int MAP_WIDTH;
     private int MAP_HEIGHT;
+    private int ORIGIN_IN_X;
+    private int ORIGIN_IN_Y;
+
 
     private Paint PERSISTENT_DOT_PAINT;
 
@@ -52,22 +55,13 @@ public class MyMapView extends AppCompatImageView {
         //Import map image resource
         String mapURI = prefs.getMapURI();
         mapBackground = mapManager.decodeImageFromURIString(mapURI);
-        if (mapBackground == null) {
-            // remove this map as a possibility, as the image may no longer exist, or be reachable.
-            //TODO
-
-            // redirect the user to the main activity, with back stack cleared
-
-            // finish the current activity, so the user cannot navigate back to here
-            ((Activity) context).finish(); //FIXME works?
-        }
 
         //Size display
         Display display = ((Activity) getContext()).getWindowManager().getDefaultDisplay();
         Point displaySize = new Point();
         display.getSize(displaySize);
         int dispWidth = displaySize.x;
-        int dispHeight = displaySize.y;
+        int dispHeight = displaySize.y; //FIXME
 
         //Calculate dimensions for image
         final int MAP_WIDTH_ORIGINAL = mapBackground.getWidth();
@@ -80,8 +74,22 @@ public class MyMapView extends AppCompatImageView {
         Log.d(TAG, "MyMapView: SF = " + SF);
         MAP_HEIGHT = (int) (MAP_HEIGHT_ORIGINAL * SF);
 
+        // Check this will fit in half of the screen
+        int maxHeight = (int) (dispHeight/2);
+        if (MAP_HEIGHT > maxHeight) {
+            double SF2 = (double) maxHeight / MAP_HEIGHT;
+            MAP_HEIGHT = maxHeight;
+            MAP_WIDTH = (int) (MAP_WIDTH * SF2);
+            Log.d(TAG, "MyMapView: Scaled due to being too tall ");
+        }
+
+        Log.d(TAG, "MyMapView: measured height: " + getRootView().getMeasuredHeight());
+        Log.d(TAG, "MyMapView: measured width: " + getRootView().getMeasuredWidth());
+
         //Construct rectangle container for background sizing
-        displayRect = new Rect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+        ORIGIN_IN_X = (dispWidth-MAP_WIDTH)/2;
+        ORIGIN_IN_Y = 0;
+        displayRect = new Rect(ORIGIN_IN_X, ORIGIN_IN_Y, ( dispWidth - ORIGIN_IN_X ), MAP_HEIGHT);
 
         //Setup Paints
         PERSISTENT_DOT_PAINT = new Paint();
@@ -181,9 +189,9 @@ public class MyMapView extends AppCompatImageView {
      */
     public void updateNavDot(int ID, int x, int y) {
         Log.d(TAG, "setDotY: newY: " + y);
-        if (x < 0 || x > MAP_WIDTH)
+        if (x <= ORIGIN_IN_X || x > (ORIGIN_IN_X + MAP_WIDTH))
             return;
-        if (y < 0 || y > MAP_HEIGHT)
+        if (y <= ORIGIN_IN_Y || y > (ORIGIN_IN_Y + MAP_HEIGHT))
             return;
         for (NavDot p : navigationDots) {
             if (p.getID() == ID) {
@@ -215,7 +223,7 @@ public class MyMapView extends AppCompatImageView {
     }
 
     public void setDotX(int ID, int newX) {
-        if (newX < 0 || newX > MAP_WIDTH)
+        if (newX < ORIGIN_IN_X || newX > (ORIGIN_IN_X + MAP_WIDTH))
             return;
         for (NavDot p : navigationDots) {
             if (p.getID() == ID) {
@@ -228,7 +236,7 @@ public class MyMapView extends AppCompatImageView {
     public void setDotY(int ID, int newY) {
         Log.d(TAG, "setDotY: newY: " + newY);
         Log.d(TAG, "setDotY: map height: " + MAP_HEIGHT);
-        if (newY < 0 || newY > MAP_HEIGHT)
+        if (newY < ORIGIN_IN_Y || newY > (ORIGIN_IN_Y + MAP_HEIGHT))
             return;
         for (NavDot p : navigationDots) {
             if (p.getID() == ID) {
