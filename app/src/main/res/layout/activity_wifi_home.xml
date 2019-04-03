@@ -66,7 +66,7 @@
         android:layout_marginTop="44dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="38dp"
-        android:onClick="addMapBackground"
+        android:onClick="addMap"
         android:text="Add map"
         app:layout_constraintBottom_toTopOf="@+id/btn_routerPlace"
         app:layout_constraintEnd_toEndOf="parent"

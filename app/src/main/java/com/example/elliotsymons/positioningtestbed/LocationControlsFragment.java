@@ -15,31 +15,27 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
-
+/**
+ * Fragment containing all the UI elements for the Locating activity.
+ */
 public class LocationControlsFragment extends Fragment implements
         SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "LocationControlsFragmen";
 
-    private LocationControllerFragmentInteractionListener locationControllerListener;
-
-    TextView pathLossTV, powerTV;
+    TextView pathLossTV;
 
 
     public LocationControlsFragment() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_buttons, container, false);
-
-
         SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
         pathLoss.setOnSeekBarChangeListener(this);
-
         pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
 
         return view;
@@ -50,9 +46,10 @@ public class LocationControlsFragment extends Fragment implements
         super.onAttach(context);
         //make sure the required interfaces are implemented by the parent activity
         try {
-            locationControllerListener = (LocationControllerFragmentInteractionListener) context;
+            LocationControllerFragmentInteractionListener locationControllerListener = (LocationControllerFragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement LocationPassListener");
+            throw new ClassCastException(context.toString() +
+                    " must implement LocationControllerFragmentInteractionListener");
         }
     }
 

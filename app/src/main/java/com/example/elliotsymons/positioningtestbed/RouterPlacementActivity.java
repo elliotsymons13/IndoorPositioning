@@ -3,12 +3,10 @@ package com.example.elliotsymons.positioningtestbed;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,16 +26,19 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERI
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startX;
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY;
 
+/**
+ * Activity allowing users to place routers on a map and enter their details.
+ */
 public class RouterPlacementActivity extends AppCompatActivity implements
         RouterPlacementButtonsFragment.DatasetStatusListener, TextWatcher {
     private static final String TAG = "RouterPlacementActivity";
+    Preferences prefs;
+    UtilityMethods utils;
 
     private MapViewFragment map;
     private RouterPlacementButtonsFragment buttons;
     Button placeCaptureButton;
-    MyMapView myMapView;
-    Preferences prefs;
-    UtilityMethods utils;
+    MapView mapView;
 
     private RouterManager rm;
 
@@ -46,10 +47,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements
     private AlertDialog routerAlertDialog;
     private Button acceptBtn;
 
+    /**
+     * Remove all routers from both the UI and the file system.
+     */
     @Override
     public void clearDataset() {
         JSONRouterManager.getInstance(getApplicationContext()).deleteAllRouters();
-        myMapView.removeAllPeristentDots();
+        mapView.removeAllPeristentDots();
     }
 
     @Override
@@ -60,16 +64,15 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         utils = new UtilityMethods(getApplicationContext());
 
         map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
-        myMapView = map.getMyMapView();
-        myMapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
-        myMapView.setNavDotRadius(GENERIC_DOT, 15);
+        mapView = map.getMapView();
+        mapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
+        mapView.setNavDotRadius(GENERIC_DOT, 15);
         buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
         prefs = Preferences.getInstance(getApplicationContext());
-
         placeCaptureButton = buttons.getView().findViewById(R.id.btn_multiPurpose);
 
-
+        // Load routers from file
         rm = JSONRouterManager.getInstance(getApplicationContext());
         new RouterLoaderTask().execute();
         Log.i(TAG, "onCreate: Loaded routers from file");
@@ -77,10 +80,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         drawExistingRouters();
     }
 
+    /**
+     * Draw all the existing routers on the map.
+     */
     public void drawExistingRouters() {
         Set<RouterPoint> existingRouters = rm.getAllRouters();
         for (RouterPoint point : existingRouters) {
-            myMapView.addPersistentDot(point.getX(), point.getY());
+            mapView.addPersistentDot(point.x, point.y);
         }
     }
 
@@ -107,10 +113,9 @@ public class RouterPlacementActivity extends AppCompatActivity implements
                 etPower.setError("Enter a power value");
             } else if (!powerValue.matches("^[0-9]+(.[0-9]+)?$")) { // and positive number
                 etPower.setError("Positive number needed");
-            } else { //TODO further validation
+            } else {
                 powerValid = true;
             }
-
 
             // Check MAC address input
             String macValue = etMAC.getText().toString();
@@ -121,9 +126,7 @@ public class RouterPlacementActivity extends AppCompatActivity implements
             } else {
                 macValid = true;
             }
-
         }
-
 
         // Set dialog accept button accordingly:
         if (powerValid && macValid) {
@@ -133,6 +136,9 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Task to asynchronously load all of the routers from the file
+     */
     private class RouterLoaderTask extends AsyncTask<String, Void, Void> {
         public static final String TAG = "RouterLoaderTask";
 
@@ -157,30 +163,41 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Handle a press of any of the directional buttons.
+     * @param v Button view
+     */
     public void directionClick(View v) {
         int increment = 1;
         switch (v.getId()) {
             case R.id.btn_up:
-                myMapView.setDotY(GENERIC_DOT, myMapView.getDotY(GENERIC_DOT) - increment);
+                mapView.setDotY(GENERIC_DOT, mapView.getDotY(GENERIC_DOT) - increment);
                 break;
             case R.id.btn_right:
-                myMapView.setDotX(GENERIC_DOT, myMapView.getDotX(GENERIC_DOT) + increment);
+                mapView.setDotX(GENERIC_DOT, mapView.getDotX(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_down:
-                myMapView.setDotY(GENERIC_DOT, myMapView.getDotY(GENERIC_DOT) + increment);
+                mapView.setDotY(GENERIC_DOT, mapView.getDotY(GENERIC_DOT) + increment);
                 break;
             case R.id.btn_left:
-                myMapView.setDotX(GENERIC_DOT, myMapView.getDotX(GENERIC_DOT) - increment);
+                mapView.setDotX(GENERIC_DOT, mapView.getDotX(GENERIC_DOT) - increment);
                 break;
             default:
                 Log.w(TAG, "Invalid direction received");
         }
     }
-    
+
+    /**
+     * Method called when the user presses 'place router'.
+     *
+     * Allows the user ot enter the detaisl for a new router (in a dialog popup).
+     * Saves this new router to file, while also adding to the UI.
+     * @param v
+     */
     public void placeRouter(View v) {
         Log.d(TAG, "placeRouter: called");
         //Lock blue dot
-        myMapView.lockNavDot(GENERIC_DOT);
+        mapView.lockNavDot(GENERIC_DOT);
 
         //Popup for router entry
         AlertDialog.Builder routerAlertDialogBuilder = new AlertDialog.Builder(this);
@@ -200,8 +217,8 @@ public class RouterPlacementActivity extends AppCompatActivity implements
                 utils.closeKeyboard();
                 boolean success;
                 try {
-                    success = rm.addRouter(myMapView.getDotX(GENERIC_DOT),
-                            myMapView.getDotY(GENERIC_DOT), etMAC.getText().toString(),
+                    success = rm.addRouter(mapView.getDotX(GENERIC_DOT),
+                            mapView.getDotY(GENERIC_DOT), etMAC.getText().toString(),
                             Double.parseDouble(etPower.getText().toString()));
                 } catch (NumberFormatException e) {
                     Log.d(TAG, "onClick: No power entered for router");
@@ -209,13 +226,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements
                 }
 
                 if (success) {
-                    myMapView.addPersistentDot(myMapView.getDotX(GENERIC_DOT), myMapView.getDotY(GENERIC_DOT));
+                    mapView.addPersistentDot(mapView.getDotX(GENERIC_DOT), mapView.getDotY(GENERIC_DOT));
                     Log.d(TAG, "onClick: " + "Added " + etMAC.getText().toString() +
-                            " @ " + myMapView.getDotX(GENERIC_DOT) + ", " + myMapView.getDotY(GENERIC_DOT)
+                            " @ " + mapView.getDotX(GENERIC_DOT) + ", " + mapView.getDotY(GENERIC_DOT)
                     + ", TxPower = " + etPower.getText().toString());
                     Toast.makeText(RouterPlacementActivity.this, "Added "
                             + etMAC.getText().toString() +  " @ "
-                            + myMapView.getDotX(GENERIC_DOT) + ", " + myMapView.getDotY(GENERIC_DOT)
+                            + mapView.getDotX(GENERIC_DOT) + ", " + mapView.getDotY(GENERIC_DOT)
                             + ", TxPower = " + etPower.getText().toString()
                             , Toast.LENGTH_LONG).show();
                 } else {
@@ -239,46 +256,18 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         etMAC.addTextChangedListener(this);
         etPower.addTextChangedListener(this);
         utils.showKeyboard();
-
-        myMapView.unlockNavDot(GENERIC_DOT);
-        
+        mapView.unlockNavDot(GENERIC_DOT);
     }
 
-
+    /**
+     * Tidy up and return to the main activity (called when the user presses 'save/exit').
+     * @param view Button view.
+     */
     public void finishCapturing(View view) {
         Intent intent = new Intent(this, WiFiHomeActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
-
-    /*public void loadRouters() {
-        //Popup for filename entry
-        AlertDialog.Builder filenameAlertDialog = new AlertDialog.Builder(this);
-        filenameAlertDialog.setTitle("Enter custom filename");
-
-        //Set the content of the popup
-        final EditText input = new EditText(getApplicationContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        filenameAlertDialog.setView(input);
-
-        //Set popup buttons
-        filenameAlertDialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String filename = input.getText().toString() + ".json";
-                new RouterLoaderTask().execute(filename);
-                Toast.makeText(getApplicationContext(), "Using file specified now", Toast.LENGTH_SHORT).show();
-            }
-        });
-        filenameAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-                Log.d(TAG, "onClick: Add custom filename cancelled by user");
-            }
-        });
-        filenameAlertDialog.show();
-    }*/
 
     @Override
     protected void onPause() {
@@ -288,6 +277,9 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         utils.closeKeyboard();
     }
 
+    /**
+     * Task for saving routers to file asynchronously.
+     */
     private static class RouterSaverTask extends AsyncTask<RouterManager, Void, Void> {
         public static final String TAG = "RouterSaverTask";
 

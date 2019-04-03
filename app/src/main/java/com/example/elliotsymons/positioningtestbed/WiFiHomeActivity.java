@@ -35,21 +35,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * The 'main' screen of the whole application.
+ *
+ * Provided the users with options to setup routers, fingerprints, or to locate.
+ * Also maintains a selectable lists of maps.
+ */
 public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerViewAdapter.ItemClickListener, TextWatcher {
-
     private static final String TAG = "WiFiHomeActivity";
-
-    private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
-    public static final int PERMISSIONS_RQ_WRITE_EXTERNAL = 3;
-
-    public static final int PICK_IMAGE_REQUEST = 1;
-
-    WifiManager wifiManager;
     Preferences prefs;
     UtilityMethods utils;
+
+    public static final int PICK_IMAGE_REQUEST = 1;
+    private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
+    public static final int PERMISSIONS_RQ_WRITE_EXTERNAL = 3;
+    private final float MAP_SCALING_THRESHOLD = 1.5f;
+
+    WifiManager wifiManager;
     MapsRecyclerViewAdapter mapListAdapter;
     private MapManager mapManager;
-    private final float MAP_SCALING_THRESHOLD = 1.5f;
 
     String newMapName;
     AlertDialog mapNameAlertDialog;
@@ -89,8 +93,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             Log.d(TAG, "onCreate: External storage permission not granted. Requesting grant. ");
             requestStoragePermission();
         }
-
-
+        // Location permission
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (manager != null && !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -106,7 +109,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
             Log.d(TAG, "onCreate: List of maps loaded from file");
         }
 
-
+        // Setup maps recycler view
         RecyclerView mapRecyclerView = findViewById(R.id.rv_maps);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mapRecyclerView.setLayoutManager(layoutManager);
@@ -130,6 +133,9 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         mapListAdapter.setSelectedRow(mapManager.getSelected());
     }
 
+    /**
+     * Create a dialog to inform the user of an incoming request for location permission.
+     */
     private void requestLocationPermission() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Location permission must be enabled for this app to function. Enable it?")
@@ -142,22 +148,30 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         dialog.cancel();
-                        Toast.makeText(WiFiHomeActivity.this, "App may function incorrectly", Toast.LENGTH_LONG).show();
+                        Toast.makeText(WiFiHomeActivity.this,
+                                "Permission required, exiting", Toast.LENGTH_LONG).show();
+                        finish();
                     }
                 });
         final AlertDialog alert = builder.create();
         alert.show();
     }
 
+    /**
+     * Android system call to ask for location permission.
+     */
     private void grantLocationPermission() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 PERMISSIONS_RQ_FINE_LOCATION);
     }
 
+    /**
+     * Create a dialog to inform the user of an incoming request for external storage permission.
+     */
     private void requestStoragePermission() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Storage permission needed to add images. Enable it?")
+        builder.setTitle("Storage permission is needed to add map images. Enable it?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
@@ -167,7 +181,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int id) {
                         dialog.cancel();
-                        Toast.makeText(WiFiHomeActivity.this, "Permission required, exiting", Toast.LENGTH_LONG).show();
+                        Toast.makeText(WiFiHomeActivity.this,
+                                "Permission required, exiting", Toast.LENGTH_LONG).show();
                         finish();
                     }
                 });
@@ -175,12 +190,18 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         alert.show();
     }
 
+    /**
+     * Android system call to ask for storage permission.
+     */
     private void grantStoragePermission() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 PERMISSIONS_RQ_WRITE_EXTERNAL);
     }
 
+    /**
+     * Dialog requesting the user ot enable the location setting, used if it is disabled.
+     */
     private void requestLocationEnabled() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Location setting must be enabled for this app to function. Enable it?")
@@ -211,6 +232,18 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                 } else {
                     //permission was not granted
                     Toast.makeText(this, "Location permissions must be granted", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            }
+            case PERMISSIONS_RQ_WRITE_EXTERNAL: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //permission was granted
+                } else {
+                    //permission was not granted
+                    Toast.makeText(this, "Storage permissions must be granted", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
             }
@@ -228,6 +261,10 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         }
     }
 
+    /**
+     * Transition to router placement activity.
+     * @param view Button view.
+     */
     public void routerPlacementSelected(View view) {
         if (prefs.getMapURI() == null) {
             Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
@@ -240,7 +277,8 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     }
 
     /**
-     * Transition to fingerprinting menu activity.
+     * Transition to fingerprinting activity.
+     * @param view Button view.
      */
     public void fingerprintingSelected(View view) {
         if (prefs.getMapURI() == null) {
@@ -253,6 +291,10 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         startActivity(transitionToFingerprinting);
     }
 
+    /**
+     * Transition to locating activity.
+     * @param view Button view.
+     */
     public void locatingSelected(View view) {
         if (prefs.getMapURI() == null) {
             Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
@@ -268,8 +310,12 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     Bitmap newMapBitmap;
     boolean mapBitmapSelected;
 
-    public void addMapBackground(View view) {
-        Log.d(TAG, "addMapBackground: Adding new map");
+    /**
+     * Add an additional map to the set of maps stored for use in the application.
+     * @param view Calling view (button).
+     */
+    public void addMap(View view) {
+        Log.d(TAG, "addMap: Adding new map");
         mapBitmapSelected = false;
 
         //Popup for map name entry
@@ -281,7 +327,6 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         View dialogView = inflater.inflate(R.layout.dialog_addmap, null);
         mapNameAlertDialogBuilder.setView(dialogView);
         mapNameInput = dialogView.findViewById(R.id.et_mapName);
-
 
         //Set popup buttons
         mapNameAlertDialogBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
@@ -296,12 +341,14 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
                     int width = newMapBitmap.getWidth();
 
                     if (height/width > MAP_SCALING_THRESHOLD || width/height > MAP_SCALING_THRESHOLD) {
+                        // image is not acceptably proportioned
                         Log.d(TAG, "onClick: Image of inappropriate size");
                         Toast.makeText(WiFiHomeActivity.this,
                                 "Inappropriately proportioned image", Toast.LENGTH_SHORT).show();
                         Toast.makeText(WiFiHomeActivity.this,
                                 "Image should be 3:2 or 'squarer'", Toast.LENGTH_LONG).show();
                     } else {
+                        // image is acceptably proportioned
                         String newMapUri = getImageUri(getApplicationContext(), newMapBitmap).toString();
                         MapData newMap = new MapData(newMapName, newMapUri);
                         mapManager.addMap(newMap); //add to persistent list
@@ -328,13 +375,18 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         utils.showKeyboard();
     }
 
+    /**
+     * Remove the currently selected map from the application.
+     * @param view Calling button / view.
+     */
     public void deleteMap(View view) {
         mapManager.deleteMap(mapManager.getSelected());
         mapListAdapter.notifyDataSetChanged();
         prefs.setMapURI(null); // stops the user advancing using a stale map URI
-        mapListAdapter.setSelectedRow(-1);
+        mapListAdapter.setSelectedRow(-1); // shows as no row selected
     }
 
+    // update dialog button accept state based on boolean flags
     private void setDialogButtonStatus() {
         if (nameValid && mapBitmapSelected) {
             acceptBtn.setEnabled(true);
@@ -343,11 +395,24 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
         }
     }
 
+    /**
+     * Find the Uri of a specified image.
+     *
+     * @param context The current application context.
+     * @param inImage The Bitmap from which to extract the Uri.
+     * @return The URI of the image inImage.
+     */
     public Uri getImageUri(Context context, Bitmap inImage) {
         String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
         return Uri.parse(path);
     }
 
+    /**
+     * Allow the user to choose an image file for a map.
+     * The default system file manager is used (on is built in on recent android versions).
+     *
+     * @param view Calling button / view.
+     */
     public void selectNewMapFile(View view) {
         //Select map image resource
         Intent intent = new Intent();
@@ -362,6 +427,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // oon receipt of image chosen externally by the user ...
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK &&
                 data != null && data.getData() != null) {
 
@@ -389,6 +455,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
     protected void onPause() {
         super.onPause();
         MapManager.getInstance(getApplicationContext()).saveMaps();
+        prefs.savePrefs(getApplicationContext());
         utils.closeKeyboard();
     }
 

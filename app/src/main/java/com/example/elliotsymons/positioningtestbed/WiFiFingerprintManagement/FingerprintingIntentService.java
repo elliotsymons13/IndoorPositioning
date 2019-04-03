@@ -27,6 +27,9 @@ import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.App.CHANNEL_ID;
 
+/**
+ * Service which carries out wifi fingerprinting off the UI thread.
+ */
 public class FingerprintingIntentService extends IntentService {
     private static final String TAG = "Fingerpr.IntentServ";
 
@@ -100,9 +103,7 @@ public class FingerprintingIntentService extends IntentService {
         }
         List<ScanResult> scanResults = wifiManager.getScanResults();
 
-
         //extract needed values
-
         Set<Capture> captures = new HashSet<>();
         for (ScanResult result : scanResults) {
             captures.add(new Capture(result.BSSID, Math.abs(result.level)));
@@ -154,6 +155,8 @@ public class FingerprintingIntentService extends IntentService {
             text += "MAC : " + result.BSSID + "\n";
             text += "RSSI: " + result.level + "\n";
         }
+
+        //FIXME trigger here, rather than busy wait
     }
 
     private void onScanFailure() {

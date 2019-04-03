@@ -14,25 +14,29 @@ import org.json.JSONObject;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Singleton class providing storage for fingerprint data, with JSON file backing.
+ */
 public class JSONFingerprintManager implements FingerprintManager {
     private static final String TAG = "JSONFingerprintManager";
     private static JSONFingerprintManager instance; //singleton
     private Context applicationContext;
 
     private final String fingerprintDirectoryPath = "/fingerprints";
-    private MapManager mapManager;
     private String filename;
     private boolean loaded = false;
 
     //JSON file storage
     private JSONObject jsonRoot;
-    private JSONObject fingerprintData;
     private JSONArray fingerprints;
 
     //Local 'live' storage
     private Set<FingerprintPoint> points;
     private int maxID;
 
+    /**
+     * Remove all fingerprints from the file system, and from the 'live' data in the application session.
+     */
     @Override
     public void deleteAllFingerprints() {
         //Delete file
@@ -51,7 +55,7 @@ public class JSONFingerprintManager implements FingerprintManager {
      * */
     private JSONFingerprintManager(Context context) {
         this.applicationContext = context;
-        mapManager = MapManager.getInstance(context);
+        MapManager mapManager = MapManager.getInstance(context);
         try {
             filename = mapManager.getMapData(mapManager.getSelected()).getName() + ".json";
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -70,12 +74,16 @@ public class JSONFingerprintManager implements FingerprintManager {
      * <--
      * */
 
+    /**
+     * Delete the current instance of the singleton (forces a constructor call on the next use).
+     */
     @Override
     public void destroyInstance() {
         save();
         instance = null;
     }
 
+    // Setup the fingerprint file
     private void initialise() {
         try {
             String json = "{\"fingerprint-data\":{\"points\":[]}}";
@@ -92,6 +100,9 @@ public class JSONFingerprintManager implements FingerprintManager {
         }
     }
 
+    /**
+     * Load fingerprints from file, if they have nto already been loaded in this session.
+     */
     @Override
     public void loadIfNotAlready() {
         if (!loaded) {
@@ -99,6 +110,8 @@ public class JSONFingerprintManager implements FingerprintManager {
         }
     }
 
+    // Load fingerprints from file
+    // Method handles cases such as no file, incorrect formatting, etc. internally.
     private void load() {
         String jsonString = "";
         loaded = true;
@@ -130,7 +143,7 @@ public class JSONFingerprintManager implements FingerprintManager {
         int ID = 0;
         try {
             jsonRoot = new JSONObject(jsonString);
-            fingerprintData = jsonRoot.getJSONObject("fingerprint-data");
+            JSONObject fingerprintData = jsonRoot.getJSONObject("fingerprint-data");
             fingerprints = fingerprintData.getJSONArray("points");
 
 
@@ -157,9 +170,16 @@ public class JSONFingerprintManager implements FingerprintManager {
         maxID = ID; //record highest current ID
     }
 
+    /**
+     * Add a new fingerprint to the dataset.
+     * @param X The X coordinate of the captured point.
+     * @param Y The Y coordinate of the captured point.
+     * @param captures The set of Captures made at this location.
+     */
     public void addFingerprint(int X, int Y, Set<Capture> captures) {
         FingerprintPoint point = new FingerprintPoint(++maxID, X, Y, captures);
 
+        // Check to see if a capture already exists at that location.
         for (FingerprintPoint pointTemp : points) {
             if (pointTemp.equals(point)) {
                 Log.i(TAG, "Did not add point at existing location. ");
@@ -169,6 +189,7 @@ public class JSONFingerprintManager implements FingerprintManager {
         Log.i(TAG, "Point did not yet exist, added. ");
         points.add(point);
 
+        // Add the point to the file
         try {
             JSONArray newCaptures = new JSONArray();
             for (Capture cap : captures) {
@@ -191,24 +212,17 @@ public class JSONFingerprintManager implements FingerprintManager {
         }
     }
 
-    public FingerprintPoint getFingerprintByXY(int x, int y) {
-        for (FingerprintPoint point : points) {
-            if (point.getX() == x && point.getY() == y) {
-                return point;
-            }
-        }
-        return null; //if point not found
-    }
-
-    public boolean fingerprintXYexists(int X, int Y) {
-        return (getFingerprintByXY(X, Y) != null);
-    }
-
+    /**
+     * @return The set of all fingerprints.
+     */
     @Override
     public Set<FingerprintPoint> getAllFingerprints() {
         return points;
     }
 
+    /**
+     * Save the fingerprints to file.
+     */
     public void save() {
         if (loaded) {
             try {
@@ -228,9 +242,5 @@ public class JSONFingerprintManager implements FingerprintManager {
         } else {
         Log.d(TAG, "save: Not saving, as not yet loaded from file");
         }
-    }
-
-    public String fileToString() {
-        return jsonRoot.toString();
     }
 }

@@ -7,4 +7,5 @@
     <color name="colorGenericDot">#425ff4</color>
     <color name="colorRSSIDot">#F441AC</color>
     <color name="colorTilatDot">#42F4E2</color>
+    <color name="colorSelected">#d1d5d6</color>
 </resources>
