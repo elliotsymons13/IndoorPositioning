@@ -63,6 +63,11 @@ public class JSONRouterManager implements RouterManager {
      * <--
      * */
 
+    public void deleteFile(String filename) {
+        File toDelete = new File(applicationContext.getFilesDir() + routerDirectoryPath, filename+".json");
+        toDelete.delete();
+    }
+
     public void destroyInstance() {
         save();
         instance = null;

@@ -50,6 +50,11 @@ public class JSONFingerprintManager implements FingerprintManager {
         Toast.makeText(applicationContext, "Fingerprints deleted", Toast.LENGTH_SHORT).show();
     }
 
+    public void deleteFile(String filename) {
+        File toDelete = new File(applicationContext.getFilesDir() + fingerprintDirectoryPath, filename+".json");
+        toDelete.delete();
+    }
+
     /*
      * Singleton support -->
      * */

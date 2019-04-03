@@ -30,6 +30,9 @@ import android.widget.Toast;
 
 import com.example.elliotsymons.positioningtestbed.MapManagement.MapData;
 import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
+import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
+import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -380,6 +383,9 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
      * @param view Calling button / view.
      */
     public void deleteMap(View view) {
+        String name = mapManager.getMapData(mapManager.getSelected()).getName();
+        JSONRouterManager.getInstance(getApplicationContext()).deleteFile(name);
+        JSONFingerprintManager.getInstance(getApplicationContext()).deleteFile(name);
         mapManager.deleteMap(mapManager.getSelected());
         mapListAdapter.notifyDataSetChanged();
         prefs.setMapURI(null); // stops the user advancing using a stale map URI
