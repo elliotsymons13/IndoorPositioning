@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="Fingerprinting"
         android:textColor="@color/colorRSSIDot"
@@ -35,7 +34,7 @@
         app:layout_constraintBottom_toTopOf="@+id/progressBar_locateProgressTrilateration"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar_correlationThreshold" />
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_pathLoss" />
 
     <ProgressBar
         android:id="@+id/progressBar_locateProgressTrilateration"
@@ -54,7 +53,7 @@
 
     <Button
         android:id="@+id/btn_locate"
-        android:layout_width="0dp"
+        android:layout_width="395dp"
         android:layout_height="60dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
@@ -77,51 +76,21 @@
         android:max="10"
         android:minHeight="70dp"
         android:progress="7"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar_correlationThreshold"
+        app:layout_constraintBottom_toTopOf="@+id/progressBar_locateProgressFingerprinting"
         app:layout_constraintEnd_toStartOf="@+id/tv_pathLoss"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_trillaterationDeets"
-        app:layout_constraintVertical_chainStyle="spread_inside" />
-
-    <SeekBar
-        android:id="@+id/seekBar_correlationThreshold"
-        style="@style/Widget.AppCompat.SeekBar"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:max="50"
-        android:minHeight="70dp"
-        android:progress="5"
-        app:layout_constraintBottom_toTopOf="@+id/progressBar_locateProgressFingerprinting"
-        app:layout_constraintEnd_toStartOf="@+id/tv_correlationThreshold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar_pathLoss" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_fingeprintingDeets" />
 
     <TextView
         android:id="@+id/tv_pathLoss"
         android:layout_width="100dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:text="PthLss\n7/10"
         app:layout_constraintBottom_toBottomOf="@+id/seekBar_pathLoss"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/seekBar_pathLoss"
         app:layout_constraintTop_toTopOf="@+id/seekBar_pathLoss" />
-
-    <TextView
-        android:id="@+id/tv_correlationThreshold"
-        android:layout_width="100dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="Correlation threshold\n5"
-        app:layout_constraintBottom_toBottomOf="@+id/seekBar_correlationThreshold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/seekBar_correlationThreshold"
-        app:layout_constraintTop_toTopOf="@+id/seekBar_correlationThreshold" />
 
     <TextView
         android:id="@+id/tv_trillaterationDeets"
@@ -132,8 +101,9 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="Trilateration"
+        android:textAlignment="viewStart"
         android:textColor="@color/colorTilatDot"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar_pathLoss"
+        app:layout_constraintBottom_toTopOf="@+id/tv_pathLoss"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tv_fingeprintingDeets"
         app:layout_constraintTop_toTopOf="parent" />
