@@ -14,6 +14,10 @@ import com.example.elliotsymons.positioningtestbed.MapManagement.MapManager;
 
 import java.util.List;
 
+/**
+ * Adapter controlling the RecyclerView used to display the set of maps stored in the application.
+ * Allows the user to select a map from those displayed.
+ */
 public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "MapsRecyclerViewAdapter";
 
@@ -50,14 +54,14 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         holder.contentView.setSelected(selectedRow == position);
     }
 
-    // total number of rows
     @Override
     public int getItemCount() {
         return data.size();
     }
 
-
-    // stores and recycles views as they are scrolled off screen
+    /**
+     * Class used for a single 'row' in the recycler view.
+     */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView nameTextView, filepathTextView;
         ConstraintLayout contentView;
@@ -90,15 +94,10 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
         notifyItemChanged(selectedRow);
     }
 
-    public int getSelectedRow() {
-        return selectedRow;
-    }
-
     void setClickListener(ItemClickListener itemClickListener) {
         this.clickListener = itemClickListener;
     }
 
-    // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
     }

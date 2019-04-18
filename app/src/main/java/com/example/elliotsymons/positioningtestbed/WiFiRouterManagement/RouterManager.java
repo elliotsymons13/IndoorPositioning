@@ -1,9 +1,10 @@
 package com.example.elliotsymons.positioningtestbed.WiFiRouterManagement;
 
-import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Capture;
-
 import java.util.Set;
 
+/**
+ * Interface specifying the requirements for a class managing the storage of routers.
+ */
 public interface RouterManager {
     void save();
     void loadIfNotAlready();

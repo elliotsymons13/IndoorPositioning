@@ -2,20 +2,20 @@ package com.example.elliotsymons.positioningtestbed;
 
 import android.graphics.Paint;
 
+/**
+ * Class representing on of the user-placeable dots in the MapView.
+ */
 public class NavDot {
     private int x;
     private int y;
     private int r;
-
-
-
     private int ID;
     private boolean locked = false;
     private boolean visible = true;
 
     private Paint paint;
 
-    public NavDot(int ID, int x, int y, Paint paint) {
+    NavDot(int ID, int x, int y, Paint paint) {
         this.ID = ID;
         this.paint = paint;
         this.x = x;
@@ -23,7 +23,7 @@ public class NavDot {
         r = 15;
     }
 
-    public int getID() {
+    int getID() {
         return ID;
     }
 
@@ -55,27 +55,23 @@ public class NavDot {
         this.r = r;
     }
 
-    public Paint getPaint() {
+    Paint getPaint() {
         return paint;
     }
 
-    public void setPaint(Paint paint) {
-        this.paint = paint;
-    }
-
-    public boolean isLocked() {
+    boolean isLocked() {
         return locked;
     }
 
-    public void setLocked(boolean locked) {
+    void setLocked(boolean locked) {
         this.locked = locked;
     }
 
-    public boolean isVisible() {
+    boolean isVisible() {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    void setVisible(boolean visible) {
         this.visible = visible;
     }
 }

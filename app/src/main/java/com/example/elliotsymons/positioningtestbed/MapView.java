@@ -20,7 +20,10 @@ import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
 
-public class MyMapView extends AppCompatImageView {
+/**
+ * Custom ImageView which implements a map with various positionable 'dots' (using a Canvas).
+ */
+public class MapView extends AppCompatImageView {
     private static final String TAG = "MyMapView";
     private Preferences prefs;
     private MapManager mapManager;
@@ -40,11 +43,11 @@ public class MyMapView extends AppCompatImageView {
     private Set<NavDot> navigationDots;
 
     //Default constructor, calls through
-    public MyMapView(Context context) {
+    public MapView(Context context) {
         this(context, null);
     }
 
-    public MyMapView(Context context, AttributeSet attributeSet) {
+    public MapView(Context context, AttributeSet attributeSet) {
         super(context);
         prefs = Preferences.getInstance(getContext());
         mapManager = MapManager.getInstance(getContext());
@@ -58,7 +61,7 @@ public class MyMapView extends AppCompatImageView {
         Point displaySize = new Point();
         display.getSize(displaySize);
         int dispWidth = displaySize.x;
-        int dispHeight = displaySize.y; //FIXME
+        int dispHeight = displaySize.y;
 
         //Calculate dimensions for image
         final int MAP_WIDTH_ORIGINAL = mapBackground.getWidth();

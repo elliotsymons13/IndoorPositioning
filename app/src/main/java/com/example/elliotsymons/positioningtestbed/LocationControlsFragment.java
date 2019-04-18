@@ -12,46 +12,31 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
-
+/**
+ * Fragment containing all the UI elements for the Locating activity.
+ */
 public class LocationControlsFragment extends Fragment implements
         SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "LocationControlsFragmen";
 
-<<<<<<< Updated upstream
-    private LocationControllerFragmentInteractionListener locationControllerListener;
-
-    TextView pathLossTV, powerTV;
-=======
-    TextView pathLossTV, correlationThresholdTV;
->>>>>>> Stashed changes
+    TextView pathLossTV;
 
 
     public LocationControlsFragment() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_buttons, container, false);
-
-
         SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
-        SeekBar correlationThreshold = view.findViewById(R.id.seekBar_correlationThreshold);
         pathLoss.setOnSeekBarChangeListener(this);
-<<<<<<< Updated upstream
-
-=======
-        correlationThreshold.setOnSeekBarChangeListener(this);
->>>>>>> Stashed changes
         pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
-        correlationThresholdTV = view.findViewById(R.id.tv_correlationThreshold);
 
         return view;
     }
@@ -61,26 +46,20 @@ public class LocationControlsFragment extends Fragment implements
         super.onAttach(context);
         //make sure the required interfaces are implemented by the parent activity
         try {
-            locationControllerListener = (LocationControllerFragmentInteractionListener) context;
+            LocationControllerFragmentInteractionListener locationControllerListener = (LocationControllerFragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement LocationPassListener");
+            throw new ClassCastException(context.toString() +
+                    " must implement LocationControllerFragmentInteractionListener");
         }
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (i == 0) {
-            Toast.makeText(getContext(), "Cannot be 0", Toast.LENGTH_SHORT).show();
-        }
         switch(seekBar.getId()) {
             case R.id.seekBar_pathLoss:
                 ((WiFiLocatingActivity) getActivity()).setPathLossExponent(i);
                 pathLossTV.setText("PthLss\n"+ i + "/10");
                 break;
-            case R.id.seekBar_correlationThreshold:
-                ((WiFiLocatingActivity) getActivity()).setCorrelationThreshold(i);
-                correlationThresholdTV.setText("Correlation threshold\n"+i);
-
         }
     }
 

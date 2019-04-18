@@ -1,12 +1,21 @@
 package com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement;
 
+import android.graphics.Point;
+
 import java.util.*;
 
+
+/**
+ * A location on the map, specified for fingerprinting by the user.
+ *
+ * Stores the location of the point (x, y), and an identifying ID, along with the set of Captures
+ * at that location.
+ */
 public class FingerprintPoint extends Point {
-    private int ID, X, Y;
+    private int ID;
     private Set<Capture> captures;
 
-    public FingerprintPoint(int ID, int X, int Y, Set<Capture> captures) {
+    FingerprintPoint(int ID, int X, int Y, Set<Capture> captures) {
         super(X, Y);
         this.ID = ID;
         this.captures = captures;
@@ -22,7 +31,7 @@ public class FingerprintPoint extends Point {
         }
         return "FingerprintPoint{" +
                 "ID = " + ID + ", " +
-                "X, Y = (" + X + ", " + Y + "), " +
+                "X, Y = (" + x + ", " + y + "), " +
                 "captures = {\n" + capStr + "}";
     }
 
@@ -38,8 +47,8 @@ public class FingerprintPoint extends Point {
 
         //We know that obj is of this class
         FingerprintPoint fp = (FingerprintPoint) obj;
-        if ((this.X == (fp.getX())) &&
-            (this.Y == (fp.getY())) ) {
+        if ((this.x == (fp.x)) &&
+            (this.y == (fp.y)) ) {
             return true;
         }
         return false;

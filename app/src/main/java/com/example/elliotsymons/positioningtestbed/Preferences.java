@@ -6,6 +6,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * Singleton class storing any user preferences, and managing their persistence.
+ */
 public class Preferences {
     private static final String TAG = "Preferences";
     private static volatile Preferences instance = null;

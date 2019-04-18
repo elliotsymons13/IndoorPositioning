@@ -22,6 +22,9 @@ import java.util.ArrayList;
 
 import java.util.List;
 
+/**
+ * Class providing a record of maps added by the user, which manages persisting this to file.
+ */
 public class MapManager {
     private static final String TAG = "MapManager";
     private static MapManager instance; //singleton

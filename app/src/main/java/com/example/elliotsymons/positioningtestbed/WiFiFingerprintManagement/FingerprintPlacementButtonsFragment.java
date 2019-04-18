@@ -17,7 +17,10 @@ import android.widget.TextView;
 import com.example.elliotsymons.positioningtestbed.FingerprintPlacementActivity;
 import com.example.elliotsymons.positioningtestbed.R;
 
-
+/**
+ * Fragment containing control buttons for and associated functionality for placing fingerprints
+ * on a map view in the same activity.
+ */
 public class FingerprintPlacementButtonsFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "PlacementButtonsFragmen";
 
@@ -45,7 +48,7 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
         if (stageProvider == null)
             Log.e(TAG, "onCreateView: STAGE PROVIDER NULL");
 
-        Button btn_multipurpose= (Button) view.findViewById(R.id.btn_multiPurpose);
+        Button btn_multipurpose= view.findViewById(R.id.btn_multiPurpose);
         btn_multipurpose.setOnClickListener(this);
         ImageButton btn_left = view.findViewById(R.id.btn_left);
         btn_left.setOnClickListener(this);
@@ -55,27 +58,30 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
         btn_right.setOnClickListener(this);
         ImageButton btn_down = view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
-        Button btn_finish = (Button) view.findViewById(R.id.btn_finishPlacing);
+        Button btn_finish = view.findViewById(R.id.btn_finishPlacing);
         btn_finish.setOnClickListener(this);
-        Button btn_delete = (Button) view.findViewById(R.id.btn_deleteDataset);
+        Button btn_delete = view.findViewById(R.id.btn_deleteDataset);
         btn_delete.setOnClickListener(this);
-
         return view;
     }
 
+    /**
+     * Handles all click actions for the fragment on a case-by-case basis.
+     * @param view Calling view.
+     */
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    public void onClick(View view) {
+        switch (view.getId()) {
             case R.id.btn_up:
             case R.id.btn_down:
             case R.id.btn_left:
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
-                ((FingerprintPlacementActivity) getActivity()).directionClick(v);
+                ((FingerprintPlacementActivity) getActivity()).directionClick(view);
                 break;
             case R.id.btn_finishPlacing:
                 Log.d(TAG, "onClick: finish");
-                ((FingerprintPlacementActivity) getActivity()).finishCapturing(v);
+                ((FingerprintPlacementActivity) getActivity()).finishCapturing(view);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
@@ -83,6 +89,7 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 break;
             case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete fingerprints");
+                // dialog for user to confirm irreversible action:
                 AlertDialog.Builder confirmDeleteDialog = new AlertDialog.Builder(getActivity());
                 confirmDeleteDialog.setTitle("Really delete all fingeprints?");
                 confirmDeleteDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -129,8 +136,10 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
         updateButtonStates(stageProvider.getStage());
     }
 
-
-
+    /**
+     * Update the disables/enabled state of all fragment buttons based on the stage provided.
+     * @param stage Stage in the fingerprinting process.
+     */
     public void updateButtonStates(String stage) {
         Button placeCaptureButton = getView().findViewById(R.id.btn_multiPurpose);
         Log.d(TAG, "updateButtonStates: Updating based on stage: " + stage);

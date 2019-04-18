@@ -18,6 +18,10 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+/**
+ * Manages the storage of router information entered by the user, using a JSON file backing for
+ * persistence.
+ */
 public class JSONRouterManager implements RouterManager {
     private static final String TAG = "JSONRouterManager";
     private static JSONRouterManager instance; //singleton
@@ -58,6 +62,11 @@ public class JSONRouterManager implements RouterManager {
     /*
      * <--
      * */
+
+    public void deleteFile(String filename) {
+        File toDelete = new File(applicationContext.getFilesDir() + routerDirectoryPath, filename+".json");
+        toDelete.delete();
+    }
 
     public void destroyInstance() {
         save();
@@ -175,8 +184,8 @@ public class JSONRouterManager implements RouterManager {
         try {
             JSONObject newRouter = new JSONObject();
             newRouter.put("ID", router.getID());
-            newRouter.put("X", router.getX());
-            newRouter.put("Y", router.getY());
+            newRouter.put("X", router.x);
+            newRouter.put("Y", router.y);
             newRouter.put("MAC", router.getMac());
             newRouter.put("TxPower", router.getTxPower());
             routers.put(newRouter);

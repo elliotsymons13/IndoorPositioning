@@ -17,7 +17,9 @@ import android.widget.TextView;
 import com.example.elliotsymons.positioningtestbed.R;
 import com.example.elliotsymons.positioningtestbed.RouterPlacementActivity;
 
-
+/**
+ * Fragment of controls for placing routers on a map.
+ */
 public class RouterPlacementButtonsFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "RouterButtonsFragment";
 
@@ -28,11 +30,9 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         void clearDataset();
     }
 
-
     public RouterPlacementButtonsFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,7 +41,7 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         View view = inflater.inflate(R.layout.fragment_router_placement_buttons, container, false);
         tvInfo = (TextView) view.findViewById(R.id.tv_info);
 
-        Button btn_multipurpose= (Button) view.findViewById(R.id.btn_multiPurpose);
+        Button btn_multipurpose= view.findViewById(R.id.btn_multiPurpose);
         btn_multipurpose.setOnClickListener(this);
         ImageButton btn_left = view.findViewById(R.id.btn_left);
         btn_left.setOnClickListener(this);
@@ -51,31 +51,34 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         btn_right.setOnClickListener(this);
         ImageButton btn_down = view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
-        Button btn_finish = (Button) view.findViewById(R.id.btn_finishPlacing);
+        Button btn_finish = view.findViewById(R.id.btn_finishPlacing);
         btn_finish.setOnClickListener(this);
-        Button btn_delete = (Button) view.findViewById(R.id.btn_deleteDataset);
+        Button btn_delete = view.findViewById(R.id.btn_deleteDataset);
         btn_delete.setOnClickListener(this);
-
         return view;
     }
 
+    /**
+     * Handles any click within the fragment.
+     * @param view Clicked view.
+     */
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    public void onClick(View view) {
+        switch (view.getId()) {
             case R.id.btn_up:
             case R.id.btn_down:
             case R.id.btn_left:
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
-                ((RouterPlacementActivity) getActivity()).directionClick(v);
+                ((RouterPlacementActivity) getActivity()).directionClick(view);
                 break;
             case R.id.btn_finishPlacing:
                 Log.d(TAG, "onClick: finish");
-                ((RouterPlacementActivity) getActivity()).finishCapturing(v);
+                ((RouterPlacementActivity) getActivity()).finishCapturing(view);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
-                ((RouterPlacementActivity) getActivity()).placeRouter(v);
+                ((RouterPlacementActivity) getActivity()).placeRouter(view);
                 break;
             case R.id.btn_deleteDataset:
                 Log.d(TAG, "onClick: delete routers");
@@ -107,12 +110,6 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         if (args != null) {
             tvInfo.setText(Integer.toString(args.getInt("x")) + ", " + Integer.toString(args.getInt("y")));
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        //updateButtonStates(stageProvider.getStage());
     }
 
     @Override
