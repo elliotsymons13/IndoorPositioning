@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -20,9 +21,13 @@ public class LocationControlsFragment extends Fragment implements
         SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "LocationControlsFragmen";
 
+<<<<<<< Updated upstream
     private LocationControllerFragmentInteractionListener locationControllerListener;
 
     TextView pathLossTV, powerTV;
+=======
+    TextView pathLossTV, correlationThresholdTV;
+>>>>>>> Stashed changes
 
 
     public LocationControlsFragment() {
@@ -38,9 +43,15 @@ public class LocationControlsFragment extends Fragment implements
 
 
         SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
+        SeekBar correlationThreshold = view.findViewById(R.id.seekBar_correlationThreshold);
         pathLoss.setOnSeekBarChangeListener(this);
+<<<<<<< Updated upstream
 
+=======
+        correlationThreshold.setOnSeekBarChangeListener(this);
+>>>>>>> Stashed changes
         pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
+        correlationThresholdTV = view.findViewById(R.id.tv_correlationThreshold);
 
         return view;
     }
@@ -58,11 +69,18 @@ public class LocationControlsFragment extends Fragment implements
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+        if (i == 0) {
+            Toast.makeText(getContext(), "Cannot be 0", Toast.LENGTH_SHORT).show();
+        }
         switch(seekBar.getId()) {
             case R.id.seekBar_pathLoss:
                 ((WiFiLocatingActivity) getActivity()).setPathLossExponent(i);
                 pathLossTV.setText("PthLss\n"+ i + "/10");
                 break;
+            case R.id.seekBar_correlationThreshold:
+                ((WiFiLocatingActivity) getActivity()).setCorrelationThreshold(i);
+                correlationThresholdTV.setText("Correlation threshold\n"+i);
+
         }
     }
 

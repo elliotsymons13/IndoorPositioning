@@ -90,11 +90,13 @@ public class FingerprintingIntentService extends IntentService {
             x = -1;
             y = -1;
         }
-        resultReceived = false;
 
+        resultReceived = false;
         // get scan result
         Log.i(TAG, "onHandleIntent: Requesting scan");
-        wifiManager.startScan();
+        boolean newScanPerformed = wifiManager.startScan(); //TODO use this framework elsewhere
+        if (!newScanPerformed)
+            postToastMessage("OLD RESULT"); //FIXME
         while (!resultReceived) {
             SystemClock.sleep(25);
         }
