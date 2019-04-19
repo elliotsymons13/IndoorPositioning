@@ -134,7 +134,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             progressBarTrilaterating.setVisibility(View.INVISIBLE);
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
-                        "Insufficient points in range for trilateration", Toast.LENGTH_LONG).show();
+                        "Insufficient points in range for trilateration" , Toast.LENGTH_LONG).show();
 
                 return;
             }
@@ -195,7 +195,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             List<TrilaterationPoint> trilaterationPoints = new ArrayList<>();
             for (ScanResult result : scanResults) {
                 String mac = result.BSSID;
-                int rssi = result.level;
+                int rssi = result.level;//Math.abs(result.level); //FIXME
 
                 for (RouterPoint routerPoint : storedRouters) {
                     if (mac.equalsIgnoreCase(routerPoint.getMac())) { //i.e. if the same router
@@ -208,7 +208,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             // Check there are sufficient points for trilateration to converge
             int N = trilaterationPoints.size();
             if (N < 3) {
-                Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points");
+                Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points (" + trilaterationPoints.size() + ")");
                 return null;
             }
 
@@ -217,9 +217,15 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
             for (TrilaterationPoint point : trilaterationPoints) {
-                point.setDistance(
-                        Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
-                );
+                double distance;
+                //distance = Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
+                double calculatedTxRSSI = -10 * Math.log10(point.getRouterPoint().getTxPower() / 0.0001);
+                Log.d(TAG, "doInBackground: CalculatedTxRSSI = " + calculatedTxRSSI);
+                Log.d(TAG, "doInBackground: MeasuredRSSI = " + point.getRSSI());
+                distance = Math.pow(10,  ((calculatedTxRSSI - point.getRSSI()) / (10 * pathLossExponent))  );
+
+
+                point.setDistance(distance);
                 Log.d(TAG, "doInBackground: Distance to router " + point.getRouterPoint().getMac() + " at " +
                         point.getRouterPoint().x + ", " +
                         point.getRouterPoint().y + " is " +
@@ -244,15 +250,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
                 i++;
             }
-//            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
-//            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
 
             TrilaterationFunction trilatFunc = new TrilaterationFunction(positions, distances);
             NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(trilatFunc
                     , new LevenbergMarquardtOptimizer());
-            LinearLeastSquaresSolver solverl = new LinearLeastSquaresSolver(trilatFunc);
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
-            RealVector optimuml = solverl.solve();
 
             // the answer
             double[] centroid = optimum.getPoint().toArray();
@@ -263,9 +265,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             // <<--
             resultPoint = "" + position_x + ", " + position_y;
             Log.i(TAG, "doInBackground: result: " + resultPoint);
-
-            Log.i(TAG, "doInBackground: linear solution " + optimuml.getEntry(0) + ", " + optimuml.getEntry(1));
-
 
 
             publishProgress(100);

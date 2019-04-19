@@ -48,6 +48,7 @@ public class LocationControlsFragment extends Fragment implements
         correlationThresholdTV = view.findViewById(R.id.tv_correlationThreshold);
         locateButton = view.findViewById(R.id.btn_locate);
 
+        //initialise seek bar-associated variables based on initial bar state
         pathLostProgress = pathlossSeekBar.getProgress();
         correlationProgress = correlationSeekBar.getProgress();
 
