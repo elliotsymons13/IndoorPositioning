@@ -423,44 +423,49 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             int numberOfPoints = fingerprintPoints.size();
             int pointsInCommon = 0;
             boolean foundSufficientCorrelationsInAnyPoint = false;
-            int index = 0;
-            for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
-                int distanceSquared = 0;
-                index++;
-                publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
-                boolean atLeast1Match = false;
-                int correlationsForThisPoint = 0;
-                Set<Capture> fingerprintCaptures = p.getCaptures();
-                for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
-                    for (Capture queryCapture: queryPointCaptures) {
-                        if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
-                            /// include in distance consideration:
-                            distanceSquared += Math.pow(
-                                    (queryCapture.getRSSI() -
-                                            fingerprintCapture.getRSSI())
-                                    , 2);
-                            correlationsForThisPoint++;
-                            if (!atLeast1Match) {
-                                pointsInCommon++;
-                                atLeast1Match = true;
+            int correlation_threshold_temp = correlation_threshold;
+            while (!foundSufficientCorrelationsInAnyPoint) { // i.e. repeat until we get a result
+                int index = 0;
+                for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
+                    int distanceSquared = 0;
+                    index++;
+                    publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
+                    boolean atLeast1Match = false;
+                    int correlationsForThisPoint = 0;
+                    Set<Capture> fingerprintCaptures = p.getCaptures();
+                    for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
+                        for (Capture queryCapture: queryPointCaptures) {
+                            if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
+                                /// include in distance consideration:
+                                distanceSquared += Math.pow(
+                                        (queryCapture.getRSSI() -
+                                                fingerprintCapture.getRSSI())
+                                        , 2);
+                                correlationsForThisPoint++;
+                                if (!atLeast1Match) {
+                                    pointsInCommon++;
+                                    atLeast1Match = true;
+                                }
                             }
                         }
                     }
-                }
 
 
-                if (correlationsForThisPoint < correlation_threshold) {
-                    Log.d(TAG, "doInBackground: NOT adding: distance = "
-                            + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
-                            + " at point X,Y = " + p.x + "," + p.y);
-                } else {
-                    Log.d(TAG, "doInBackground: POSSIBLE POINT: distance = "
-                            + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
-                            + " at point X,Y = " + p.x + "," + p.y);
-                    possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
-                    foundSufficientCorrelationsInAnyPoint = true;
+                    if (correlationsForThisPoint < correlation_threshold_temp) {
+                        Log.d(TAG, "doInBackground: NOT adding: distance = "
+                                + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                                + " at point X,Y = " + p.x + "," + p.y);
+                    } else {
+                        Log.d(TAG, "doInBackground: POSSIBLE POINT: distance = "
+                                + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                                + " at point X,Y = " + p.x + "," + p.y);
+                        possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
+                        foundSufficientCorrelationsInAnyPoint = true;
+                    }
                 }
+                correlation_threshold_temp--;
             }
+
             publishProgress(90);
 
             // calculate nearest (euclidean) point
