@@ -25,10 +25,12 @@ import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRout
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
 
+import com.lemmingapex.trilateration.LinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -218,7 +220,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 point.setDistance(
                         Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
                 );
-                Log.d(TAG, "doInBackground: Distance to router at " + 
+                Log.d(TAG, "doInBackground: Distance to router " + point.getRouterPoint().getMac() + " at " +
                         point.getRouterPoint().x + ", " +
                         point.getRouterPoint().y + " is " +
                         point.getDistance() + " @ RSSI " + point.getRSSI());
@@ -245,22 +247,24 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 //            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
 //            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
 
-            NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(
-                    new TrilaterationFunction(positions, distances), new LevenbergMarquardtOptimizer());
+            TrilaterationFunction trilatFunc = new TrilaterationFunction(positions, distances);
+            NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(trilatFunc
+                    , new LevenbergMarquardtOptimizer());
+            LinearLeastSquaresSolver solverl = new LinearLeastSquaresSolver(trilatFunc);
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
+            RealVector optimuml = solverl.solve();
 
             // the answer
             double[] centroid = optimum.getPoint().toArray();
-
-
             double position_x = centroid[0];
             double position_y = centroid[1];
 
 
             // <<--
             resultPoint = "" + position_x + ", " + position_y;
+            Log.i(TAG, "doInBackground: result: " + resultPoint);
 
-            Log.i(TAG, "doInBackground: Dummy result: " + resultPoint);
+            Log.i(TAG, "doInBackground: linear solution " + optimuml.getEntry(0) + ", " + optimuml.getEntry(1));
 
 
 

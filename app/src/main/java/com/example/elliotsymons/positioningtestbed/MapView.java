@@ -24,7 +24,7 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERI
  * Custom ImageView which implements a map with various positionable 'dots' (using a Canvas).
  */
 public class MapView extends AppCompatImageView {
-    private static final String TAG = "MyMapView";
+    private static final String TAG = "MapView";
     private Preferences prefs;
     private MapManager mapManager;
 
@@ -66,8 +66,6 @@ public class MapView extends AppCompatImageView {
         //Calculate dimensions for image
         final int MAP_WIDTH_ORIGINAL = mapBackground.getWidth();
         final int MAP_HEIGHT_ORIGINAL = mapBackground.getHeight();
-        Log.d(TAG, "MyMapView: ORI_WIDTH: " + MAP_WIDTH_ORIGINAL);
-        Log.d(TAG, "MyMapView: ORI_HEIGHT: " + MAP_HEIGHT_ORIGINAL);
 
         MAP_WIDTH = dispWidth;
         final double SF = (double) MAP_WIDTH / MAP_WIDTH_ORIGINAL;
@@ -82,9 +80,6 @@ public class MapView extends AppCompatImageView {
             MAP_WIDTH = (int) (MAP_WIDTH * SF2);
             Log.d(TAG, "MyMapView: Scaled due to being too tall ");
         }
-
-        Log.d(TAG, "MyMapView: measured height: " + getRootView().getMeasuredHeight());
-        Log.d(TAG, "MyMapView: measured width: " + getRootView().getMeasuredWidth());
 
         //Construct rectangle container for background sizing
         ORIGIN_IN_X = (dispWidth-MAP_WIDTH)/2;
@@ -180,7 +175,6 @@ public class MapView extends AppCompatImageView {
      * @param y pixel coordinate of center of dot vertically
      */
     public void updateNavDot(int ID, int x, int y) {
-        Log.d(TAG, "setDotY: newY: " + y);
         if (x <= ORIGIN_IN_X || x > (ORIGIN_IN_X + MAP_WIDTH))
             return;
         if (y <= ORIGIN_IN_Y || y > (ORIGIN_IN_Y + MAP_HEIGHT))
@@ -224,8 +218,6 @@ public class MapView extends AppCompatImageView {
     }
 
     public void setDotY(int ID, int newY) {
-        Log.d(TAG, "setDotY: newY: " + newY);
-        Log.d(TAG, "setDotY: map height: " + MAP_HEIGHT);
         if (newY < ORIGIN_IN_Y || newY > (ORIGIN_IN_Y + MAP_HEIGHT))
             return;
         for (NavDot p : navigationDots) {
@@ -285,10 +277,6 @@ public class MapView extends AppCompatImageView {
     public void removeAllPeristentDots() {
         persistentDots = new HashSet<>();
         invalidate();
-    }
-
-    public int getMapWidth() {
-        return MAP_WIDTH;
     }
 
     public int getMapHeight() {
