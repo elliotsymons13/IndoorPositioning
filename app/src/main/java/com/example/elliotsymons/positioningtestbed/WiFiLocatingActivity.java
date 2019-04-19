@@ -61,16 +61,16 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
 
-    private double pathLossExponent = 6;
+    private double pathLossExponent;
     public void setPathLossExponent(double pathLossExponent) {
         this.pathLossExponent = pathLossExponent;
         Log.d(TAG, "setPathLossExponent: set to " + pathLossExponent);
     }
 
-    private int correlation_threshold = 5;
+    private int correlation_threshold;
     public void setCorrelationThreshold(int correlationThreshold) {
         this.correlation_threshold = correlationThreshold;
-        Log.d(TAG, "setCorrelationThreshold: set to " + correlationThreshold);
+        Log.d(TAG, "setCorrelationThreshold: set to " + correlationThreshold+"%");
     }
 
     @Override
@@ -448,8 +448,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                     }
                 }
 
-
-                if (correlationsForThisPoint < correlation_threshold) {
+                // if the proportion of captures matched (compared to total) is above
+                // the user defined threshold, then accept this point as a possible location:
+                if ((correlationsForThisPoint / fingerprintCaptures.size()) * 100  < correlation_threshold) {
                     Log.d(TAG, "doInBackground: NOT adding: distance = "
                             + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
                             + " at point X,Y = " + p.x + "," + p.y);

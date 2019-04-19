@@ -68,7 +68,7 @@ public class LocationControlsFragment extends Fragment implements
     }
 
     private void setCorrelationText(int progress) {
-        correlationThresholdTV.setText("Correlation threshold\n"+progress);
+        correlationThresholdTV.setText("Correlation threshold\n"+progress + "%");
     }
 
     @Override
