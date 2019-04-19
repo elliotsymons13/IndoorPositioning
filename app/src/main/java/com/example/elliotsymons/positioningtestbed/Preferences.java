@@ -15,7 +15,8 @@ public class Preferences {
     private Context applicationContext;
 
     //Variables
-    private String mapURI = null;
+    private String mapURI;
+    private int activeLocationMethods;
 
     //Setters and getters
     String getMapURI() {
@@ -30,6 +31,8 @@ public class Preferences {
      * */
     private Preferences(Context context) {
         this.applicationContext = context;
+        activeLocationMethods = 0;
+        mapURI = null;
     }
 
     public static Preferences getInstance(Context context) {
@@ -46,6 +49,19 @@ public class Preferences {
     /*
      * <--
      * */
+
+    public int getActiveLocationMethods() {
+        return activeLocationMethods;
+    }
+
+    public void incrementActiveLocationMethods() {
+        activeLocationMethods++;
+    }
+
+    public void decrementActiveLocationMethods() {
+        activeLocationMethods--;
+    }
+
 
     //Taken from: https://stackoverflow.com/questions/13670862/setting-a-value-in-one-class-and-retrieving-from-another-class-in-java-android/13673178#13673178
     //Called automatically on first instantiation per session

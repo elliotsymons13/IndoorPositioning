@@ -259,16 +259,6 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         mapView.unlockNavDot(GENERIC_DOT);
     }
 
-    /**
-     * Tidy up and return to the main activity (called when the user presses 'save/exit').
-     * @param view Button view.
-     */
-    public void finishCapturing(View view) {
-        Intent intent = new Intent(this, WiFiHomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-
     @Override
     protected void onPause() {
         super.onPause();

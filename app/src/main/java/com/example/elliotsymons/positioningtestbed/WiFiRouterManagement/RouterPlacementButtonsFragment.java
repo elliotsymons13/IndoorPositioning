@@ -51,8 +51,6 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
         btn_right.setOnClickListener(this);
         ImageButton btn_down = view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
-        Button btn_finish = view.findViewById(R.id.btn_finishPlacing);
-        btn_finish.setOnClickListener(this);
         Button btn_delete = view.findViewById(R.id.btn_deleteDataset);
         btn_delete.setOnClickListener(this);
         return view;
@@ -71,10 +69,6 @@ public class RouterPlacementButtonsFragment extends Fragment implements View.OnC
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
                 ((RouterPlacementActivity) getActivity()).directionClick(view);
-                break;
-            case R.id.btn_finishPlacing:
-                Log.d(TAG, "onClick: finish");
-                ((RouterPlacementActivity) getActivity()).finishCapturing(view);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");

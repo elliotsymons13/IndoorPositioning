@@ -24,11 +24,13 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSO
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
+
+import com.lemmingapex.trilateration.LinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
-
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.RealVector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,10 +60,17 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     LocationControlsFragment controls;
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
-    private double pathLossExponent = 6;
+
+    private double pathLossExponent = 2.2;
     public void setPathLossExponent(double pathLossExponent) {
         this.pathLossExponent = pathLossExponent;
         Log.d(TAG, "setPathLossExponent: set to " + pathLossExponent);
+    }
+
+    private int correlation_threshold = 90;
+    public void setCorrelationThreshold(int correlationThreshold) {
+        this.correlation_threshold = correlationThreshold;
+        Log.d(TAG, "setCorrelationThreshold: set to " + correlationThreshold+"%");
     }
 
     @Override
@@ -89,10 +98,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         mapView.hideNavDot(FINGERPRINT_DOT);
     }
 
-    /**
-     * Update location provided by all locating methods.
-     * @param view Calling button / view.
-     */
     @Override
     public void updateLocation(View view) {
         new WiFiFingerprintLocatorTask().execute();
@@ -107,24 +112,35 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         private static final String TAG = "WiFiTrilaterationLocato";
         RouterManager rm;
         WifiManager wifiManager;
-        boolean resultReceived = false;
+        boolean trilaterationResultReceived = false;
 
         String resultPoint = "";
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            findViewById(R.id.btn_locate).setEnabled(false);
+            findViewById(R.id.seekBar_pathLoss).setEnabled(false);
+            findViewById(R.id.seekBar_correlationThreshold).setEnabled(false);
             progressBarTrilaterating.setVisibility(View.VISIBLE);
+            mapView.hideNavDot(MapViewFragment.TRILATERATION_DOT); // hide previous location
+            prefs.incrementActiveLocationMethods();
         }
 
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
+            prefs.decrementActiveLocationMethods();
+            if (prefs.getActiveLocationMethods() == 0) {
+                findViewById(R.id.btn_locate).setEnabled(true);
+                findViewById(R.id.seekBar_pathLoss).setEnabled(true);
+                findViewById(R.id.seekBar_correlationThreshold).setEnabled(true);
+            }
             progressBarTrilaterating.setVisibility(View.INVISIBLE);
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
-                        "Insufficient points in range for trilateration", Toast.LENGTH_LONG).show();
-                findViewById(R.id.btn_locate).setEnabled(true);
+                        "Insufficient points in range for trilateration" , Toast.LENGTH_LONG).show();
+
                 return;
             }
             int x = location.x;
@@ -134,8 +150,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             mapView.setDotX(MapViewFragment.TRILATERATION_DOT, x);
             mapView.setDotY(MapViewFragment.TRILATERATION_DOT, y);
             mapView.showNavDot(MapViewFragment.TRILATERATION_DOT);
-
-            findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
@@ -156,17 +170,18 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             registerReceiver(wifiScanReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             Log.d(TAG, "doInBackground: Requesting scan");
+            trilaterationResultReceived = false;
             wifiManager.startScan();
-            while (!resultReceived) {
+            while (!trilaterationResultReceived) {
                 SystemClock.sleep(100);
             }
 
-            //CREDIT: https://stackoverflow.com/questions/17285337/how-can-i-sort-the-a-list-of-getscanresults-based-on-signal-strength-in-ascend
+            // Sort the scan results on RSSI
+            //ADAPTED FROM: https://stackoverflow.com/questions/17285337/how-can-i-sort-the-a-list-of-getscanresults-based-on-signal-strength-in-ascend
             // -->>
             Comparator<ScanResult> comparator = new Comparator<ScanResult>() {
                 @Override
                 public int compare(ScanResult lhs, ScanResult rhs) {
-                    //return (lhs.level <rhs.level ? -1 : (lhs.level==rhs.level ? 0 : 1));
                     return WifiManager.compareSignalLevel(lhs.level, rhs.level);
                 }
             };
@@ -180,8 +195,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
             Set<RouterPoint> storedRouters = rm.getAllRouters();
 
-
-            //Find all routers that are present in our scan and the set of stored routers
+            //Find all routers that are present in BOTH the new scan and the set of stored routers
             List<TrilaterationPoint> trilaterationPoints = new ArrayList<>();
             for (ScanResult result : scanResults) {
                 String mac = result.BSSID;
@@ -195,29 +209,25 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             }
             publishProgress(30);
 
-            //Find the N of these that are closest to our position (based on RSSI)
-            int N = 3;
-            int length = trilaterationPoints.size();
-            if (length < N) {
-                N = length;
-            }
-            Log.d(TAG, "doInBackground: N = " + N);
+            // Check there are sufficient points for trilateration to converge
+            int N = trilaterationPoints.size();
             if (N < 3) {
-                Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points");
+                Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points (" + trilaterationPoints.size() + ")");
+                for (TrilaterationPoint p : trilaterationPoints)
+                    Log.d(TAG, "doInBackground: Seen " + p.getRouterPoint().getMac());
                 return null;
             }
-            List<TrilaterationPoint> NtrilaterationPoints = trilaterationPoints.subList(0, N);
-
-
 
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
-            for (TrilaterationPoint point : NtrilaterationPoints) {
-                point.setDistance(
-                        Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
-                );
-                Log.d(TAG, "doInBackground: Distance to router at " + 
-                        point.getRouterPoint().x + ", " + 
+            for (TrilaterationPoint point : trilaterationPoints) {
+                double calculatedTxRSSI = -10 * Math.log10(point.getRouterPoint().getTxPower() / 0.0001);
+                Log.d(TAG, "doInBackground: CalculatedTxRSSI = " + calculatedTxRSSI);
+                Log.d(TAG, "doInBackground: MeasuredRSSI = " + point.getRSSI());
+                double distance = Math.pow(10,  ((calculatedTxRSSI - point.getRSSI()) / (10 * pathLossExponent))  );
+                point.setDistance(distance);
+                Log.d(TAG, "doInBackground: Distance to router " + point.getRouterPoint().getMac() + " at " +
+                        point.getRouterPoint().x + ", " +
                         point.getRouterPoint().y + " is " +
                         point.getDistance() + " @ RSSI " + point.getRSSI());
             }
@@ -225,42 +235,36 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             publishProgress(40);
 
             //Perform the trilateration algorithm, given the distances calculated above, and the known locations of the routers.
-
-
-            //DUMMY FIXME
-            //CREDIT: https://github.com/lemmingapex/Trilateration
+            //ADAPTED FROM: https://github.com/lemmingapex/Trilateration
             // -->> (adapted)
+
+            /// Format conversion
             double[][] positions = new double[N][2];
             double[] distances = new double[N];
             int i = 0;
-            for (TrilaterationPoint p : NtrilaterationPoints) {
+            for (TrilaterationPoint p : trilaterationPoints) {
                 positions[i][0] = p.getRouterPoint().x;
                 positions[i][1] = p.getRouterPoint().y;
                 distances[i] = p.getDistance();
 
                 i++;
             }
-//            double[][] positions = new double[][] { { 5.0, -6.0 }, { 13.0, -15.0 }, { 21.0, -3.0 }, { 12.4, -21.2 } };
-//            double[] distances = new double[] { 8.06, 13.97, 23.32, 15.31 };
 
-            NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(new TrilaterationFunction(positions, distances), new LevenbergMarquardtOptimizer());
+            // Pass to solver-optimiser classes
+            TrilaterationFunction trilatFunc = new TrilaterationFunction(positions, distances);
+            NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(trilatFunc
+                    , new LevenbergMarquardtOptimizer());
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
 
-            // the answer
+            // Extract the answer
             double[] centroid = optimum.getPoint().toArray();
-
-
             double position_x = centroid[0];
             double position_y = centroid[1];
-
-
             // <<--
+
+
             resultPoint = "" + position_x + ", " + position_y;
-
-            Log.i(TAG, "doInBackground: Dummy result: " + resultPoint);
-
-
-
+            Log.i(TAG, "doInBackground: result: " + resultPoint);
             publishProgress(100);
             Log.d(TAG, "doInBackground: Finished");
             return new Point((int) position_x, (int) position_y);
@@ -287,22 +291,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             }
         };
 
-        // actions performed on scan success: process results into todo ...
+        // actions performed on scan success:
         private void onScanSuccess() {
             Log.i(TAG, "onScanSuccess: Scan result received");
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            resultReceived = true;
-
-            //Process results:
-            String text = "";
-            for (ScanResult result : scanResults) {
-                text += "SSID: " + result.SSID + "\n";
-                text += "MAC : " + result.BSSID + "\n";
-                text += "RSSI: " + result.level + "\n";
-            }
-
-            //fixme fix or remove?
-            //todo also fix in other classes?
+            trilaterationResultReceived = true;
         }
 
         private void onScanFailure() {
@@ -354,19 +347,29 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         private static final String TAG = "WiFiFingerprintLocatorT";
         FingerprintManager fm;
         WifiManager wifiManager;
-        boolean resultReceived = false;
+
+        private boolean fingerprintingResultReceived = false;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            findViewById(R.id.btn_locate).setEnabled(false); // disable the fingerprint button
-            // while fingerprinting
+            findViewById(R.id.btn_locate).setEnabled(false);
+            findViewById(R.id.seekBar_pathLoss).setEnabled(false);
+            findViewById(R.id.seekBar_correlationThreshold).setEnabled(false);
             progressBarFingerprinting.setVisibility(View.VISIBLE);
+            mapView.hideNavDot(MapViewFragment.FINGERPRINT_DOT);
+            prefs.incrementActiveLocationMethods();
         }
 
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
+            prefs.decrementActiveLocationMethods();
+            if (prefs.getActiveLocationMethods() == 0) {
+                findViewById(R.id.btn_locate).setEnabled(true);
+                findViewById(R.id.seekBar_pathLoss).setEnabled(true);
+                findViewById(R.id.seekBar_correlationThreshold).setEnabled(true);
+            }
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
                         "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
@@ -374,7 +377,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 // Toast.LENGTH_SHORT).show();
                 progressBarFingerprinting.setVisibility(View.INVISIBLE);
                 progressBarFingerprinting.setProgress(0);
-                findViewById(R.id.btn_locate).setEnabled(true);
                 return;
             }
             int x = location.x;
@@ -385,7 +387,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             mapView.setDotY(MapViewFragment.FINGERPRINT_DOT, y);
             mapView.showNavDot(MapViewFragment.FINGERPRINT_DOT);
             progressBarFingerprinting.setVisibility(View.INVISIBLE);
-            findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
@@ -406,16 +407,17 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             registerReceiver(wifiScanReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             Log.d(TAG, "doInBackground: Requesting scan");
+            fingerprintingResultReceived = false;
             wifiManager.startScan();
-            while (!resultReceived) { // wait for scan results
+            while (!fingerprintingResultReceived) { // wait for scan results
                 SystemClock.sleep(100);
             }
             List<ScanResult> scanResults = wifiManager.getScanResults();
             publishProgress(10);
             unregisterReceiver(wifiScanReceiver);
-            Log.d(TAG, "doInBackground: Scan completed");
 
-            // extract needed values
+            Log.d(TAG, "doInBackground: Scan completed");
+            //extract needed values
             Set<Capture> queryPointCaptures = new HashSet<>();
             for (ScanResult result : scanResults) {
                 queryPointCaptures.add(new Capture(result.BSSID, Math.abs(result.level)));
@@ -429,38 +431,53 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             //TODO document
             Set<PossiblePoint> possiblePoints = new HashSet<>();
             int numberOfPoints = fingerprintPoints.size();
-            int pointsInCommon = 0;
-            int index = 0;
-            for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
-                int distanceSquared = 0;
-                index++;
-                publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
-                boolean atLeast1Match = false;
-                int correlationsForThisPoint = 0;
-                Set<Capture> fingerprintCaptures = p.getCaptures();
-                for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
-                    for (Capture queryCapture: queryPointCaptures) {
-                        if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
-                            /// include in distance consideration:
-                            distanceSquared += Math.pow(
-                                    (queryCapture.getRSSI() -
-                                            fingerprintCapture.getRSSI()), 2);
-                            correlationsForThisPoint++;
-                            if (!atLeast1Match) {
-                                pointsInCommon++;
-                                atLeast1Match = true;
+            boolean foundSufficientCorrelationsInAnyPoint = false;
+            while (!foundSufficientCorrelationsInAnyPoint) { //i.e. continue until a point is found, reducing the threshold as necessary
+                int index = 0;
+                for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
+                    int distanceSquared = 0;
+                    index++;
+                    publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
+                    int correlationsForThisPoint = 0;
+                    Set<Capture> fingerprintCaptures = p.getCaptures();
+                    for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
+                        for (Capture queryCapture: queryPointCaptures) {
+                            if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
+                                /// ...include in distance consideration:
+                                distanceSquared += Math.pow(
+                                        (queryCapture.getRSSI() -
+                                                fingerprintCapture.getRSSI())
+                                        , 2);
+                                correlationsForThisPoint++;
                             }
                         }
                     }
+
+                    // if the proportion of captures matched (compared to total) is above
+                    // the user defined threshold, then accept this point as a possible location:
+                    Log.d(TAG, "doInBackground: Correlations at point = " + correlationsForThisPoint +
+                            ", reference records at point = " + fingerprintCaptures.size());
+                    double percentage_correlated =  (((double) correlationsForThisPoint / (double) fingerprintCaptures.size())) * 100.0;
+                    Log.d(TAG, "doInBackground: percentage_correlated = " + percentage_correlated
+                    + ", correlation_threshold = " + correlation_threshold);
+                    if (percentage_correlated  <= correlation_threshold) {
+                        Log.d(TAG, "doInBackground: NOT adding: distance = "
+                                + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                                + " at point X,Y = " + p.x + "," + p.y);
+                    } else {
+                        Log.d(TAG, "doInBackground: POSSIBLE POINT: distance = "
+                                + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                                + " at point X,Y = " + p.x + "," + p.y);
+                        possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
+                        foundSufficientCorrelationsInAnyPoint = true;
+                    }
                 }
-                Log.d(TAG, "doInBackground: possible fingerprintPoint: distance = "
-                        + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
-                + " at point X,Y = " + p.x + "," + p.y);
-                possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
+                correlation_threshold--;
             }
+
             publishProgress(90);
 
-            //calculate nearest point
+            // calculate nearest (euclidean) point
             PossiblePoint currentMinimum = null;
             for (PossiblePoint pp : possiblePoints) {
                 if (currentMinimum == null) {
@@ -474,8 +491,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 }
             }
 
-            if (pointsInCommon < 1)  {
-                publishProgress(40);
+            if (!foundSufficientCorrelationsInAnyPoint)  {
+                // out of range of any fingerprinted routers, or threshold too high
                 return null;
             }
             publishProgress(100);
@@ -509,19 +526,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
         private void onScanSuccess() {
             Log.i(TAG, "onScanSuccess: Scan result received");
-            List<ScanResult> scanResults = wifiManager.getScanResults();
-            //postToastMessage("Scan completed (" + scanResults.size() + " captures)");
-            resultReceived = true;
-
-            //Process results:
-            String text = "";
-            for (ScanResult result : scanResults) {
-                text += "SSID: " + result.SSID + "\n";
-                text += "MAC : " + result.BSSID + "\n";
-                text += "RSSI: " + result.level + "\n";
-            }
-
-            //FIXME trigger somethign here rather than busy waiting!!
+            fingerprintingResultReceived = true;
         }
 
         private void onScanFailure() {
@@ -529,29 +534,5 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * Class representing a possible final location in the fingerprinting algorithm.
-     */
-    class PossiblePoint {
-        private double distance;
-        private int matchingRouters;
-        private FingerprintPoint fingerprintPoint;
 
-
-        PossiblePoint(double distance, int matchingRouters, FingerprintPoint p) {
-            this.distance = distance;
-            this.matchingRouters = matchingRouters;
-            this.fingerprintPoint = p;
-        }
-
-        double getDistance() {
-            return distance;
-        }
-
-        FingerprintPoint getFingerprintPoint() {
-            return fingerprintPoint;
-        }
-
-        int getMatchingRouters() {return matchingRouters;}
-    }
 }
