@@ -61,16 +61,16 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
 
-    private double pathLossExponent = 6;
+    private double pathLossExponent = 2.2;
     public void setPathLossExponent(double pathLossExponent) {
         this.pathLossExponent = pathLossExponent;
         Log.d(TAG, "setPathLossExponent: set to " + pathLossExponent);
     }
 
-    private int correlation_threshold = 5;
+    private int correlation_threshold = 90;
     public void setCorrelationThreshold(int correlationThreshold) {
         this.correlation_threshold = correlationThreshold;
-        Log.d(TAG, "setCorrelationThreshold: set to " + correlationThreshold);
+        Log.d(TAG, "setCorrelationThreshold: set to " + correlationThreshold+"%");
     }
 
     @Override
@@ -120,6 +120,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         protected void onPreExecute() {
             super.onPreExecute();
             findViewById(R.id.btn_locate).setEnabled(false);
+            findViewById(R.id.seekBar_pathLoss).setEnabled(false);
+            findViewById(R.id.seekBar_correlationThreshold).setEnabled(false);
             progressBarTrilaterating.setVisibility(View.VISIBLE);
             mapView.hideNavDot(MapViewFragment.TRILATERATION_DOT); // hide previous location
             prefs.incrementActiveLocationMethods();
@@ -129,8 +131,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
             prefs.decrementActiveLocationMethods();
-            if (prefs.getActiveLocationMethods() == 0)
+            if (prefs.getActiveLocationMethods() == 0) {
                 findViewById(R.id.btn_locate).setEnabled(true);
+                findViewById(R.id.seekBar_pathLoss).setEnabled(true);
+                findViewById(R.id.seekBar_correlationThreshold).setEnabled(true);
+            }
             progressBarTrilaterating.setVisibility(View.INVISIBLE);
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
@@ -349,6 +354,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         protected void onPreExecute() {
             super.onPreExecute();
             findViewById(R.id.btn_locate).setEnabled(false);
+            findViewById(R.id.seekBar_pathLoss).setEnabled(false);
+            findViewById(R.id.seekBar_correlationThreshold).setEnabled(false);
             progressBarFingerprinting.setVisibility(View.VISIBLE);
             mapView.hideNavDot(MapViewFragment.FINGERPRINT_DOT);
             prefs.incrementActiveLocationMethods();
@@ -358,8 +365,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
             prefs.decrementActiveLocationMethods();
-            if (prefs.getActiveLocationMethods() == 0)
+            if (prefs.getActiveLocationMethods() == 0) {
                 findViewById(R.id.btn_locate).setEnabled(true);
+                findViewById(R.id.seekBar_pathLoss).setEnabled(true);
+                findViewById(R.id.seekBar_correlationThreshold).setEnabled(true);
+            }
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
                         "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
@@ -421,46 +431,50 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             //TODO document
             Set<PossiblePoint> possiblePoints = new HashSet<>();
             int numberOfPoints = fingerprintPoints.size();
-            int pointsInCommon = 0;
             boolean foundSufficientCorrelationsInAnyPoint = false;
-            int index = 0;
-            for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
-                int distanceSquared = 0;
-                index++;
-                publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
-                boolean atLeast1Match = false;
-                int correlationsForThisPoint = 0;
-                Set<Capture> fingerprintCaptures = p.getCaptures();
-                for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
-                    for (Capture queryCapture: queryPointCaptures) {
-                        if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
-                            /// include in distance consideration:
-                            distanceSquared += Math.pow(
-                                    (queryCapture.getRSSI() -
-                                            fingerprintCapture.getRSSI())
-                                    , 2);
-                            correlationsForThisPoint++;
-                            if (!atLeast1Match) {
-                                pointsInCommon++;
-                                atLeast1Match = true;
+            while (!foundSufficientCorrelationsInAnyPoint) { //i.e. continue until a point is found, reducing the threshold as necessary
+                int index = 0;
+                for (FingerprintPoint p : fingerprintPoints) { //for each stored point...
+                    int distanceSquared = 0;
+                    index++;
+                    publishProgress((10 + index/numberOfPoints * 80)); //update progress bar in UI
+                    int correlationsForThisPoint = 0;
+                    Set<Capture> fingerprintCaptures = p.getCaptures();
+                    for (Capture fingerprintCapture : fingerprintCaptures) { //...consider each capture point...
+                        for (Capture queryCapture: queryPointCaptures) {
+                            if (fingerprintCapture.getMAC().equalsIgnoreCase(queryCapture.getMAC())) { //..and if MACs match
+                                /// ...include in distance consideration:
+                                distanceSquared += Math.pow(
+                                        (queryCapture.getRSSI() -
+                                                fingerprintCapture.getRSSI())
+                                        , 2);
+                                correlationsForThisPoint++;
                             }
                         }
                     }
-                }
 
-
-                if (correlationsForThisPoint < correlation_threshold) {
-                    Log.d(TAG, "doInBackground: NOT adding: distance = "
-                            + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
-                            + " at point X,Y = " + p.x + "," + p.y);
-                } else {
-                    Log.d(TAG, "doInBackground: POSSIBLE POINT: distance = "
-                            + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
-                            + " at point X,Y = " + p.x + "," + p.y);
-                    possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
-                    foundSufficientCorrelationsInAnyPoint = true;
+                    // if the proportion of captures matched (compared to total) is above
+                    // the user defined threshold, then accept this point as a possible location:
+                    Log.d(TAG, "doInBackground: Correlations at point = " + correlationsForThisPoint +
+                            ", reference records at point = " + fingerprintCaptures.size());
+                    double percentage_correlated =  (((double) correlationsForThisPoint / (double) fingerprintCaptures.size())) * 100.0;
+                    Log.d(TAG, "doInBackground: percentage_correlated = " + percentage_correlated
+                    + ", correlation_threshold = " + correlation_threshold);
+                    if (percentage_correlated  <= correlation_threshold) {
+                        Log.d(TAG, "doInBackground: NOT adding: distance = "
+                                + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                                + " at point X,Y = " + p.x + "," + p.y);
+                    } else {
+                        Log.d(TAG, "doInBackground: POSSIBLE POINT: distance = "
+                                + Math.sqrt(distanceSquared) + ", correlations = " + correlationsForThisPoint
+                                + " at point X,Y = " + p.x + "," + p.y);
+                        possiblePoints.add(new PossiblePoint(Math.sqrt(distanceSquared), correlationsForThisPoint, p));
+                        foundSufficientCorrelationsInAnyPoint = true;
+                    }
                 }
+                correlation_threshold--;
             }
+
             publishProgress(90);
 
             // calculate nearest (euclidean) point
@@ -477,7 +491,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 }
             }
 
-            if (pointsInCommon < 1 || !foundSufficientCorrelationsInAnyPoint)  {
+            if (!foundSufficientCorrelationsInAnyPoint)  {
                 // out of range of any fingerprinted routers, or threshold too high
                 return null;
             }
