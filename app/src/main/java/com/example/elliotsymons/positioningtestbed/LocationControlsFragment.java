@@ -1,20 +1,15 @@
 package com.example.elliotsymons.positioningtestbed;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 
@@ -26,8 +21,9 @@ public class LocationControlsFragment extends Fragment implements
     private static final String TAG = "LocationControlsFragmen";
 
     TextView pathLossTV, correlationThresholdTV;
+    SeekBar pathlossSeekBar, correlationSeekBar;
     Button locateButton;
-    int pathLostProgress;
+    int pathLossProgress;
     int correlationProgress;
 
 
@@ -40,8 +36,8 @@ public class LocationControlsFragment extends Fragment implements
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_buttons, container, false);
-        SeekBar pathlossSeekBar = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
-        SeekBar correlationSeekBar = view.findViewById(R.id.seekBar_correlationThreshold);
+        pathlossSeekBar = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
+        correlationSeekBar = view.findViewById(R.id.seekBar_correlationThreshold);
         pathlossSeekBar.setOnSeekBarChangeListener(this);
         correlationSeekBar.setOnSeekBarChangeListener(this);
         pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
@@ -49,15 +45,15 @@ public class LocationControlsFragment extends Fragment implements
         locateButton = view.findViewById(R.id.btn_locate);
 
         //initialise seek bar-associated variables based on initial bar state
-        pathLostProgress = pathlossSeekBar.getProgress();
+        pathLossProgress = pathlossSeekBar.getProgress();
         correlationProgress = correlationSeekBar.getProgress();
 
-        double scaledProgress = (((double) pathLostProgress) / 10);
+        double scaledProgress = (((double) pathLossProgress) / 10);
         ((WiFiLocatingActivity) getActivity()).setPathLossExponent(scaledProgress);
         setPathLossText(scaledProgress);
 
         setCorrelationText(correlationProgress);
-
+        ((WiFiLocatingActivity) getActivity()).setCorrelationThreshold(correlationProgress);
         return view;
     }
 
@@ -72,18 +68,6 @@ public class LocationControlsFragment extends Fragment implements
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        //make sure the required interfaces are implemented by the parent activity
-        try {
-            LocationControllerFragmentInteractionListener locationControllerListener = (LocationControllerFragmentInteractionListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() +
-                    " must implement LocationControllerFragmentInteractionListener");
-        }
-    }
-
-    @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
         if (progress == 0) {
             Toast.makeText(getContext(), "Cannot be 0", Toast.LENGTH_SHORT).show();
@@ -91,7 +75,7 @@ public class LocationControlsFragment extends Fragment implements
         }
         switch(seekBar.getId()) {
             case R.id.seekBar_pathLoss:
-                pathLostProgress = progress;
+                pathLossProgress = progress;
                 double scaledProgress = (((double) progress) / 10);
                 ((WiFiLocatingActivity) getActivity()).setPathLossExponent(scaledProgress);
                 setPathLossText(scaledProgress);
@@ -102,8 +86,10 @@ public class LocationControlsFragment extends Fragment implements
                 setCorrelationText(progress);
 
         }
-        if (correlationProgress != 0 && pathLostProgress != 0) {
+        if (correlationProgress != 0 && pathLossProgress != 0) {
             locateButton.setEnabled(true);
+            correlationSeekBar.setEnabled(true);
+            pathlossSeekBar.setEnabled(true);
         }
     }
 
