@@ -24,9 +24,9 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSO
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
+
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
-
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 
@@ -57,6 +57,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     MapView mapView;
     LocationControlsFragment controls;
     ProgressBar progressBarFingerprinting, progressBarTrilaterating;
+
 
     private double pathLossExponent = 6;
     public void setPathLossExponent(double pathLossExponent) {
@@ -109,25 +110,30 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         private static final String TAG = "WiFiTrilaterationLocato";
         RouterManager rm;
         WifiManager wifiManager;
-        private boolean resultReceived = false;
+        boolean trilaterationResultReceived = false;
 
         String resultPoint = "";
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            findViewById(R.id.btn_locate).setEnabled(false);
             progressBarTrilaterating.setVisibility(View.VISIBLE);
             mapView.hideNavDot(MapViewFragment.TRILATERATION_DOT); // hide previous location
+            prefs.incrementActiveLocationMethods();
         }
 
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
+            prefs.decrementActiveLocationMethods();
+            if (prefs.getActiveLocationMethods() == 0)
+                findViewById(R.id.btn_locate).setEnabled(true);
             progressBarTrilaterating.setVisibility(View.INVISIBLE);
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
                         "Insufficient points in range for trilateration", Toast.LENGTH_LONG).show();
-                findViewById(R.id.btn_locate).setEnabled(true);
+
                 return;
             }
             int x = location.x;
@@ -137,8 +143,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             mapView.setDotX(MapViewFragment.TRILATERATION_DOT, x);
             mapView.setDotY(MapViewFragment.TRILATERATION_DOT, y);
             mapView.showNavDot(MapViewFragment.TRILATERATION_DOT);
-
-            findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
@@ -159,9 +163,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             registerReceiver(wifiScanReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             Log.d(TAG, "doInBackground: Requesting scan");
-            resultReceived = false;
+            trilaterationResultReceived = false;
             wifiManager.startScan();
-            while (!resultReceived) {
+            while (!trilaterationResultReceived) {
                 SystemClock.sleep(100);
             }
 
@@ -286,11 +290,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             }
         };
 
-        // actions performed on scan success: process results into todo ...
+        // actions performed on scan success:
         private void onScanSuccess() {
             Log.i(TAG, "onScanSuccess: Scan result received");
             List<ScanResult> scanResults = wifiManager.getScanResults();
-            resultReceived = true;
+            trilaterationResultReceived = true;
         }
 
         private void onScanFailure() {
@@ -342,7 +346,8 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         private static final String TAG = "WiFiFingerprintLocatorT";
         FingerprintManager fm;
         WifiManager wifiManager;
-        private boolean resultReceived = false;
+
+        private boolean fingerprintingResultReceived = false;
 
         @Override
         protected void onPreExecute() {
@@ -350,11 +355,15 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             findViewById(R.id.btn_locate).setEnabled(false);
             progressBarFingerprinting.setVisibility(View.VISIBLE);
             mapView.hideNavDot(MapViewFragment.FINGERPRINT_DOT);
+            prefs.incrementActiveLocationMethods();
         }
 
         @Override
         protected void onPostExecute(Point location) {
             super.onPostExecute(location);
+            prefs.decrementActiveLocationMethods();
+            if (prefs.getActiveLocationMethods() == 0)
+                findViewById(R.id.btn_locate).setEnabled(true);
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
                         "Out of range / unmapped area", Toast.LENGTH_SHORT).show();
@@ -362,7 +371,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 // Toast.LENGTH_SHORT).show();
                 progressBarFingerprinting.setVisibility(View.INVISIBLE);
                 progressBarFingerprinting.setProgress(0);
-                findViewById(R.id.btn_locate).setEnabled(true);
                 return;
             }
             int x = location.x;
@@ -373,7 +381,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             mapView.setDotY(MapViewFragment.FINGERPRINT_DOT, y);
             mapView.showNavDot(MapViewFragment.FINGERPRINT_DOT);
             progressBarFingerprinting.setVisibility(View.INVISIBLE);
-            findViewById(R.id.btn_locate).setEnabled(true);
         }
 
         @Override
@@ -394,9 +401,9 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             registerReceiver(wifiScanReceiver,
                     new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
             Log.d(TAG, "doInBackground: Requesting scan");
-            resultReceived = false;
+            fingerprintingResultReceived = false;
             wifiManager.startScan();
-            while (!resultReceived) { // wait for scan results
+            while (!fingerprintingResultReceived) { // wait for scan results
                 SystemClock.sleep(100);
             }
             List<ScanResult> scanResults = wifiManager.getScanResults();
@@ -509,7 +516,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
         private void onScanSuccess() {
             Log.i(TAG, "onScanSuccess: Scan result received");
-            resultReceived = true;
+            fingerprintingResultReceived = true;
         }
 
         private void onScanFailure() {
