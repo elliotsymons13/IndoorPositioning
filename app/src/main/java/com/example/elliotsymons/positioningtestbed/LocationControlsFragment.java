@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
+
 /**
  * Fragment containing all the UI elements for the Locating activity.
  */
@@ -24,6 +26,9 @@ public class LocationControlsFragment extends Fragment implements
     private static final String TAG = "LocationControlsFragmen";
 
     TextView pathLossTV, correlationThresholdTV;
+    Button locateButton;
+    int pathLostProgress;
+    int correlationProgress;
 
 
     public LocationControlsFragment() {
@@ -35,14 +40,35 @@ public class LocationControlsFragment extends Fragment implements
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_buttons, container, false);
-        SeekBar pathLoss = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
-        SeekBar correlationThreshold = view.findViewById(R.id.seekBar_correlationThreshold);
-        pathLoss.setOnSeekBarChangeListener(this);
-        correlationThreshold.setOnSeekBarChangeListener(this);
+        SeekBar pathlossSeekBar = (SeekBar) view.findViewById(R.id.seekBar_pathLoss);
+        SeekBar correlationSeekBar = view.findViewById(R.id.seekBar_correlationThreshold);
+        pathlossSeekBar.setOnSeekBarChangeListener(this);
+        correlationSeekBar.setOnSeekBarChangeListener(this);
         pathLossTV = (TextView) view.findViewById(R.id.tv_pathLoss);
         correlationThresholdTV = view.findViewById(R.id.tv_correlationThreshold);
+        locateButton = view.findViewById(R.id.btn_locate);
+
+        //initialise seek bar-associated variables based on initial bar state
+        pathLostProgress = pathlossSeekBar.getProgress();
+        correlationProgress = correlationSeekBar.getProgress();
+
+        double scaledProgress = (((double) pathLostProgress) / 10);
+        ((WiFiLocatingActivity) getActivity()).setPathLossExponent(scaledProgress);
+        setPathLossText(scaledProgress);
+
+        setCorrelationText(correlationProgress);
 
         return view;
+    }
+
+    private void setPathLossText(double scaledProgress) {
+        DecimalFormat df = new DecimalFormat("#.0");
+        String scaledRoundedProgress = df.format(scaledProgress);
+        pathLossTV.setText("PthLss\n"+ scaledRoundedProgress + "/10");
+    }
+
+    private void setCorrelationText(int progress) {
+        correlationThresholdTV.setText("Correlation threshold\n"+progress);
     }
 
     @Override
@@ -58,19 +84,26 @@ public class LocationControlsFragment extends Fragment implements
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        if (i == 0) {
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+        if (progress == 0) {
             Toast.makeText(getContext(), "Cannot be 0", Toast.LENGTH_SHORT).show();
+            locateButton.setEnabled(false);
         }
         switch(seekBar.getId()) {
             case R.id.seekBar_pathLoss:
-                ((WiFiLocatingActivity) getActivity()).setPathLossExponent(i);
-                pathLossTV.setText("PthLss\n"+ i + "/10");
+                pathLostProgress = progress;
+                double scaledProgress = (((double) progress) / 10);
+                ((WiFiLocatingActivity) getActivity()).setPathLossExponent(scaledProgress);
+                setPathLossText(scaledProgress);
                 break;
             case R.id.seekBar_correlationThreshold:
-                ((WiFiLocatingActivity) getActivity()).setCorrelationThreshold(i);
-                correlationThresholdTV.setText("Correlation threshold\n"+i);
+                correlationProgress = progress;
+                ((WiFiLocatingActivity) getActivity()).setCorrelationThreshold(progress);
+                setCorrelationText(progress);
 
+        }
+        if (correlationProgress != 0 && pathLostProgress != 0) {
+            locateButton.setEnabled(true);
         }
     }
 
