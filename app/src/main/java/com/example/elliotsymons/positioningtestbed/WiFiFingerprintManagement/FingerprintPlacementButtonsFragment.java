@@ -58,8 +58,6 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
         btn_right.setOnClickListener(this);
         ImageButton btn_down = view.findViewById(R.id.btn_down);
         btn_down.setOnClickListener(this);
-        Button btn_finish = view.findViewById(R.id.btn_finishPlacing);
-        btn_finish.setOnClickListener(this);
         Button btn_delete = view.findViewById(R.id.btn_deleteDataset);
         btn_delete.setOnClickListener(this);
         return view;
@@ -78,10 +76,6 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
             case R.id.btn_right:
                 Log.d(TAG, "onClick: direction");
                 ((FingerprintPlacementActivity) getActivity()).directionClick(view);
-                break;
-            case R.id.btn_finishPlacing:
-                Log.d(TAG, "onClick: finish");
-                ((FingerprintPlacementActivity) getActivity()).finishCapturing(view);
                 break;
             case R.id.btn_multiPurpose:
                 Log.d(TAG, "onClick: place/capture");
@@ -150,7 +144,6 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
                 getView().findViewById(R.id.btn_down).setEnabled(true);
                 getView().findViewById(R.id.btn_left).setEnabled(true);
                 getView().findViewById(R.id.btn_deleteDataset).setEnabled(true);
-                getView().findViewById(R.id.btn_finishPlacing).setEnabled(true);
                 placeCaptureButton.setText(R.string.place);
                 placeCaptureButton.setEnabled(true);
                 break;
@@ -166,7 +159,6 @@ public class FingerprintPlacementButtonsFragment extends Fragment implements Vie
             case "Capture":
                 placeCaptureButton.setEnabled(false);
                 getView().findViewById(R.id.btn_deleteDataset).setEnabled(false);
-                getView().findViewById(R.id.btn_finishPlacing).setEnabled(false);
                 getView().invalidate();
                 break;
         }

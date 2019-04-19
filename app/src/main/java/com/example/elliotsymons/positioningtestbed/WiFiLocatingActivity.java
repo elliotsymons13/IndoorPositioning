@@ -158,7 +158,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             rm = JSONRouterManager.getInstance(getApplicationContext());
             rm.loadIfNotAlready();
 
-            //Get captures at current mapBitmap
+            //Get captures at current location
             publishProgress(5);
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             enableWifi();
@@ -171,12 +171,12 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 SystemClock.sleep(100);
             }
 
-            //CREDIT: https://stackoverflow.com/questions/17285337/how-can-i-sort-the-a-list-of-getscanresults-based-on-signal-strength-in-ascend
+            // Sort the scan results on RSSI
+            //ADAPTED FROM: https://stackoverflow.com/questions/17285337/how-can-i-sort-the-a-list-of-getscanresults-based-on-signal-strength-in-ascend
             // -->>
             Comparator<ScanResult> comparator = new Comparator<ScanResult>() {
                 @Override
                 public int compare(ScanResult lhs, ScanResult rhs) {
-                    //return (lhs.level <rhs.level ? -1 : (lhs.level==rhs.level ? 0 : 1));
                     return WifiManager.compareSignalLevel(lhs.level, rhs.level);
                 }
             };
@@ -190,12 +190,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
             Set<RouterPoint> storedRouters = rm.getAllRouters();
 
-
-            //Find all routers that are present in our scan and the set of stored routers
+            //Find all routers that are present in BOTH the new scan and the set of stored routers
             List<TrilaterationPoint> trilaterationPoints = new ArrayList<>();
             for (ScanResult result : scanResults) {
                 String mac = result.BSSID;
-                int rssi = result.level;//Math.abs(result.level); //FIXME
+                int rssi = result.level;
 
                 for (RouterPoint routerPoint : storedRouters) {
                     if (mac.equalsIgnoreCase(routerPoint.getMac())) { //i.e. if the same router
@@ -209,22 +208,18 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             int N = trilaterationPoints.size();
             if (N < 3) {
                 Log.d(TAG, "doInBackground: Trilateration impossible, insufficient points (" + trilaterationPoints.size() + ")");
+                for (TrilaterationPoint p : trilaterationPoints)
+                    Log.d(TAG, "doInBackground: Seen " + p.getRouterPoint().getMac());
                 return null;
             }
-
-
 
             //Calculate the distances to these N routers, using the path-loss model
             //(parameters are set globally, and configurable via the seek bars)
             for (TrilaterationPoint point : trilaterationPoints) {
-                double distance;
-                //distance = Math.pow(10,  ((point.getRouterPoint().getTxPower() - point.getRSSI()) / (10 * pathLossExponent))  )
                 double calculatedTxRSSI = -10 * Math.log10(point.getRouterPoint().getTxPower() / 0.0001);
                 Log.d(TAG, "doInBackground: CalculatedTxRSSI = " + calculatedTxRSSI);
                 Log.d(TAG, "doInBackground: MeasuredRSSI = " + point.getRSSI());
-                distance = Math.pow(10,  ((calculatedTxRSSI - point.getRSSI()) / (10 * pathLossExponent))  );
-
-
+                double distance = Math.pow(10,  ((calculatedTxRSSI - point.getRSSI()) / (10 * pathLossExponent))  );
                 point.setDistance(distance);
                 Log.d(TAG, "doInBackground: Distance to router " + point.getRouterPoint().getMac() + " at " +
                         point.getRouterPoint().x + ", " +
@@ -235,11 +230,10 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             publishProgress(40);
 
             //Perform the trilateration algorithm, given the distances calculated above, and the known locations of the routers.
-
-
-            //DUMMY FIXME
-            //CREDIT: https://github.com/lemmingapex/Trilateration
+            //ADAPTED FROM: https://github.com/lemmingapex/Trilateration
             // -->> (adapted)
+
+            /// Format conversion
             double[][] positions = new double[N][2];
             double[] distances = new double[N];
             int i = 0;
@@ -251,22 +245,21 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 i++;
             }
 
+            // Pass to solver-optimiser classes
             TrilaterationFunction trilatFunc = new TrilaterationFunction(positions, distances);
             NonLinearLeastSquaresSolver solver = new NonLinearLeastSquaresSolver(trilatFunc
                     , new LevenbergMarquardtOptimizer());
             LeastSquaresOptimizer.Optimum optimum = solver.solve();
 
-            // the answer
+            // Extract the answer
             double[] centroid = optimum.getPoint().toArray();
             double position_x = centroid[0];
             double position_y = centroid[1];
-
-
             // <<--
+
+
             resultPoint = "" + position_x + ", " + position_y;
             Log.i(TAG, "doInBackground: result: " + resultPoint);
-
-
             publishProgress(100);
             Log.d(TAG, "doInBackground: Finished");
             return new Point((int) position_x, (int) position_y);

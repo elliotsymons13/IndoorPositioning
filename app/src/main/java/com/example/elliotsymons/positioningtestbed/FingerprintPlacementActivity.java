@@ -75,7 +75,6 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
                 new IntentFilter("fingerprinting-finished"));
 
         drawExistingFingerprints();
-
     }
 
     @Override
@@ -178,7 +177,7 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
         Log.d(TAG, "placeOrCaptureStep: Called");
         switch (stage) {
             case "Place":
-                //User is to place the fingerprint mapBitmap
+                //User is to place the fingerprint location
                 stage = "Locked";
                 //Lock blue dot
                 mapView.lockNavDot(GENERIC_DOT);
@@ -210,17 +209,6 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
             placeOrCaptureStep();
         }
     };
-
-    /**
-     * Tidy up and return to the main activity (called when the user presses 'save/exit').
-     * @param view Button view.
-     */
-    public void finishCapturing(View view) {
-        Intent intent = new Intent(this, WiFiHomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-    }
-
 
     @Override
     protected void onPause() {

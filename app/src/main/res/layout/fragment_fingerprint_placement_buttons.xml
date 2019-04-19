@@ -7,6 +7,21 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
     tools:context=".WiFiFingerprintManagement.FingerprintPlacementButtonsFragment">
 
+    <TextView
+        android:id="@+id/tv_saveExplanation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="121dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/save_explanation"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_deleteDataset"
+        app:layout_constraintTop_toBottomOf="@+id/tv_info" />
+
     <Button
         android:id="@+id/btn_multiPurpose"
         android:layout_width="wrap_content"
@@ -15,7 +30,7 @@ android:layout_height="match_parent"
         android:layout_marginBottom="8dp"
         android:onClick="onClick"
         android:text="@string/place"
-        app:layout_constraintBottom_toTopOf="@+id/btn_finishPlacing"
+        app:layout_constraintBottom_toTopOf="@+id/btn_deleteDataset"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -81,29 +96,14 @@ android:layout_height="match_parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_multiPurpose" />
 
     <Button
-        android:id="@+id/btn_finishPlacing"
-        android:layout_width="0dp"
-        android:layout_height="67dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:onClick="onClick"
-        android:text="Save and finish"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_deleteDataset" />
-
-    <Button
         android:id="@+id/btn_deleteDataset"
-        android:layout_width="0dp"
-        android:layout_height="67dp"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="5dp"
         android:layout_marginBottom="8dp"
         android:onClick="onClick"
         android:text="Delete dataset"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_finishPlacing"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -114,7 +114,7 @@ android:layout_height="match_parent"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_finishPlacing"
+        app:layout_constraintBottom_toTopOf="@+id/btn_deleteDataset"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"

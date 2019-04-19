@@ -146,8 +146,8 @@ public class MapView extends AppCompatImageView {
     }
 
     /**
-     * Adds a graphical dot to the map representing a users mapBitmap,
-     * or the placed mapBitmap for fingerprint capture.
+     * Adds a graphical dot to the map representing a users location,
+     * or the placed location for fingerprint capture.
      *
      * @param x pixel coordinate of center of dot horizontally
      * @param y pixel coordinate of center of dot vertically
@@ -169,7 +169,7 @@ public class MapView extends AppCompatImageView {
     }
 
     /**
-     * Allows for the mapBitmap of the 'blue dot' representing the user's mapBitmap to be changed.
+     * Allows for the location of the 'blue dot' representing the user's location to be changed.
      *
      * @param x pixel coordinate of center of dot horizontally
      * @param y pixel coordinate of center of dot vertically
