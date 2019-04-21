@@ -20,11 +20,11 @@ public class LocationControlsFragment extends Fragment implements
         SeekBar.OnSeekBarChangeListener {
     private static final String TAG = "LocationControlsFragmen";
 
-    TextView pathLossTV, correlationThresholdTV;
-    SeekBar pathlossSeekBar, correlationSeekBar;
-    Button locateButton;
-    int pathLossProgress;
-    int correlationProgress;
+    private TextView pathLossTV, correlationThresholdTV;
+    private SeekBar pathlossSeekBar, correlationSeekBar;
+    private Button locateButton;
+    private int pathLossProgress;
+    private int correlationProgress;
 
 
     public LocationControlsFragment() {
@@ -103,7 +103,7 @@ public class LocationControlsFragment extends Fragment implements
         //do nothing
     }
 
-    public interface LocationControllerFragmentInteractionListener {
+    public interface LocationControllerListener {
         void updateLocation(View view);
     }
 

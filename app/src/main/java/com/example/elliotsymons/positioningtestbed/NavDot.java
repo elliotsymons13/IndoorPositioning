@@ -27,10 +27,6 @@ public class NavDot {
         return ID;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
     public int getX() {
         return x;
     }

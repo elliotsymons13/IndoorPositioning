@@ -228,6 +228,7 @@ public class JSONFingerprintManager implements FingerprintManager {
     /**
      * Save the fingerprints to file.
      */
+    @Override
     public void save() {
         if (loaded) {
             try {

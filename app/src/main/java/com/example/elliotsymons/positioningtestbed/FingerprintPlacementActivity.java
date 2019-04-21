@@ -22,6 +22,7 @@ import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.Fin
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.JSONFingerprintManager;
 import com.example.elliotsymons.positioningtestbed.WiFiFingerprintManagement.StageProvider;
 
+import java.util.Objects;
 import java.util.Set;
 
 import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERIC_DOT;
@@ -37,13 +38,10 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
     private final String TAG = "Pl.Fing.Activity";
     Preferences prefs;
 
-    private MapViewFragment map;
     MapView mapView;
     private FingerprintPlacementButtonsFragment buttons;
     private Button placeCaptureButton;
-
     private String stage = "Place";
-
     private FingerprintManager fm;
 
 
@@ -51,10 +49,10 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_placement_fingerprinting);
-        getSupportActionBar().setTitle("Fingerprint capture");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Fingerprint capture");
 
         // Setup map
-        map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
+        MapViewFragment map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapView);
         mapView = map.getMapView();
         //Add a generic dot, to be placed by the users for fingerprints
         mapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
@@ -63,7 +61,7 @@ public class FingerprintPlacementActivity extends AppCompatActivity implements
         buttons = (FingerprintPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtons);
         prefs = Preferences.getInstance(getApplicationContext());
-        placeCaptureButton = (Button) buttons.getView().findViewById(R.id.btn_multiPurpose);
+        placeCaptureButton = (Button) Objects.requireNonNull(buttons.getView()).findViewById(R.id.btn_multiPurpose);
 
         // Load fingerprints from file
         fm = JSONFingerprintManager.getInstance(getApplicationContext());

@@ -25,7 +25,7 @@ public class MapsRecyclerViewAdapter extends RecyclerView.Adapter<MapsRecyclerVi
     private LayoutInflater inflater;
     private ItemClickListener clickListener;
     private int selectedRow;
-    MapManager mapManager;
+    private MapManager mapManager;
 
     MapsRecyclerViewAdapter(Context context, List<MapData> data) {
         mapManager = MapManager.getInstance(context);

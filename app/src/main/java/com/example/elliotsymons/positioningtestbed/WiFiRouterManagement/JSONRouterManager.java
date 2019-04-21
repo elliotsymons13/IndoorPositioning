@@ -68,6 +68,7 @@ public class JSONRouterManager implements RouterManager {
         toDelete.delete();
     }
 
+    @Override
     public void destroyInstance() {
         save();
         instance = null;

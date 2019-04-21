@@ -46,23 +46,23 @@ import java.util.Objects;
  */
 public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerViewAdapter.ItemClickListener, TextWatcher {
     private static final String TAG = "WiFiHomeActivity";
-    Preferences prefs;
-    UtilityMethods utils;
+    private Preferences prefs;
+    private UtilityMethods utils;
 
-    public static final int PICK_IMAGE_REQUEST = 1;
+    private static final int PICK_IMAGE_REQUEST = 1;
     private static final int PERMISSIONS_RQ_FINE_LOCATION = 2;
-    public static final int PERMISSIONS_RQ_WRITE_EXTERNAL = 3;
+    private static final int PERMISSIONS_RQ_WRITE_EXTERNAL = 3;
     private final float MAP_SCALING_THRESHOLD = 1.5f;
 
-    WifiManager wifiManager;
-    MapsRecyclerViewAdapter mapListAdapter;
+    private WifiManager wifiManager;
+    private MapsRecyclerViewAdapter mapListAdapter;
     private MapManager mapManager;
 
-    String newMapName;
-    AlertDialog mapNameAlertDialog;
-    Button acceptBtn;
-    EditText mapNameInput;
-    boolean nameValid;
+    private String newMapName;
+    private AlertDialog mapNameAlertDialog;
+    private Button acceptBtn;
+    private EditText mapNameInput;
+    private boolean nameValid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -268,7 +268,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
      * Transition to router placement activity.
      * @param view Button view.
      */
-    public void routerPlacementSelected(View view) {
+    public void onRouterPlacementSelected(View view) {
         if (prefs.getMapURI() == null) {
             Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
             return;
@@ -283,7 +283,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
      * Transition to fingerprinting activity.
      * @param view Button view.
      */
-    public void fingerprintingSelected(View view) {
+    public void onFingerprintPlacementSelected(View view) {
         if (prefs.getMapURI() == null) {
             Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
             return;
@@ -298,7 +298,7 @@ public class WiFiHomeActivity extends AppCompatActivity implements MapsRecyclerV
      * Transition to locating activity.
      * @param view Button view.
      */
-    public void locatingSelected(View view) {
+    public void onLocatingSelected(View view) {
         if (prefs.getMapURI() == null) {
             Toast.makeText(this, "Select map before proceeding", Toast.LENGTH_SHORT).show();
             return;

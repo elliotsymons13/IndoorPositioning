@@ -7,7 +7,9 @@ import java.util.Set;
  */
 public interface RouterManager {
     void save();
+
     void loadIfNotAlready();
+
     void deleteAllRouters();
 
     //Boolean to indicate success

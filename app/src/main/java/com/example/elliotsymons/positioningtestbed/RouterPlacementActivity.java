@@ -32,18 +32,15 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY
 public class RouterPlacementActivity extends AppCompatActivity implements
         RouterPlacementButtonsFragment.DatasetStatusListener, TextWatcher {
     private static final String TAG = "RouterPlacementActivity";
-    Preferences prefs;
-    UtilityMethods utils;
+    private UtilityMethods utils;
 
-    private MapViewFragment map;
-    private RouterPlacementButtonsFragment buttons;
-    Button placeCaptureButton;
-    MapView mapView;
+    private Button placeCaptureButton;
+    private MapView mapView;
 
     private RouterManager rm;
 
-    EditText etMAC;
-    EditText etPower;
+    private EditText etMAC;
+    private EditText etPower;
     private AlertDialog routerAlertDialog;
     private Button acceptBtn;
 
@@ -63,13 +60,13 @@ public class RouterPlacementActivity extends AppCompatActivity implements
         Objects.requireNonNull(getSupportActionBar()).setTitle("Router placement");
         utils = new UtilityMethods(getApplicationContext());
 
-        map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
+        MapViewFragment map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewRouter);
         mapView = map.getMapView();
         mapView.addNavDot(GENERIC_DOT, startX, startY, R.color.colorGenericDot);
         mapView.setNavDotRadius(GENERIC_DOT, 15);
-        buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
+        RouterPlacementButtonsFragment buttons = (RouterPlacementButtonsFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_placementButtonsRouter);
-        prefs = Preferences.getInstance(getApplicationContext());
+        Preferences prefs = Preferences.getInstance(getApplicationContext());
         placeCaptureButton = buttons.getView().findViewById(R.id.btn_multiPurpose);
 
         // Load routers from file

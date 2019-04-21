@@ -50,15 +50,15 @@ public class Preferences {
      * <--
      * */
 
-    public int getActiveLocationMethods() {
+    int getActiveLocationMethods() {
         return activeLocationMethods;
     }
 
-    public void incrementActiveLocationMethods() {
+    void incrementActiveLocationMethods() {
         activeLocationMethods++;
     }
 
-    public void decrementActiveLocationMethods() {
+    void decrementActiveLocationMethods() {
         activeLocationMethods--;
     }
 
@@ -78,7 +78,7 @@ public class Preferences {
     }
 
     // Should be called manually from onPause (only required in activities where preferences are changed)
-    public void savePrefs(Context ctx) {
+    void savePrefs(Context ctx) {
         try {
             SharedPreferences.Editor sp =
                     PreferenceManager.getDefaultSharedPreferences(ctx).edit();

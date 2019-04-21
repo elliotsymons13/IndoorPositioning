@@ -25,8 +25,6 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.GENERI
  */
 public class MapView extends AppCompatImageView {
     private static final String TAG = "MapView";
-    private Preferences prefs;
-    private MapManager mapManager;
 
     //Map
     private Bitmap mapBackground;
@@ -36,9 +34,8 @@ public class MapView extends AppCompatImageView {
     private int ORIGIN_IN_X;
     private int ORIGIN_IN_Y;
 
-
+    //Dots
     private Paint PERSISTENT_DOT_PAINT;
-
     private Set<Point> persistentDots;
     private Set<NavDot> navigationDots;
 
@@ -49,8 +46,8 @@ public class MapView extends AppCompatImageView {
 
     public MapView(Context context, AttributeSet attributeSet) {
         super(context);
-        prefs = Preferences.getInstance(getContext());
-        mapManager = MapManager.getInstance(getContext());
+        Preferences prefs = Preferences.getInstance(getContext());
+        MapManager mapManager = MapManager.getInstance(getContext());
 
         //Import map image resource
         String mapURI = prefs.getMapURI();
@@ -130,7 +127,7 @@ public class MapView extends AppCompatImageView {
 
                 switch(event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        updateNavDot(GENERIC_DOT, touchX, touchY);
+                        updateNavDotPosition(GENERIC_DOT, touchX, touchY);
                         return true;
                     default:
                         return false;
@@ -174,7 +171,7 @@ public class MapView extends AppCompatImageView {
      * @param x pixel coordinate of center of dot horizontally
      * @param y pixel coordinate of center of dot vertically
      */
-    public void updateNavDot(int ID, int x, int y) {
+    public void updateNavDotPosition(int ID, int x, int y) {
         if (x <= ORIGIN_IN_X || x > (ORIGIN_IN_X + MAP_WIDTH))
             return;
         if (y <= ORIGIN_IN_Y || y > (ORIGIN_IN_Y + MAP_HEIGHT))

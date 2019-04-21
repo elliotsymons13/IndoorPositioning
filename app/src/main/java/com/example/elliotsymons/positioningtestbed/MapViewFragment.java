@@ -17,12 +17,10 @@ import android.view.ViewGroup;
  */
 public class MapViewFragment extends Fragment {
     private static final String TAG = "MapViewFragment";
-    private View rootView;
 
     public static final int GENERIC_DOT = 1;
     public static final int TRILATERATION_DOT = 2;
     public static final int FINGERPRINT_DOT = 3;
-
 
     private MapView mapView;
     public static int startX, startY;
@@ -39,7 +37,7 @@ public class MapViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        rootView = inflater.inflate(R.layout.fragment_map_view, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_map_view, container, false);
 
         ConstraintLayout rootLayout = rootView.findViewById(R.id.constraintLayout);
         ConstraintSet set = new ConstraintSet();

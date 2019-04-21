@@ -11,7 +11,6 @@ public class RouterPoint extends Point {
         return txPower;
     }
 
-
     int getID() {
         return ID;
     }

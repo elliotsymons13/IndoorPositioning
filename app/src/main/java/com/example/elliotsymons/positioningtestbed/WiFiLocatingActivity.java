@@ -25,12 +25,10 @@ import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.JSONRout
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterManager;
 import com.example.elliotsymons.positioningtestbed.WiFiRouterManagement.RouterPoint;
 
-import com.lemmingapex.trilateration.LinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.linear.RealVector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,15 +48,13 @@ import static com.example.elliotsymons.positioningtestbed.MapViewFragment.startY
  * Tilateration algorithm parameters can be adjusted.
  */
 public class WiFiLocatingActivity extends AppCompatActivity implements
-        LocationControlsFragment.LocationControllerFragmentInteractionListener {
+        LocationControlsFragment.LocationControllerListener {
     private static final String TAG = "WiFiLocatingActivity";
-    Preferences prefs;
+    private Preferences prefs;
     MapManager mapManager;
 
-    MapViewFragment map;
-    MapView mapView;
-    LocationControlsFragment controls;
-    ProgressBar progressBarFingerprinting, progressBarTrilaterating;
+    private MapView mapView;
+    private ProgressBar progressBarFingerprinting, progressBarTrilaterating;
 
 
     private double pathLossExponent = 2.2;
@@ -79,11 +75,11 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_wifi_locating);
         Objects.requireNonNull(getSupportActionBar()).setTitle("WiFi Locating");
 
-        map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
+        MapViewFragment map = (MapViewFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_mapViewLocate);
         mapView = map.getMapView();
         prefs = Preferences.getInstance(getApplicationContext());
         mapManager = MapManager.getInstance(getApplicationContext());
-        controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
+        LocationControlsFragment controls = (LocationControlsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_locationControls);
         progressBarFingerprinting = findViewById(R.id.progressBar_locateProgressFingerprinting);
         progressBarFingerprinting.setVisibility(View.INVISIBLE);
         progressBarTrilaterating = findViewById(R.id.progressBar_locateProgressTrilateration);
@@ -498,6 +494,30 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             publishProgress(100);
             return new Point(currentMinimum.getFingerprintPoint().x,
                     currentMinimum.getFingerprintPoint().y);
+        }
+
+        class PossiblePoint {
+            private double distance;
+            private int matchingRouters;
+            private FingerprintPoint fingerprintPoint;
+
+
+            PossiblePoint(double distance, int matchingRouters, FingerprintPoint p) {
+                this.distance = distance;
+                this.matchingRouters = matchingRouters;
+                this.fingerprintPoint = p;
+            }
+
+            double getDistance() {
+                return distance;
+            }
+
+            FingerprintPoint getFingerprintPoint() {
+                return fingerprintPoint;
+            }
+
+            int getMatchingRouters() {return matchingRouters;}
+
         }
 
         /**
