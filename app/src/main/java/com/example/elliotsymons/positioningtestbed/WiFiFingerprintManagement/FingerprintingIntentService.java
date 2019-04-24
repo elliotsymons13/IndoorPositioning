@@ -97,9 +97,9 @@ public class FingerprintingIntentService extends IntentService {
         resultReceived = false;
         // get scan result
         Log.i(TAG, "onHandleIntent: Requesting scan");
-        boolean newScanPerformed = wifiManager.startScan(); //TODO use this framework elsewhere
+        boolean newScanPerformed = wifiManager.startScan();
         if (!newScanPerformed)
-            postToastMessage("OLD RESULT"); //FIXME
+            postToastMessage("OLD RESULT");
         while (!resultReceived) {
             SystemClock.sleep(25);
         }
@@ -149,16 +149,6 @@ public class FingerprintingIntentService extends IntentService {
         List<ScanResult> scanResults = wifiManager.getScanResults();
         postToastMessage("Scan completed (" + scanResults.size() + " captures)");
         resultReceived = true;
-
-        //Process results:
-        String text = "";
-        for (ScanResult result : scanResults) {
-            text += "SSID: " + result.SSID + "\n";
-            text += "MAC : " + result.BSSID + "\n";
-            text += "RSSI: " + result.level + "\n";
-        }
-
-        //FIXME trigger here, rather than busy wait
     }
 
     private void onScanFailure() {

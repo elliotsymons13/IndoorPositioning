@@ -103,7 +103,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
     /**
      * Task for asynchronously calculating the users location based on a trilateration approach.
      */
-    //TODO document
     private class WiFiTrilaterationLocatorTask extends AsyncTask<Void, Integer, Point> {
         private static final String TAG = "WiFiTrilaterationLocato";
         RouterManager rm;
@@ -136,7 +135,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
             if (location == null) {
                 Toast.makeText(WiFiLocatingActivity.this,
                         "Insufficient points in range for trilateration" , Toast.LENGTH_LONG).show();
-
                 return;
             }
             int x = location.x;
@@ -172,7 +170,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
                 SystemClock.sleep(100);
             }
 
-            // Sort the scan results on RSSI
+            // Sort the scan results on based on RSSI
             //ADAPTED FROM: https://stackoverflow.com/questions/17285337/how-can-i-sort-the-a-list-of-getscanresults-based-on-signal-strength-in-ascend
             // -->>
             Comparator<ScanResult> comparator = new Comparator<ScanResult>() {
@@ -245,6 +243,7 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
                 i++;
             }
+            publishProgress(60);
 
             // Pass to solver-optimiser classes
             TrilaterationFunction trilatFunc = new TrilaterationFunction(positions, distances);
@@ -424,7 +423,6 @@ public class WiFiLocatingActivity extends AppCompatActivity implements
 
 
             // ---POSITIONING ALGORITHM---
-            //TODO document
             Set<PossiblePoint> possiblePoints = new HashSet<>();
             int numberOfPoints = fingerprintPoints.size();
             boolean foundSufficientCorrelationsInAnyPoint = false;
